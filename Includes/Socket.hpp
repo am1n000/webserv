@@ -16,8 +16,15 @@
 #include <poll.h>
 #include <sys/event.h>
 
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 1024
 #define MAX_EVENTS 10
+
+typedef struct t_file
+{
+	std::string filename;
+	std::string media;
+	int 		fd;
+}               s_file;
 
 class request
 {
@@ -98,12 +105,14 @@ class sock
 		bool is_listen_socket;
 		struct sockaddr_in host_addr;
 		int host_addrlen;
-		std::string buffer;
+		std::string reading_buffer;
+		char *writing_buffer;
 		request	req;
 		bool finished_reading_header;
-		int finished_writing;
-		s_file ressource;
-		
+		int oppened_file;
+		int ressource_fd;
+		int bytes_to_send;
+		int bytes_sent;
 };
 
 
