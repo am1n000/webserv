@@ -1,101 +1,109 @@
 #include "Includes/Socket.hpp"
+#include <ctime>
+#include <string.h>
+#include <unistd.h>
 
-
-int preparation(int kq, std::vector<server> servero, struct kevent *change, struct kevent *events)
+typedef struct t_data
 {
-	int connections = 0;
+	char buffer[2048];
+	int sock_fd;
+	struct sockaddr_in host_addr;
+	int host_addrlen;
+	request req;
+	int bytes_to_send;
+	char *writing_buffer;
+	int oppened_file;
+	int bytes_sent;
+	int id;
+	int filter;
+	std::ifstream file;
+}				s_data;
 
-	for (int i = 0; i < servero.size(); i++)
+char *my_tostring(int num)
+{
+    int i = 0, rem, len = 0, n;
+ 
+    n = num;
+    while (n != 0)
+    {
+        len++;
+        n /= 10;
+    }
+	if  (len == 1)
+		len = 2;
+	char *str = new char[len];
+	if  (len == 1)
 	{
-		sock *serv = new sock;
-		serv->fails = 0;
-		serv->create_socket();
-		if (serv->sock_fd == -1)
-			serv->fails = 1;
-		else
-			std::cout << "socket n:  " << i << " created successfully!" << std::endl;
-		serv->bind_socket(servero[i].port);
-		if (serv->host_addr.sin_zero[0] == 'x')
-			serv->fails = 0;
-		else
-			std::cout << "socket n:  " << i << " bounded successfully!" << std::endl;
-		serv->host_addrlen = sizeof(serv->host_addr);
-		serv->id = i + 1;
-		serv->port = servero[i].port;
-		serv->is_listen_socket = 1;
-		if (serv->listen_to_connections() == -1)
-			serv->fails = 1;
-		else
-			std::cout << "server n:  " << i << " listening  for  connections!" << std::endl;
-		EV_SET(&change[i], serv->sock_fd, EVFILT_READ, EV_ADD, 0, 0, serv); 
-		if (kevent(kq, &change[i], 1, NULL, 0, NULL) == -1) //  kevent registation
-		{
-			std::cerr << "error: kevent registration" << std::endl;
-			serv->fails = 1;
-		}
-		if (serv->fails == 0)
-			connections++;
+		str[0] = '0';
+		i = 1;
 	}
-	return (connections);
+    for (;i < len; i++)
+    {
+        rem = num % 10;
+        num = num / 10;
+        str[len - (i + 1)] = rem + '0';
+    }
+    str[len] = '\0';
+	return (str);
+}
+std::string get_time()
+{
+	time_t now = time(0);
+
+	tm* local_time = localtime(&now);
+
+	int year = local_time->tm_year + 1900;
+	int day = local_time->tm_mday;
+	int hour = local_time->tm_hour;
+	int min = local_time->tm_min;
+	int sec = local_time->tm_sec;
+
+	char month_name[4];
+	char day_name[4];
+	strftime(day_name, 4, "%a", local_time);
+	strftime(month_name, 4, "%b", local_time);
+
+	std::string now_time;
+	now_time = day_name;
+	now_time += ", ";
+	now_time += my_tostring(day);
+	now_time += " ";
+	now_time += month_name;
+	now_time += " ";
+	now_time += my_tostring(year);
+	now_time += " ";
+	now_time += my_tostring(hour);
+	now_time += ":";
+	now_time += my_tostring(min);
+	now_time += ":";
+	now_time += my_tostring(sec);
+	now_time += " ";
+	now_time += "GMT";
+	return (now_time);
 }
 
-void reading(int kq, struct kevent *change, struct kevent *events, int i, sock *u_data)
-{
-	char buff[BUFFER_SIZE];
-	std::cout << "ok ok ok" << std::endl;
-	int bytes_read = recv(u_data->sock_fd, buff, BUFFER_SIZE, 0);
-	if (bytes_read < 0)
-	{
-		std::cerr << "error: recv" << std::endl;
-		close (u_data->sock_fd);
-		EV_SET(change, u_data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-		kevent(kq, change, 1, NULL, 0, NULL); // remove the socket from the change
-		std::cout << " 1 1 1 " <<std::endl;
-		return ;
-	}
-	else if (bytes_read == 0 || strstr(buff, "\r\n\r\n"))
-	{
-		// ? change the event from the read filter to the write filter
-		u_data->reading_buffer += strtok(buff, "\r\n\r\n");
-		std::cout << "ok2 ok2 ok2" << std::endl;
-		EV_SET(change,u_data->sock_fd, EVFILT_WRITE, EV_ADD | EV_CLEAR, 0, 0, u_data);
-		if (kevent(kq, change, 1, NULL, 0, NULL) == -1)
-			std::cerr << "error: kevent registration 3" << std::endl;
-		char *temp = strdup((u_data->reading_buffer).c_str());
-		u_data->req.parse_request_line(strtok(temp, "\n"));
-		u_data->finished_reading_header = 1;
-		// std::cout << "--------------------------------" << std::endl;
-		// std::cout << u_data->reading_buffer << std::endl; // printing the request
-		// std::cout << "--------------------------------" << std::endl;
-	}
-	else
-	{
-		u_data->reading_buffer += buff;
-	}
-}
-
-void writing(int kq, sock *u_data, struct kevent *change)
+void serve_file(s_data *u_data)
 {	
 	// Open the requested file
 	s_file ressource = u_data->req.get_file();
-	// if (u_data->oppened_file == 0)
-	// {
-		std::ifstream file((ressource.filename).c_str(), std::ios::binary);
-		// if (!file.is_open())
-		// {
-		// 	std::cerr << "error: file" << std::endl;
-		// 	close (u_data->sock_fd);
-		// 	EV_SET(change, u_data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-		// 	kevent(kq, change, 1, NULL, 0, NULL); // remove the socket from the change
-		// std::cout << " 2 2 2 2 " <<std::endl;
-			// return;
-		// }
+	if (u_data->oppened_file == 0)
+	{
+		u_data->file.open((ressource.filename).c_str(), std::ios::binary);
+		if (!u_data->file.is_open())
+		{
+			std::cerr << "error: file" << std::endl;
+			close (u_data->sock_fd);
+			return;
+		}
 
 		// Send the HTTP response header
-		std::string resp = "HTTP/1.0 200 OK\r\n"
+		std::string resp = "HTTP/1.1 200 OK\r\n"
 						"Server: webserver-c\r\n"
 						"Content-type: ";
 		resp += ressource.media;
+		resp += "\r\n";
+		resp += "Last-Modified: ";
+		resp += get_time();
 		resp += "\r\n\r\n";
 		int k = send(u_data->sock_fd, resp.c_str(), resp.length(), 0);
 		if (k == -1)
@@ -103,75 +111,60 @@ void writing(int kq, sock *u_data, struct kevent *change)
 			std::cerr << "error: sending 1" << std::endl;
 			return;
 		}
-		// file.seekg(0, std::ios::end);
-		// u_data->bytes_to_send = file.tellg();
-		// file.seekg(0, std::ios::beg);
-		// u_data->writing_buffer = new char[u_data->bytes_to_send];
-		// file.read(u_data->writing_buffer, u_data->bytes_to_send);
-		// u_data->oppened_file = 1;
-		// return;
-	// }
-	// 	int len = 1024;
-	// 	if(u_data->bytes_sent + len > u_data->bytes_to_send)
-	// 		len = u_data->bytes_to_send - u_data->bytes_sent;
-	// 	int k = send(u_data->sock_fd, u_data->writing_buffer + u_data->bytes_sent, len, 0);
-	// 	if (k == -1)
-	// 	{
-	// 		std::cerr << "error: sending 2" << std::endl;
-	// 		return;
-	// 	}
-	// 	u_data->bytes_sent += len;
-	// 	if (u_data->bytes_sent >= u_data->bytes_to_send)
-	// 	{
-			close (u_data->sock_fd);
-			EV_SET(change, u_data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-			kevent(kq, change, 1, NULL, 0, NULL); // remove the socket from the change
-			std::cout << "3 3 3 3 " << std::endl;
-			file.close();
-			return ;
-	// 	}
-}
-
-
-void event_loop(int kq, struct kevent *change, struct kevent *events, int connections)
-{
-	while (true)
-	{
-		int nevents;
-
-		//. waiting for events........................................
-		nevents = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
-		std::cout << "number of events:      " << nevents << std::endl;
-		if (nevents == -1)
+		u_data->file.seekg(0, std::ios::end);
+		u_data->bytes_to_send = u_data->file.tellg();
+		u_data->file.seekg(0, std::ios::beg);
+		u_data->oppened_file = 1;
+		return;
+	}
+		int len = 1000;
+		if(u_data->bytes_sent + len >= u_data->bytes_to_send)
+			len = u_data->bytes_to_send - u_data->bytes_sent;
+		char buffer[len];
+		u_data->file.read(buffer, len);
+		int k = send(u_data->sock_fd, buffer, len, 0);
+		if (k == -1)
 		{
-			std::cerr << "error: kevent waiting events" << std::endl;
+			close (u_data->sock_fd);
 			return;
 		}
-		//. handing events...............................................
+		u_data->bytes_sent += len;
+		if (u_data->bytes_sent >= u_data->bytes_to_send)
+		{
+			close (u_data->sock_fd);
+			u_data->file.close();
+			return ;
+		}
+}
+
+int event_loop(struct kevent *change, int kq, s_data *server_data, int connections)
+{	
+	while (1)
+	{
+		struct kevent events[MAX_EVENTS];
+		int nevents = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
+		if (nevents == -1)
+			std::cerr << "error: kevent monitoring" << std::endl;
 		for (int i = 0; i < nevents; i++)
 		{
-			int event_sock = events[i].ident;
-			sock *u_data = (sock *)events[i].udata;
-
-			if (u_data->is_listen_socket)
+			s_data *temp_data = (s_data *)events[i].udata;
+			if (temp_data->sock_fd == server_data->sock_fd)
 			{
-				std::cout << "1111111111111" << std::endl;
-				// .Accepting connections...........................................
-				int client_sock_fd = accept(u_data->sock_fd, reinterpret_cast<struct sockaddr *>(&u_data->host_addr), reinterpret_cast<socklen_t *>(&u_data->host_addrlen));
-				if (client_sock_fd == -1)
-					std::cerr << "error: accept (server n: " << u_data->id << ")" << std::endl;
+				s_data *u_data = new s_data;
+				int client_sock = accept(server_data->sock_fd, reinterpret_cast<sockaddr *>(&(server_data->host_addr)), reinterpret_cast<socklen_t *>(&(server_data->host_addrlen)));
+				if (client_sock == -1)
+					std::cerr << "error: accept server " << std::endl;
 				else
 				{
-					//.adding socket to queue
-					sock *new_socket = new sock;
-					new_socket->sock_fd = client_sock_fd;
-					new_socket->id = connections + 1;
-					new_socket->is_listen_socket = 0;
-					new_socket->finished_reading_header = 0;
-					new_socket->oppened_file = 0;
-					EV_SET(&change[connections], new_socket->sock_fd, EVFILT_READ, EV_ADD, 0, 0, new_socket);
-					if (kevent(kq, &change[connections], 1, NULL, 0, NULL) == -1)
-						std::cerr << "error: kevent registration 2" << std::endl;
+					u_data->sock_fd = client_sock;
+					u_data->id = connections;
+					u_data->bytes_sent = 0;
+					u_data->oppened_file = 0;
+					u_data->writing_buffer = nullptr;
+					u_data->filter = EVFILT_READ;
+					EV_SET(&change[connections], client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
+					if (kevent(kq, &change[connections], 1, NULL, 0, NULL) != 0)
+						std::cout << "error: kevent registration 2" << std::endl;
 					connections++;
 				}
 			}
@@ -179,49 +172,80 @@ void event_loop(int kq, struct kevent *change, struct kevent *events, int connec
 			{
 				if (events[i].filter == EVFILT_READ)
 				{
+					int val_read = recv(temp_data->sock_fd, temp_data->buffer, BUFFER_SIZE, 0);
+					if (val_read < 0)
+					{
+						if (val_read < 0)
+							std::cerr << "error: recv" << std::endl;
+						close(temp_data->sock_fd);
+						continue;
+					}
+					if (val_read == 0 || strstr(temp_data->buffer, "\r\n"))
+					{
+						EV_SET(&change[temp_data->id], temp_data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, temp_data);
+						if (kevent(kq, &change[temp_data->id], 1, NULL, 0, NULL) == -1)
+							std::cerr << "error: kevent 3" << std::endl;
+						EV_SET(&change[temp_data->id], temp_data->sock_fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, temp_data);
+						if (kevent(kq, &change[temp_data->id], 1, NULL, 0, NULL) == -1)
+							std::cerr << "error: kevent 33" << std::endl;
+						temp_data->filter = EVFILT_WRITE;
+						temp_data->req.parse_request_line(strtok(temp_data->buffer, "\r\n"));
+					}
 
-				std::cout << "222222222222" << std::endl;
-					reading(kq, change, events, i , u_data);
+					// . printing the request...........................................
 				}
 				else
-				{
-				std::cout << "333333333" << std::endl;
-
-					writing(kq, u_data ,change);
-				}
+					serve_file(temp_data);
 			}
 		}
-
 	}
+
 }
 
-int serving(std::vector<server> servero)
+int main()
 {
-	int kq = kqueue(); //? creating new queue
-	struct kevent *change;
-	struct kevent *events;
-
-	change = new struct kevent[MAX_EVENTS];
-	events = new struct kevent[MAX_EVENTS];
+	struct kevent *change = new struct kevent[MAX_EVENTS];
+	int kq = kqueue();
 	if (kq == -1)
-	{
 		std::cerr << "error: kqueue" << std::endl;
-		return (1);
+	s_data *server_data = new s_data;
+	server_data->sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_data->sock_fd == -1)
+		std::cerr << "error: socket" << std::endl;
+	fcntl(server_data->sock_fd, F_SETFL, O_NONBLOCK); // if not the connection will block
+	server_data->host_addrlen = sizeof(server_data->host_addr);
+	memset(&server_data->host_addr, 0, sizeof(server_data->host_addr));
+	server_data->host_addr.sin_family = AF_INET;					//? which protocol IPv4, IPv6, ...
+	server_data->host_addr.sin_port = htons(8080);				//? the port in network byte order
+	server_data->host_addr.sin_addr.s_addr = htonl(INADDR_ANY);	//? the ip, use inet_addr function in case of and ip
+	// .allowing the socket to be reusable..................................
+	int opt = 1;
+	if (setsockopt(server_data->sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	{
+		std::cerr << "error: setsockopt" << std::endl;
+		server_data->host_addr.sin_zero[0] = -1;
 	}
-    int connections = preparation(kq, servero, change, events);
-	event_loop(kq, change, events, connections);
-    return (0);
-}
-
-int main ()
-{
-	server s1(8080);
-	server s2(8081);
-	server s3(8082);
-	std::vector<server> servero;
-	servero.push_back(s1);
-	servero.push_back(s2);
-	servero.push_back(s3);
-
-	serving(servero);
+	opt = 1;
+	if (setsockopt(server_data->sock_fd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0)
+	{
+		std::cerr << "error: setsockopt" << std::endl;
+		server_data->host_addr.sin_zero[0] = -1;
+	}
+	// .binding the socket with an adress...................................
+	if (bind(server_data->sock_fd, reinterpret_cast<struct sockaddr *>(&server_data->host_addr), server_data->host_addrlen) != 0) //? sockaddr is just an interface, is a sort of polymorphism
+	{
+		std::cerr << "error: bind" << std::endl;
+		server_data->host_addr.sin_zero[0] = -1;
+	}
+	if (listen(server_data->sock_fd, SOMAXCONN) == -1)
+	{
+		std::cerr << "error: listen" << std::endl;
+		return (-1);
+	}
+	server_data->id = 0;
+	EV_SET(&change[0], server_data->sock_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
+	if (kevent(kq, change, 1, NULL, 0, NULL) != 0)
+		std::cout << "error: kevent registration 1" << std::endl;
+	int connections = 1;
+	event_loop(change, kq, server_data, connections);
 }
