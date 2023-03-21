@@ -1,29 +1,30 @@
-
 #include <iostream>
-#include <vector>
-// #include <sys/socket.h>
-// #include <sys/types.h>
-// #include <sys/event.h>
-// #include <sys/time.h>
-// #include <stdlib.h>
-// #include <fcntl.h>
+#include <fstream>
 
 
-void test()
+class test
 {
-        std::vector<int*> tests;
-        for (int i = 0; i < 5; i++)
-        {
-            int *a = new int;
-            *a = i;
-            tests.push_back(a);
-        }
-        delete tests[2];
-        std::cout << *(tests[2]) << std::endl;
+    public:
+        std::ifstream file;
+        test() {};
+        ~test() {};
+};
 
-}
 int main()
 {
-    test();
-    system( "leaks a.out");
+    char *buff = new char[1000];
+    buff[0] = 'h';
+    buff[1] = 'e';
+    buff[2] = 'l';
+    buff[3] = 'l';
+    buff[4] = 'o';
+    buff[5] = 'w';
+    buff[6] = 'o';
+    buff[7] = 'r';
+    buff[8] = 'l';
+    buff[9] = 'd';
+    buff[500] = 'a';
+    std::string test ="hi  and ";
+    test += buff;
+    std::cout << test;    
 }

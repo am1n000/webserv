@@ -13,7 +13,7 @@
 COMPILE = c++
 FLAGS = -Wall -Wextra -Werror
 NAME = Webserv
-SRC = main.cpp App/Socket.cpp 
+SRC = main.cpp App/Socket.cpp App/Request.cpp App/Response.cpp Utils/helpers.cpp
 OBJ = $(SRC:.cpp=.o)
 
 all: $(NAME)
