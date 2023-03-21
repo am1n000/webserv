@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 22:14:56 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/21 00:17:03 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/21 20:56:23 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ public:
   data_type getNextToken(char c = ' ');
   data_type getNextScope();
   data_type data();
+  bool  end();
   ~Tockenizer();
 };
 

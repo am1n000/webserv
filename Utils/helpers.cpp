@@ -6,13 +6,14 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 11:45:31 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/13 11:45:34 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/20 13:35:48 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/helpers.hpp"
 #include <cctype>
 #include <exception>
+#include <stdexcept>
 #include <string>
 
 std::string helpers::trim(const std::string str, char c) {
@@ -62,5 +63,31 @@ std::string helpers::getBracketsContent(char *buffer)  {
       openBrackets--;
     size++;
   }
+  return std::string(buffer+start, buffer+start+size-1);
+}
+
+std::string helpers::getNextScop(char *buffer)  {
+  int         openBrackets;
+  int         size;
+  int         start;
+  std::string serverString;
+
+  openBrackets = 1;
+  size = 0;
+  start = 0;
+  while (buffer[start] != '{')
+    start++;
+  if(buffer[start] != '{')
+    throw std::exception();
+  start++;
+  while(buffer [start + size] && openBrackets > 0) {
+    if(buffer[start + size] == '{')
+      openBrackets++;
+    else if (buffer[start + size] == '}')
+      openBrackets--;
+    size++;
+  }
+  if(!buffer [start + size])
+    throw std::runtime_error("unclosed scop");
   return std::string(buffer+start, buffer+start+size-1);
 }

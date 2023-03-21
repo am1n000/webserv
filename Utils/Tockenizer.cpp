@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 23:22:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/21 01:54:57 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/21 20:57:12 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,16 @@ Tockenizer::Tockenizer() : current_(0) {}
 Tockenizer::Tockenizer(Tockenizer::const_reference data) : data_(data), current_(0) {}
 
 std::string Tockenizer::getLine() {
-  size_type end;
+  size_type size(0);
   size_type begin;
 
-  end = this->current_;
-  while (end < this->data_.length() && this->data_[end] != '\n')
-    end++;
+  while (current_ + size < this->data_.length() && this->data_[current_ + size] != '\n')
+    size++;
   begin = this->current_;
-  this->current_ = end;
-  return this->data_.substr(begin, end);
+  // if (data_[current_ + size] == '\n')
+  //   current_++;
+  this->current_ = current_ + size;
+  return this->data_.substr(begin, size);
 }
 
 Tockenizer::data_type Tockenizer::getNoneEmptyLine() {
@@ -82,3 +83,7 @@ std::string Tockenizer::getNextScope() {
 }
 
 Tockenizer::data_type Tockenizer::data() { return this->data_; }
+
+bool Tockenizer::end() { return this->current_ >= this->data_.length(); }
+
+Tockenizer::~Tockenizer() {}

@@ -6,11 +6,12 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/13 12:27:14 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/21 22:04:52 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Config.hpp"
+#include <cctype>
 #include <cstddef>
 #include <cstring>
 #include <stdexcept>
@@ -18,11 +19,28 @@
 #include <iostream>
 #include "../Includes/Server.hpp"
 
-Config::Config(): path_("webserv.conf"), file_(new std::ifstream(this->path_)){
+Config::Config(): path_("webserv.conf") {
+  try {
+  this->file_ = new std::ifstream(this->path_);
   this->setFileSize();
+  this->read();
+  this->tockenizer_ = new Tockenizer(this->buffer_);
+  } catch (...) {
+    std::cerr << "Config file could not be oppened"  << std::endl;
+    exit(1);
+  }
 }
 
-Config::Config(const std::string &path): path_(path), file_(new std::ifstream(this->path_)), file_size_(this->file_->tellg()){}
+Config::Config(const std::string &path): path_(path) {
+  try {
+  this->file_ = new std::ifstream(this->path_);
+  this->setFileSize();
+  this->read();
+  } catch (...) {
+    std::cerr << "Config file could not be oppened"  << std::endl;
+    exit(1);
+  }
+}
 
 
 std::string Config::read() {
@@ -48,22 +66,28 @@ void   Config::closeFile() {
 
 void Config::parse() {
   std::string token;
-  token = std::strtok(&this->buffer_[0], " ");
-  std::cout << token ;
-  token = std::strtok(NULL, "\n");
-  std::cout << token ;
-  token = std::strtok(NULL, "\n");
-  // token = std::strtok(NULL, "}");
-  std::cout << token << std::endl;
+  while(!tockenizer_->end()) {
+    token = this->tockenizer_->getNextToken();
+    if(token == "server")
+      this->pushServer(this->tockenizer_->getNextScope());
+  }
+  dev::br();
+  std::cout << this->servers_[0]->getRoot() << std::endl;
+  std::cout << this->servers_[0]->getClienBodySizeLimit() << std::endl;
+  std::cout << this->servers_[0]->getHost() << std::endl;
+  std::cout << this->servers_[0]->getPort() << std::endl;
+  // std::cout << this->servers_[1]->getRoot() << std::endl;
+  dev::br();
+  std::cout << this->servers_[1]->getRoot() << std::endl;
+  std::cout << this->servers_[1]->getClienBodySizeLimit() << std::endl;
+  std::cout << this->servers_[1]->getHost() << std::endl;
+  std::cout << this->servers_[1]->getPort() << std::endl;
 }
 
-// std::string Config::getServerString(size_type start) {
-// }
-
-void Config::parseServer() {
-  // Server *server = new Server();
+void Config::pushServer(const std::string& serverString) {
+  Server* server = new Server(serverString);
+  servers_.push_back(server);
 }
-
 
 std::string Config::getConfigBuffer() const {
   return this->buffer_;
