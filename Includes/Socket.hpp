@@ -26,7 +26,7 @@ class sock
 		sock();
 		~sock();
 		void prepare_response();
-		void sending();
+		void sending(int kq, struct kevent *change);
 		void reading(int kq, struct kevent *change);
 		int sock_fd;
 		char reading_buffer[4096];
@@ -36,6 +36,7 @@ class sock
 		response resp;
 		int id;
 		int filter;
+		bool is_listening_sock;
 };
 
 

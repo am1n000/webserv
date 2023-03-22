@@ -12,7 +12,7 @@ void sock::prepare_response()
 	this->resp.set_file(this->req.get_file());
 }
 
-void sock::sending()
+void sock::sending(int kq, struct kevent *change)
 {
 	bool finished;
 	try
@@ -21,10 +21,17 @@ void sock::sending()
 	}
 	catch (std::exception &e)
 	{
+		EV_SET(&change[this->id], this->sock_fd, EVFILT_WRITE, EV_DELETE, 0, 0, this);
+		kevent(kq, &change[this->id], 1, NULL, 0, NULL);
 		close(this->sock_fd);
 	}
 	if (finished)
+	{
+
+		EV_SET(&change[this->id], this->sock_fd, EVFILT_WRITE, EV_DELETE, 0, 0, this);
+		kevent(kq, &change[this->id], 1, NULL, 0, NULL);
 		close (this->sock_fd);
+	}
 }
 
 
@@ -36,6 +43,8 @@ void sock::reading(int kq, struct kevent *change)
 	}
 	catch(std::exception &e)
 	{
+		EV_SET(&change[this->id], this->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, this);
+		kevent(kq, &change[this->id], 1, NULL, 0, NULL);
 		close(this->sock_fd);
 	}
 }

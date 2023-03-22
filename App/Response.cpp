@@ -33,16 +33,13 @@ int response::upload(int sock_fd)
 		this->_started = 1;
 		return (0);
 	}
-		int len = 1000;
+		int len = 2048;
 		if(this->_bytes_sent + len >= this->_bytes_to_send)
 			len = this->_bytes_to_send - this->_bytes_sent;
 		char buffer[len];
 		this->_file.read(buffer, len);
 		if (send(sock_fd, buffer, len, 0) < 0)
-        {
-            
             throw(SendFailedException());
-        }
 		this->_bytes_sent += len;
 		if (this->_bytes_sent >= this->_bytes_to_send)
 		{

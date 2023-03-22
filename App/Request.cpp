@@ -89,9 +89,7 @@ int	request::receive(int kq, sock *data,struct kevent *change)
 {
 	int val_read = recv(data->sock_fd, this->reading_buffer, BUFFER_SIZE, 0);
 	if (val_read < 0)
-	{
 		throw(RecvFailedException());
-	}
 	if (val_read == 0 || strstr(this->reading_buffer, "\r\n"))
 	{
 		EV_SET(&change[data->id], data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, data);
