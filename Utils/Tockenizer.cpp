@@ -6,13 +6,14 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 23:22:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/21 20:57:12 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/25 02:29:56 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Tockenizer.hpp"
 #include <cctype>
 #include <stdexcept>
+#include <vector>
 
 Tockenizer::Tockenizer() : current_(0) {}
 
@@ -53,7 +54,7 @@ std::string Tockenizer::getNextToken(char c) {
     begin++;
   while (begin + size < this->data_.length() && (data_[begin + size] != c || data_[begin + size] == '\n'))
     size++;
-  this->current_ = begin + size;
+  this->current_ = begin + size ;
   result = this->data_.substr(begin, size);
   if(result[result.length() - 1] == '\n')
     result[result.length() - 1] = '\0';
@@ -87,3 +88,4 @@ Tockenizer::data_type Tockenizer::data() { return this->data_; }
 bool Tockenizer::end() { return this->current_ >= this->data_.length(); }
 
 Tockenizer::~Tockenizer() {}
+

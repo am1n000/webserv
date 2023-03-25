@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 22:14:56 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/21 20:56:23 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/23 14:24:07 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ public:
   data_type data();
   bool  end();
   ~Tockenizer();
+  static bool inDictionary(const std::string& token, const std::vector<std::string>& dictionary);
 };
 
 #endif // !TOCKENIZER_HPP

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/21 22:37:54 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/25 02:54:06 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include "../Includes/helpers.hpp"
@@ -23,11 +24,11 @@
 
 
 Server::Server() {
-  this->setMemebers();
+  this->setMembers();
 }
 
 Server::Server(const std::string& serverString): server_string_(serverString) {
-  this->setMemebers();
+  this->setMembers();
   this->tockenizer_ = new Tockenizer(serverString.substr(1, serverString.length() - 2));
   this->parseServer();
 }
@@ -61,7 +62,6 @@ void Server::setServerName(const std::string &val){
 (void) val;
 }
 void Server::setListen(const std::string &val){
-  std::cout << "set listen trigred" << std::endl;
   std::size_t i = val.find(":");
   if (i == std::string::npos) {
     this->host_ = "0.0.0.0";
@@ -77,7 +77,7 @@ void Server::setErrorPage(const std::string &val){
 }
 
 
-void Server::setMemebers() {
+void Server::setMembers() {
   this->members_.insert(std::make_pair("root", &Server::setRoot));
   this->members_.insert(std::make_pair("index", &Server::setIndex));
   this->members_.insert(std::make_pair("server_name", &Server::setServerName));
@@ -97,18 +97,15 @@ void Server::test() {
 // end test
 
 void  Server::pushLocation(const std::string& locationString) {
-  (void) locationString;
+  Location * location = new Location(locationString, this->tockenizer_->getNextScope());
+  this->locations_.push_back(location);
+  this->tockenizer_->getNextScope();
 }
 
 void Server::setProp(const std::string &prop, const std::string &val) {
   (this->*members_[prop])(helpers::trim(val));
 }
 
-Location::Location() {};
-Location::Location(const std::string& locationString) { 
-  (void)locationString;
-  std::cout << "location has been parsed" << std::endl;
-};
 
 void Server::parseServer() {
   std::string token;
@@ -116,10 +113,15 @@ void Server::parseServer() {
 
   while(!tockenizer_->end()) { 
     token = this->tockenizer_->getNextToken();
-    val = this->tockenizer_->getLine();
-    if (token.length() == 0 || val.length() == 0)
+    if (token.length() == 0)
       break;
-      // std::cout << "we got an error here " << std::endl;
+    if(!Server::inDictinary(token))
+      throw std::runtime_error("invalid directive " + token);
+    
+    if (token == "location")
+      val = this->tockenizer_->getNextToken();
+    else
+      val = this->tockenizer_->getLine();
     this->setProp(token, val);
   };
 }
@@ -134,3 +136,109 @@ std::string &Server::getServerName() {return this->server_name_;}
 std::string &Server::getErrorPage() {return this->error_page_;}
 std::size_t &Server::getClienBodySizeLimit() { return this->client_body_size_limit_;}
 std::vector<std::string> &Server::getIndexes() { return this->indexs_;}
+
+const char* Server::pdictionary_[] = {
+  "root",
+  "index",
+  "server_name",
+  "listen",
+  "error_page",
+  "client_body_limit",
+  "location"
+};
+
+std::vector<std::string> Server::dictionary_(Server::pdictionary_, std::end(Server::pdictionary_));
+
+bool Server::inDictinary(const std::string& token) {
+  for (std::vector<std::string const >::iterator it = Server::dictionary_.begin(); it != Server::dictionary_.end(); it++)
+    {
+      if (*it == token)
+        return true;
+    }
+  return false;
+}
+
+
+/*
+* Location members
+*
+*/
+
+Location::Location() {};
+
+Location::Location(const std::string& location, const std::string& locationScope): auto_index_(false) { 
+  this->location_ = location;
+  this->tockenizer_ = new Tockenizer(locationScope);
+  this->parse();
+};
+
+void Location::parse() {
+  while(!this->tockenizer_->end())
+    this->setProp(this->tockenizer_->getNextToken(), this->tockenizer_->getLine());
+}
+
+Location::~Location() {}
+
+ std::map<std::string, Location::memberPointer> Location::location_members_;
+
+void Location::setMembers() {
+  Location::location_members_.insert(std::make_pair("root", &Location::setRoot));
+  Location::location_members_.insert(std::make_pair("index", &Location::setIndex));
+  Location::location_members_.insert(std::make_pair("allowed_methods", &Location::setAllowedMethods));
+  Location::location_members_.insert(std::make_pair("cgi", &Location::setCgi));
+  Location::location_members_.insert(std::make_pair("redirection", &Location::setRedirection));
+  Location::location_members_.insert(std::make_pair("auto_indexing", &Location::setAutoIndex));
+
+}
+
+// setters
+
+void Location::setIndex(const std::string &val) {
+  Tockenizer tok(val);
+  while (!tok.end()) {
+      this->indexs_.push_back(helpers::trim(tok.getNextToken()));
+  }
+}
+
+void Location::setCgi(const std::string &val) {
+  Tockenizer tok(val);
+  std::string extention;
+  std::string cgi;
+  extention = tok.getNextToken();
+  cgi = tok.getNextToken();
+  if(extention.length() == 0 || cgi.length() == 0)
+    throw std::runtime_error("bad cgi directive");
+  this->cgis_.insert(std::make_pair(extention, cgi));
+}
+
+void Location::setRedirection(const std::string &val) {
+ (void) val;
+  std::cout << "redirection setter has been called" << std::endl;
+}
+
+
+
+void Location::setAutoIndex(const std::string &val) {
+  if(val != "on" && val != "off")
+    throw std::runtime_error("invalid value for auto_indexing");
+  this->auto_index_ = val == "on" ? true : false;
+}
+
+
+void Location::setAllowedMethods(const std::string &val) {
+  Tockenizer tok = Tockenizer(val);
+  while (!tok.end()) {
+    this->allowed_methods_.push_back(helpers::trim(tok.getNextToken()));
+  }
+}
+void Location::setRoot(const std::string &val) {
+  Tockenizer tok = Tockenizer(val);
+  this->root_ = helpers::trim(tok.getNextToken());
+  if (!tok.end())
+    throw std::runtime_error("invalid value for root");
+}
+
+void Location::setProp(const std::string &prop, const std::string &val) {
+  (this->*Location::location_members_[prop])(helpers::trim(val));
+}
+

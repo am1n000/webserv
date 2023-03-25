@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 11:45:31 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/20 13:35:48 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/25 02:13:58 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,4 +90,21 @@ std::string helpers::getNextScop(char *buffer)  {
   if(!buffer [start + size])
     throw std::runtime_error("unclosed scop");
   return std::string(buffer+start, buffer+start+size-1);
+}
+
+std::string helpers::unscope(const std::string& scope) {
+
+  size_t start(0);
+  size_t size(scope.length() - 1);
+
+  while (std::isspace(scope[start]))
+    start++;
+  if(scope[start] != '{')
+    throw std::runtime_error("invalid scope");
+  start++;
+  while(std::isspace(scope[size]))
+    size--;
+  if(scope[size] != '}')
+      throw std::runtime_error("invalid scope");
+  return scope.substr(start, size - start);
 }
