@@ -20,7 +20,7 @@ int event_loop(int kq, std::vector<sock*> servers_data)
 		for (int j = 0; j < nevents; j++)
 		{
 			sock *temp_data = (sock *)events[j].udata;
-			for (int i = 0; i < servers_data.size(); i++)
+			for (size_t i = 0; i < servers_data.size(); i++)
 			{
 				if (temp_data->sock_fd == servers_data[i]->sock_fd)
 				{
@@ -61,10 +61,9 @@ void serving(std::vector<servero> servers)
 	std::vector<sock *> servers_data;
 	if (kq == -1)
 		std::cerr << "error: kqueue" << std::endl;
-	for (int j = 0; j < servers.size(); j++)
+	for (size_t j = 0; j < servers.size(); j++)
 	{
 		sock *server_data = new sock;
-		int valid = 1;
 		server_data->sock_fd = socket(AF_INET, SOCK_STREAM, 0);
 		if (server_data->sock_fd == -1)
 		{
