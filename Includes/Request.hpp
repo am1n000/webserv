@@ -48,7 +48,6 @@ class request
 		void			set_file(char *file);
 		void            parse_request_line(char *line);
 		std::string 	media_type(std::string extension);
-		int				receive(int kq, sock *data);
 };
 
 
