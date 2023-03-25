@@ -6,24 +6,38 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/03/08 11:37:03 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/03/21 21:43:04 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CPP=c++
 FLAGS=-Wall -Wextra -Werror -std=c++98
 NAME=webserv
-SRC=main.cpp
-OBJ=$(SRC:.cpp=.o)
+SRC=main.cpp App/Config.cpp App/Server.cpp App/socket.cpp HTTP/Request.cpp HTTP/Response.cpp Utils/helpers.cpp dev/dev.cpp Utils/Tockenizer.cpp
+OBJ_DIR=objects
+OBJ := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
-all: $(NAAME)
+all: $(NAME)
 
+test: all  
+	@clear
+	@./$(NAME)
 
-%.o:%.cpp
+$(OBJ_DIR)/%.o:%.cpp
 	$(CPP) $(FLAGS) -c $< -o $@
+
+$(NAME): $(OBJ)
+	$(CPP) $^ -o $@
+
+debug: $(SRC)
+	$(CPP) -g $^  -o $@
+	clear
+	lldb debug
+
 
 clean:
 	rm -rf $(OBJ)
+	rm -rf debug
 
 fclean: clean
 	rm -rf $(NAME)
