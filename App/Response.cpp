@@ -5,12 +5,17 @@ response::response() : _bytes_sent(0), _started(0), _finished(0)
 {};
 response::~response() {};
 
-void response::set_file(s_file file)
+void response::set_file(s_file file, int sock_fd)
 {
     this->_filename = file.filename;
     this->_file.open((_filename).c_str(), std::ios::binary | std::ios::ate);
     if (!this->_file.is_open())
 	{
+		std::string header = "HTTP/1.1 404 NOT Found\r\nServer: webserver-c";
+		header += "\r\n\r\n";
+		header += "<!DOCTYPE html>\n<html>\n<body>\n<h1>Skafandri: The requested URL was not found on this server.</h1>\n</body>\n</html>\r\n";
+		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+            throw(SendFailedException());
         throw(FileNotFound());
 	}
     this->_mime_type = file.media;

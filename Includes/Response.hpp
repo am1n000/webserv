@@ -19,7 +19,7 @@ class response
     public:
         response();
         ~response();
-        void set_file(s_file file);
+        void set_file(s_file file, int sock_fd);
         int upload(int sock_fd);
 
 };

@@ -9,7 +9,7 @@ sock::~sock()
 
 void sock::prepare_response()
 {
-	this->resp.set_file(this->req.get_file());
+	this->resp.set_file(this->req.get_file(), this->sock_fd);
 }
 
 void sock::sending(int kq, struct kevent *change)
