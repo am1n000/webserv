@@ -1,7 +1,7 @@
 #include "../Includes/Response.hpp"
 
 
-response::response() : _bytes_sent(0), _started(0), _finished(0)
+response::response() : _bytes_sent(0), _finished(0), _started(0)
 {};
 response::~response() {};
 
@@ -57,7 +57,7 @@ int response::handle_get(int sock_fd)
 
 int response::handle_post(int sock_fd)
 {
-	return (1);
+	return (sock_fd);
 }
 #include <cstdio>
 int response::handle_delete(int sock_fd)
