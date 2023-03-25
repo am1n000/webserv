@@ -85,22 +85,22 @@ void	request::parse_request_line(char *line)
 }
 
 
-int	request::receive(int kq, sock *data,struct kevent *change)
+int	request::receive(int kq, sock *data)
 {
 	int val_read = recv(data->sock_fd, this->reading_buffer, BUFFER_SIZE, 0);
 	if (val_read < 0)
 		throw(RecvFailedException());
 	if (val_read == 0 || strstr(this->reading_buffer, "\r\n"))
 	{
-		EV_SET(&change[data->id], data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, data);
-		if (kevent(kq, &change[data->id], 1, NULL, 0, NULL) == -1)
+		EV_SET (data->change_ptr, data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, data);
+		if (kevent(kq, data->change_ptr, 1, NULL, 0, NULL) == -1)
 			std::cerr << "error: kevent 3" << std::endl;
-		EV_SET(&change[data->id], data->sock_fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, data);
-		if (kevent(kq, &change[data->id], 1, NULL, 0, NULL) == -1)
+		EV_SET (data->change_ptr, data->sock_fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, data);
+		if (kevent(kq, data->change_ptr, 1, NULL, 0, NULL) == -1)
 			std::cerr << "error: kevent 33" << std::endl;
 		data->filter = EVFILT_WRITE;
-		data->req.parse_request_line(strtok(data->req.reading_buffer, "\r\n"));
-			data->prepare_response();
+		this->parse_request_line(strtok(this->reading_buffer, "\r\n"));
+		data->prepare_response(this->_method);
 	}
 	return (0);
 	

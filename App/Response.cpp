@@ -23,7 +23,7 @@ void response::set_file(s_file file, int sock_fd)
     this->_file.seekg(0, std::ios::beg);
 }
 
-int response::upload(int sock_fd)
+int response::handle_get(int sock_fd)
 {
 	if (this->_started == 0)
 	{
@@ -53,4 +53,25 @@ int response::upload(int sock_fd)
             return (1);
 		}
     return (0);
+}
+
+int response::handle_post(int sock_fd)
+{
+	return (1);
+}
+#include <cstdio>
+int response::handle_delete(int sock_fd)
+{
+	if (this->_started == 0)
+	{
+		std::string header = "HTTP/1.1 204 No Content\r\n\r\n";
+		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+            throw(SendFailedException());
+		this->_started = 1;
+		return (0);
+	}
+	if (std::remove(this->_filename.c_str()) != 0)
+		std::cerr << "error : file deletion" << std::endl;
+	std::cout << "ok" << std::endl;
+	return (1);
 }

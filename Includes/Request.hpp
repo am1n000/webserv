@@ -12,6 +12,7 @@
 #include <vector>
 #include <poll.h>
 #include <sys/event.h>
+#include <cstdio>
 
 #define BUFFER_SIZE 4096
 
@@ -47,7 +48,7 @@ class request
 		void			set_file(char *file);
 		void            parse_request_line(char *line);
 		std::string 	media_type(std::string extension);
-		int				receive(int kq, sock *data,struct kevent *change);
+		int				receive(int kq, sock *data);
 };
 
 

@@ -6,37 +6,24 @@
 #include "Response.hpp"
 #define MAX_EVENTS 1000
 
-
-class server
-{
-	public:
-		server();
-		~server();
-		server(server const &obj);
-		server& operator=(server const &obj);
-		
-		void create_serveret();
-		void bind_serveret(int port);
-		int listen_to_connections();
-};
-
 class sock
 {
 	public :
 		sock();
+		sock(int sockfd, int filtr, bool listen_sock);
 		~sock();
-		void prepare_response();
-		void sending(int kq, struct kevent *change);
-		void reading(int kq, struct kevent *change);
+		void prepare_response(int method);
+		bool sending(int kq);
+		void reading(int kq);
 		int sock_fd;
-		char reading_buffer[4096];
 		struct sockaddr_in host_addr;
 		int host_addrlen;
 		request req;
 		response resp;
-		int id;
 		int filter;
 		bool is_listening_sock;
+		struct kevent *change_ptr;
+		int _method;
 };
 
 

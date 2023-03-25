@@ -1,50 +1,66 @@
 #include "../Includes/Socket.hpp"
 
 sock::sock()
-{}
-
-sock::~sock()
-{}
-
-
-void sock::prepare_response()
 {
-	this->resp.set_file(this->req.get_file(), this->sock_fd);
+	this->change_ptr = new struct kevent;
 }
 
-void sock::sending(int kq, struct kevent *change)
+sock::sock(int sockfd, int filtr, bool listen_sock) : sock_fd(sockfd), filter(filtr), is_listening_sock(listen_sock) 
 {
-	bool finished;
+	this->change_ptr = new struct kevent;
+}
+
+sock::~sock()
+{
+	delete (this->change_ptr);
+}
+
+
+void sock::prepare_response(int method)
+{
+	this->resp.set_file(this->req.get_file(), this->sock_fd);
+	this->_method = method;
+}
+
+bool sock::sending(int kq)
+{
+	bool finished = false;
 	try
 	{
-		finished = this->resp.upload(this->sock_fd);
+		if (this->_method == 1)
+			finished = this->resp.handle_get(this->sock_fd);
+		else if (this->_method == 2)
+			finished = this->resp.handle_post(this->sock_fd);
+		else
+			finished = this->resp.handle_delete(this->sock_fd);
 	}
 	catch (std::exception &e)
 	{
-		EV_SET(&change[this->id], this->sock_fd, EVFILT_WRITE, EV_DELETE, 0, 0, this);
-		kevent(kq, &change[this->id], 1, NULL, 0, NULL);
+		EV_SET(this->change_ptr, this->sock_fd, EVFILT_WRITE, EV_DELETE, 0, 0, this);
+		kevent(kq, this->change_ptr, 1, NULL, 0, NULL);
 		close(this->sock_fd);
 	}
 	if (finished)
 	{
 
-		EV_SET(&change[this->id], this->sock_fd, EVFILT_WRITE, EV_DELETE, 0, 0, this);
-		kevent(kq, &change[this->id], 1, NULL, 0, NULL);
+		EV_SET(this->change_ptr, this->sock_fd, EVFILT_WRITE, EV_DELETE, 0, 0, this);
+		kevent(kq, this->change_ptr, 1, NULL, 0, NULL);
 		close (this->sock_fd);
 	}
+	return (finished);
 }
 
 
-void sock::reading(int kq, struct kevent *change)
+void sock::reading(int kq)
 {
 	try
 	{
-		this->req.receive(kq, this, change);
+		this->req.receive(kq, this);
 	}
 	catch(std::exception &e)
 	{
-		EV_SET(&change[this->id], this->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, this);
-		kevent(kq, &change[this->id], 1, NULL, 0, NULL);
+		EV_SET(this->change_ptr, this->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, this);
+		kevent(kq, this->change_ptr, 1, NULL, 0, NULL);
 		close(this->sock_fd);
 	}
 }
