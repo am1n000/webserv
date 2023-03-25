@@ -83,25 +83,3 @@ void	request::parse_request_line(char *line)
 	else if (strcmp(version, "HTTP/1.1") == 0)
 		this->_version = 2;
 }
-
-
-int	request::receive(int kq, sock *data)
-{
-	int val_read = recv(data->sock_fd, this->reading_buffer, BUFFER_SIZE, 0);
-	if (val_read < 0)
-		throw(RecvFailedException());
-	if (val_read == 0 || strstr(this->reading_buffer, "\r\n"))
-	{
-		EV_SET (data->change_ptr, data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, data);
-		if (kevent(kq, data->change_ptr, 1, NULL, 0, NULL) == -1)
-			std::cerr << "error: kevent 3" << std::endl;
-		EV_SET (data->change_ptr, data->sock_fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, data);
-		if (kevent(kq, data->change_ptr, 1, NULL, 0, NULL) == -1)
-			std::cerr << "error: kevent 33" << std::endl;
-		data->filter = EVFILT_WRITE;
-		this->parse_request_line(strtok(this->reading_buffer, "\r\n"));
-		data->prepare_response(this->_method);
-	}
-	return (0);
-	
-}

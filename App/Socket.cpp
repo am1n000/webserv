@@ -55,7 +55,21 @@ void sock::reading(int kq)
 {
 	try
 	{
-		this->req.receive(kq, this);
+		int val_read = recv(this->sock_fd, this->req.reading_buffer, BUFFER_SIZE, 0);
+		if (val_read < 0)
+			throw(RecvFailedException());
+		if (val_read == 0 || strstr(this->req.reading_buffer, "\r\n"))
+		{
+			EV_SET (this->change_ptr, this->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, this);
+			if (kevent(kq, this->change_ptr, 1, NULL, 0, NULL) == -1)
+				std::cerr << "error: kevent 3" << std::endl;
+			EV_SET (this->change_ptr, this->sock_fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, this);
+			if (kevent(kq, this->change_ptr, 1, NULL, 0, NULL) == -1)
+				std::cerr << "error: kevent 33" << std::endl;
+			this->filter = EVFILT_WRITE;
+			this->req.parse_request_line(strtok(this->req.reading_buffer, "\r\n"));
+			this->prepare_response(this->req.get_method());
+		}
 	}
 	catch(std::exception &e)
 	{
