@@ -24,7 +24,6 @@ class Client
 		Request 			*req;
 		Response			*resp;
 
-		void				prepare_response();
 		bool				sending(int kq);
 		void				reading(int kq);
 

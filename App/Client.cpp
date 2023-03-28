@@ -20,11 +20,6 @@ Client::~Client()
 }
 
 
-void Client::prepare_response()
-{
-	this->resp->set_file(this->req->get_file(), this->_sockFd);
-}
-
 bool Client::sending(int kq)
 {
 	bool finished = false;
@@ -45,7 +40,6 @@ bool Client::sending(int kq)
 	}
 	if (finished)
 	{
-
 		EV_SET(this->_changePtr, this->_sockFd, EVFILT_WRITE, EV_DELETE, 0, 0, this);
 		kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
 		close (this->_sockFd);
@@ -72,9 +66,7 @@ void Client::reading(int kq)
 		if (this->req->content_lenght == 0 && (val_read == 0 || std::strstr(buffer, "\r\n\r\n")))
 		{
 			this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
-			if (this->req->get_method() != 2)
-				this->prepare_response();
-			// this->req->content_lenght = 135154;
+		// this->req->content_lenght = 135154;
 		}
 	}
 	catch(std::exception &e)
@@ -82,6 +74,7 @@ void Client::reading(int kq)
 		EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
 		kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
 		close(this->_sockFd);
+		return;
 	}
 	if(this->req->get_method() == 2)
 	{
@@ -101,6 +94,7 @@ void Client::reading(int kq)
 				EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
 				kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
 				close(this->_sockFd);
+				return;
 			}
 			char *bod = std::strstr(temp_buff, "\r\n\r\n");
 			this->req->post_file.write(bod, std::strlen(bod));
@@ -115,6 +109,16 @@ void Client::reading(int kq)
 	}
 	if (this->req->content_lenght <= 0)
 	{
+		try {
+			this->resp->set_file(this->req->get_file(), this->getSockFd());
+		}
+		catch(std::exception &e)
+		{
+			EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
+			kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
+			close(this->_sockFd);
+			return;
+		}
 		EV_SET (this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
 		if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)
 			std::cerr << "error: kevent 3" << std::endl;
