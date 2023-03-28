@@ -1,14 +1,14 @@
 #include "../Includes/Request.hpp"
-#include "../Includes/Socket.hpp"
-request::request() : _method(0) , _version(0)
+#include "../Includes/Client.hpp"
+Request::Request() : _method(0) , _version(0), content_lenght(0)
 {}
 
-request::~request() {}
+Request::~Request() {}
 
-request::request(const request &x): _method(x._method), _file(x._file), _version(x._version)
+Request::Request(const Request &x): _method(x._method), _file(x._file), _version(x._version), content_lenght(0)
 {}
 
-request &request::operator=(const request &x)
+Request &Request::operator=(const Request &x)
 {
 	this->_method = x.get_method();
 	this->_file = x.get_file();
@@ -16,22 +16,22 @@ request &request::operator=(const request &x)
 	return (*this);
 }
 
-int request::get_method() const
+int Request::get_method() const
 {
 	return (this->_method);
 }
 
-s_file request::get_file() const
+s_file Request::get_file() const
 {
 	return (this->_file);
 }
 
-int request::get_version() const
+int Request::get_version() const
 {
 	return (this->_version);
 }
 
-std::string request::media_type(std::string extension) //to be removed, handeled by parsing config file
+std::string Request::media_type(std::string extension) //to be removed, handeled by parsing config file
 {		
     std::string ext[] = {"css", "csv", "gif", "htm", "html", "ico", "jpeg", "jpg", "js", "json", "png", "pdf", "mp4", "txt", "ico"};
     std::string med[] = {"text/css" , "text/csv", "image/gif", "text/html", "text/html", "image/x-con", "image/jpeg", "image/jpeg", "application/javascript", "application/json", "image/png", "application/pdf", "video/mp4", "text/plain", "image/vnd.microsoft.icon"};
@@ -42,7 +42,7 @@ std::string request::media_type(std::string extension) //to be removed, handeled
     	return (media[extension]);
 	return ("binary/octet-stream");
 }
-void request::set_file(char *file)
+void Request::set_file(char *file)
 {
 	std::string extension;
 	this->_file.filename = file;
@@ -62,7 +62,7 @@ void request::set_file(char *file)
 		this->_file.filename = "ressources/index.html";
 }
 
-void	request::parse_request_line(char *line)
+void	Request::parse_request_line(char *line)
 {
 	char *method;
 	char *version;
@@ -82,26 +82,4 @@ void	request::parse_request_line(char *line)
 		this->_version = 1;
 	else if (strcmp(version, "HTTP/1.1") == 0)
 		this->_version = 2;
-}
-
-
-int	request::receive(int kq, sock *data)
-{
-	int val_read = recv(data->sock_fd, this->reading_buffer, BUFFER_SIZE, 0);
-	if (val_read < 0)
-		throw(RecvFailedException());
-	if (val_read == 0 || strstr(this->reading_buffer, "\r\n"))
-	{
-		EV_SET (data->change_ptr, data->sock_fd, EVFILT_READ, EV_DELETE, 0, 0, data);
-		if (kevent(kq, data->change_ptr, 1, NULL, 0, NULL) == -1)
-			std::cerr << "error: kevent 3" << std::endl;
-		EV_SET (data->change_ptr, data->sock_fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, data);
-		if (kevent(kq, data->change_ptr, 1, NULL, 0, NULL) == -1)
-			std::cerr << "error: kevent 33" << std::endl;
-		data->filter = EVFILT_WRITE;
-		this->parse_request_line(strtok(this->reading_buffer, "\r\n"));
-		data->prepare_response(this->_method);
-	}
-	return (0);
-	
 }
