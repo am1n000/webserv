@@ -1,11 +1,11 @@
 #include "../Includes/Response.hpp"
+#include <cstdio>
 
-
-response::response() : _bytes_sent(0), _finished(0), _started(0)
+Response::Response() : _bytes_sent(0), _finished(0), _started(0)
 {};
-response::~response() {};
+Response::~Response() {};
 
-void response::set_file(s_file file, int sock_fd)
+void Response::set_file(s_file file, int sock_fd)
 {
     this->_filename = file.filename;
     this->_file.open((_filename).c_str(), std::ios::binary | std::ios::ate);
@@ -23,7 +23,7 @@ void response::set_file(s_file file, int sock_fd)
     this->_file.seekg(0, std::ios::beg);
 }
 
-int response::handle_get(int sock_fd)
+int Response::handle_get(int sock_fd)
 {
 	if (this->_started == 0)
 	{
@@ -55,23 +55,19 @@ int response::handle_get(int sock_fd)
     return (0);
 }
 
-int response::handle_post(int sock_fd)
+int Response::handle_post(int sock_fd)
 {
-	return (sock_fd);
+	std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post\t\nContent-Type: text/plain\r\n\r\n";
+	if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+		throw(SendFailedException());
+	return (1);
 }
-#include <cstdio>
-int response::handle_delete(int sock_fd)
+int Response::handle_delete(int sock_fd)
 {
-	if (this->_started == 0)
-	{
-		std::string header = "HTTP/1.1 204 No Content\r\n\r\n";
-		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-            throw(SendFailedException());
-		this->_started = 1;
-		return (0);
-	}
+	std::string header = "HTTP/1.1 204 No Content\r\n\r\n";
+	if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+		throw(SendFailedException());
 	if (std::remove(this->_filename.c_str()) != 0)
 		std::cerr << "error : file deletion" << std::endl;
-	std::cout << "ok" << std::endl;
 	return (1);
 }

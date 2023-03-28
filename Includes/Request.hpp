@@ -13,10 +13,11 @@
 #include <poll.h>
 #include <sys/event.h>
 #include <cstdio>
+#include <fstream>
 
 #define BUFFER_SIZE 4096
 
-class sock;
+class Client;
 
 typedef struct t_file
 {
@@ -25,7 +26,7 @@ typedef struct t_file
 }               s_file;
 
 
-class request
+class Request
 {
 	private:
 		int _method; // ? 1: GET, 2: POST, 3: DELETE
@@ -35,13 +36,15 @@ class request
 
 	
 	public:
-		request();
-		~request();
-		request (const request &x);
+		Request();
+		~Request();
+		Request (const Request &x);
 
-		char reading_buffer[BUFFER_SIZE];
+		std::string reading_buffer;
+		int			content_lenght;
+		std::ofstream	post_file;
 
-		request &operator= (const request &x);
+		Request &operator= (const Request &x);
 		int             get_method() const;
 		s_file			get_file() const;
 		int             get_version() const;

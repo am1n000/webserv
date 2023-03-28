@@ -2,11 +2,10 @@
 #define RESPONSE_HPP
 
 #include <iostream>
-#include <fstream>
 #include "Request.hpp"
 #include "Utils.hpp"
 
-class response
+class Response
 {
 	private:
 		int             _bytes_to_send;
@@ -17,8 +16,8 @@ class response
 		std::string     _mime_type;
 		std::ifstream   _file;
 	public:
-		response();
-		~response();
+		Response();
+		~Response();
 		void	set_file(s_file file, int sock_fd);
 		int     handle_get(int sock_fd);
 		int     handle_post(int sock_fd);
