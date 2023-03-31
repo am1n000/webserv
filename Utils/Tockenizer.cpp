@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 23:22:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/25 02:29:56 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/31 01:35:51 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ std::string Tockenizer::getLine() {
   while (current_ + size < this->data_.length() && this->data_[current_ + size] != '\n')
     size++;
   begin = this->current_;
-  // if (data_[current_ + size] == '\n')
-  //   current_++;
   this->current_ = current_ + size;
+  if(size == 0)
+    return "";
   return this->data_.substr(begin, size);
 }
 
@@ -52,9 +52,13 @@ std::string Tockenizer::getNextToken(char c) {
   begin = this->current_;
   while(std::isspace(this->data_[begin]))
     begin++;
-  while (begin + size < this->data_.length() && (data_[begin + size] != c || data_[begin + size] == '\n'))
+  while (begin + size < this->data_.length() &&
+         (data_[begin + size] != c || data_[begin + size] == '\n')) {
     size++;
-  this->current_ = begin + size ;
+  }
+  this->current_ = begin + size + 1 ;
+  if(size == 0)
+    return result;
   result = this->data_.substr(begin, size);
   if(result[result.length() - 1] == '\n')
     result[result.length() - 1] = '\0';
@@ -80,7 +84,19 @@ std::string Tockenizer::getNextScope() {
   this->current_ = begin + size;
   if (begin + size >= data_.length())
     throw std::runtime_error("unclosed brackets");
-  return this->data_.substr(begin, size);
+  return this->data_.substr(begin + 1, size - 2);
+}
+
+
+Tockenizer::data_type Tockenizer::getHeaders() {
+  size_type size;
+ size_type pos = this->data_.find("\r\n\r\n"); 
+  if (pos == std::string::npos)
+    throw std::runtime_error("header not found");
+ size = pos - this->current_; 
+  std::string header = this->data_.substr(this->current_, size);
+  this->current_ += size + 4;
+  return header;
 }
 
 Tockenizer::data_type Tockenizer::data() { return this->data_; }
