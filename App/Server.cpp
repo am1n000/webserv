@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/25 02:54:06 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/31 01:33:50 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,6 @@ void Server::test() {
 void  Server::pushLocation(const std::string& locationString) {
   Location * location = new Location(locationString, this->tockenizer_->getNextScope());
   this->locations_.push_back(location);
-  this->tockenizer_->getNextScope();
 }
 
 void Server::setProp(const std::string &prop, const std::string &val) {
@@ -164,17 +163,29 @@ bool Server::inDictinary(const std::string& token) {
 *
 */
 
-Location::Location() {};
+Location::Location() {
+  this->setMembers();
+};
 
 Location::Location(const std::string& location, const std::string& locationScope): auto_index_(false) { 
   this->location_ = location;
   this->tockenizer_ = new Tockenizer(locationScope);
+  this->setMembers();
   this->parse();
 };
 
 void Location::parse() {
-  while(!this->tockenizer_->end())
-    this->setProp(this->tockenizer_->getNextToken(), this->tockenizer_->getLine());
+  std::string key;
+  std::string value;
+  while (!this->tockenizer_->end()) {
+      key = this->tockenizer_->getNextToken();
+      value = this->tockenizer_->getLine();
+    if((key.length() == 0) ^ (value.length() == 0))
+      throw std::runtime_error("invalid value for "+ key);
+    if(key.length() != 0 && value.length() != 0)
+      this->setProp(key, value);
+    std::cout << key << std::endl;
+  }
 }
 
 Location::~Location() {}
@@ -212,8 +223,7 @@ void Location::setCgi(const std::string &val) {
 }
 
 void Location::setRedirection(const std::string &val) {
- (void) val;
-  std::cout << "redirection setter has been called" << std::endl;
+  std::cout << "this is redirection " << val << std::endl;
 }
 
 
@@ -233,7 +243,7 @@ void Location::setAllowedMethods(const std::string &val) {
 }
 void Location::setRoot(const std::string &val) {
   Tockenizer tok = Tockenizer(val);
-  this->root_ = helpers::trim(tok.getNextToken());
+  this->root_ = helpers::trim(tok.getLine());
   if (!tok.end())
     throw std::runtime_error("invalid value for root");
 }
