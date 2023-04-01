@@ -74,7 +74,7 @@ void Client::reading(int kq)
 			this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
 			if (this->req->get_method() != 2)
 				this->prepare_response();
-			// this->req->content_lenght = 135154;
+			// this->req->content_lenght = 543879;
 		}
 	}
 	catch(std::exception &e)
@@ -89,7 +89,7 @@ void Client::reading(int kq)
 		{
 			try
 			{
-				this->req->post_file.open("ressources/post/test2.txt");
+				this->req->post_file.open("ressources/post/ts.mp4");
 				if (!this->req->post_file.is_open())
 				{
 					std::cerr << "post file open error" << std::endl;

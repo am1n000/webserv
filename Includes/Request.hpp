@@ -45,12 +45,14 @@ class Request
 		std::ofstream	post_file;
 
 		Request &operator= (const Request &x);
+
 		int             get_method() const;
 		s_file			get_file() const;
 		int             get_version() const;
 		void			set_file(char *file);
 		void            parse_request_line(char *line);
 		std::string 	media_type(std::string extension);
+		
 };
 
 

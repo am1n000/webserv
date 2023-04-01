@@ -13,7 +13,7 @@
 CPP=c++
 FLAGS=-Wall -Wextra -Werror -std=c++98
 NAME=webserv
-SRC=main.cpp App/Config.cpp App/Server.cpp App/Client.cpp HTTP/Request.cpp HTTP/Response.cpp Utils/helpers.cpp dev/dev.cpp Utils/Tockenizer.cpp
+SRC=main.cpp App/Config.cpp App/Server.cpp App/Client.cpp App/ClientSelect.cpp HTTP/Request.cpp HTTP/Response.cpp Utils/helpers.cpp dev/dev.cpp Utils/Tockenizer.cpp
 OBJ_DIR=objects
 OBJ := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
