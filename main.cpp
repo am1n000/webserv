@@ -10,6 +10,8 @@ class servero
 		~servero() {};
 };
 
+
+//.kqueue.....................................................................................
 int event_loop(int kq, std::vector<Client*> servers_data)
 {
 	while (1)
@@ -55,7 +57,6 @@ int event_loop(int kq, std::vector<Client*> servers_data)
 	}
 
 }
-
 void serving(std::vector<servero> servers)
 {
 	int kq = kqueue();
@@ -109,8 +110,9 @@ void serving(std::vector<servero> servers)
 	}
 	event_loop(kq, servers_data);
 }
+//............................................................................................
 
-
+//.select.....................................................................................
 void main_loop(std::map<int, clientSelect *> clients_data, fd_set read_master, int fd_max)
 {
 	fd_set write_master;
@@ -191,7 +193,6 @@ void main_loop(std::map<int, clientSelect *> clients_data, fd_set read_master, i
 	}
 
 }
-
 void select_module(std::vector<servero> servers)
 {
     fd_set master_read;
@@ -242,12 +243,15 @@ void select_module(std::vector<servero> servers)
 	}
 	main_loop(servers_data, master_read, fd_max);
 }
+//............................................................................................
+
+
 
 int main ()
 {
 	servero s1(8080);
-	servero s2(8081);
-	servero s3(8082);
+	// servero s2(8081);
+	// servero s3(8082);
 	std::vector<servero> servers;
 	servers.push_back(s1);
 	// servers.push_back(s2);
