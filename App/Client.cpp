@@ -1,4 +1,6 @@
 #include "../Includes/Client.hpp"
+#include <stdexcept>
+#include <string>
 
 Client::Client()
 {
@@ -22,7 +24,8 @@ Client::~Client()
 
 void Client::prepare_response()
 {
-	this->resp->set_file(this->req->get_file(), this->_sockFd);
+  std::cout << this->req->getFile().filename << std::endl;
+	this->resp->set_file(this->req->getFile(), this->_sockFd);
 }
 
 bool Client::sending(int kq)
@@ -30,13 +33,17 @@ bool Client::sending(int kq)
 	bool finished = false;
 	try
 	{
-		if (this->req->get_method() == 1)
-			finished = this->resp->handle_get(this->_sockFd);
-		else if (this->req->get_method() == 2)
-			finished = this->resp->handle_post(this->_sockFd);
-		else
-			finished = this->resp->handle_delete(this->_sockFd);
-	}
+          if (this->req->getRequestMethod() == 0)
+            finished = this->resp->handle_get(this->_sockFd);
+          else if (this->req->getRequestMethod() == 1)
+            finished = this->resp->handle_post(this->_sockFd);
+          else if (this->req->getRequestMethod() == 2)
+            finished = this->resp->handle_delete(this->_sockFd);
+          else
+            throw std::runtime_error("method not found");
+          // the exception trhown above is temporary
+          // need to be handled lather on
+        }
 	catch (std::exception &e)
 	{
 		EV_SET(this->_changePtr, this->_sockFd, EVFILT_WRITE, EV_DELETE, 0, 0, this);
@@ -53,29 +60,34 @@ bool Client::sending(int kq)
 	return (finished);
 }
 
-
 void Client::reading(int kq)
 {
-	char buffer[BUFFER_SIZE + 1];
-	int val_read;
-	char *temp_buff;
+	char buffer[BUFFER_SIZE];
+	int recieved_size;
 	try
 	{
-		val_read = recv(this->_sockFd, buffer, BUFFER_SIZE, 0);
-		if (val_read < 0)
-		{
-			throw(RecvFailedException());
-		}
-		buffer[val_read] = '\0';
-		temp_buff = strdup(buffer);
-		this->req->reading_buffer += buffer;
-		if (this->req->content_lenght == 0 && (val_read == 0 || std::strstr(buffer, "\r\n\r\n")))
-		{
-			this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
-			if (this->req->get_method() != 2)
+		recieved_size = recv(this->_sockFd, buffer, BUFFER_SIZE, 0);
+		if (recieved_size < 0)
+      throw std::runtime_error("recv failed");
+    this->req->appendBuffer(buffer, recieved_size);
+    // begin test
+      std::cout << "here the game begans" << std::endl;
+			// this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
+      this->req->parseHeader();
+			if (this->req->getRequestMethod() != POST)
 				this->prepare_response();
-			// this->req->content_lenght = 135154;
-		}
+
+      //end of test
+		// if (this->req->getContentLength() == 0 && (recieved_size == 0 || std::strstr(buffer, "\r\n\r\n")))
+		// {
+
+  //     std::cout << "here the game begans" << std::endl;
+		// 	// this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
+  //     this->req->parseHeader();
+		// 	if (this->req->getRequestMethod() != 2)
+		// 		this->prepare_response();
+		// 	// this->req->content_lenght = 135154;
+		// }
 	}
 	catch(std::exception &e)
 	{
@@ -83,38 +95,38 @@ void Client::reading(int kq)
 		kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
 		close(this->_sockFd);
 	}
-	if(this->req->get_method() == 2)
-	{
-		if (this->_postFileCreated == 0)
-		{
-			try
-			{
-				this->req->post_file.open("ressources/post/test2.txt");
-				if (!this->req->post_file.is_open())
-				{
-					std::cerr << "post file open error" << std::endl;
-					throw(FileNotFound());
-				}
-			}
-			catch(std::exception &e)
-			{
-				EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
-				kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
-				close(this->_sockFd);
-			}
-			char *bod = std::strstr(temp_buff, "\r\n\r\n");
-			this->req->post_file.write(bod, std::strlen(bod));
-			this->req->content_lenght -= std::strlen(bod);
-			this->_postFileCreated = 1;
-		}
-		else
-		{
-			this->req->post_file.write(temp_buff, val_read);
-			this->req->content_lenght -= val_read;
-		}
-	}
-	if (this->req->content_lenght <= 0)
-	{
+	// if(this->req->get_method() == 2)
+	// {
+	// 	if (this->_postFileCreated == 0)
+	// 	{
+	// 		try
+	// 		{
+	// 			this->req->post_file.open("ressources/post/test2.txt");
+	// 			if (!this->req->post_file.is_open())
+	// 			{
+	// 				std::cerr << "post file open error" << std::endl;
+	// 				throw(FileNotFound());
+	// 			}
+	// 		}
+	// 		catch(std::exception &e)
+	// 		{
+	// 			EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
+	// 			kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
+	// 			close(this->_sockFd);
+	// 		}
+	// 		char *bod = std::strstr(temp_buff, "\r\n\r\n");
+	// 		this->req->post_file.write(bod, std::strlen(bod));
+	// 		this->req->content_lenght -= std::strlen(bod);
+	// 		this->_postFileCreated = 1;
+	// 	}
+	// 	else
+	// 	{
+	// 		this->req->post_file.write(temp_buff, val_read);
+	// 		this->req->content_lenght -= val_read;
+	// 	}
+	// }
+	// if (this->req->getContentLength() <= 0)
+	// {
 		EV_SET (this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
 		if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)
 			std::cerr << "error: kevent 3" << std::endl;
@@ -122,7 +134,7 @@ void Client::reading(int kq)
 		if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)
 			std::cerr << "error: kevent 33" << std::endl;
 		this->_filter = EVFILT_WRITE;
-	}
+	// }
 }
 
 

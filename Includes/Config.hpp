@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/11 17:49:09 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/31 00:25:20 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/01 23:48:10 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ class Config {
     static Config* boot();
     static Config* boot(const std::string& path);
     static Config* get();
-    static void cleenup();
+    static void cleanup();
     std::string read();
     void setFileSize();
     void  closeFile();
@@ -72,7 +72,7 @@ class Config {
     std::string getConfigBuffer() const;
     void pushServer(const std::string& serverString);
     std::vector<Server*> getServers();
-    std::map<std::string, std::string> getMimeTypes();
+    std::map<std::string, std::string>& getMimeTypes();
     ~Config();
   /*
   * test method
