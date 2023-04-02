@@ -1,85 +1,174 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Request.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
+/*   Updated: 2023/04/01 23:49:39 by hchakoub         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../Includes/Request.hpp"
-#include "../Includes/Client.hpp"
-Request::Request() : _method(0) , _version(0), content_lenght(0)
-{}
+// for test only, to be removed lather
+#include "../Includes/Config.hpp"
+#include "../dev/dev.hpp"
+#include <cstdlib>
+#include <stdexcept>
+#include <utility>
 
-Request::~Request() {}
+/*
+ * constructors
+ */
 
-Request::Request(const Request &x): _method(x._method), _file(x._file), _version(x._version), content_lenght(0)
-{}
+Request::Request()
+    : header_completed_(false), body_completed_(false),
+      buffer_size(BUFFER_SIZE) {}
 
-Request &Request::operator=(const Request &x)
-{
-	this->_method = x.get_method();
-	this->_file = x.get_file();
-	this->_version = x.get_version();
-	return (*this);
+Request::Request(Request::size_type buffer_size)
+    : header_completed_(false), body_completed_(false),
+      buffer_size(buffer_size) {}
+
+Request::Request(char *buffer, Request::size_type recieved_size,
+                 Request::size_type buffer_size)
+    : request_string_(buffer, recieved_size), header_completed_(false),
+      body_completed_(false), buffer_size(buffer_size) {}
+
+/*
+ * modifiers
+ */
+
+int Request::appendBuffer(char *buffer, size_type recieved_size) {
+  this->request_string_.append(buffer, recieved_size);
+  return this->isHeaderCompleted();
 }
 
-int Request::get_method() const
-{
-	return (this->_method);
+/*
+ * checkers
+ */
+
+bool Request::isHeaderCompleted() {
+  if (header_completed_)
+    return true;
+  if (this->request_string_.find(REQUEST_SEPARATOR) != std::string::npos)
+    this->header_completed_ = true;
+  return this->header_completed_;
 }
 
-s_file Request::get_file() const
-{
-	return (this->_file);
+/*
+ * parsers
+ */
+
+void Request::parseHeader() {
+  if (!this->header_completed_)
+    throw std::runtime_error("header not completed");
+  std::string token;
+  this->tockenizer_ = new Tockenizer(this->request_string_);
+  token = this->tockenizer_->getLine();
+  this->parseMetadata_(token);
+  try {
+    this->header_string_ = this->tockenizer_->getHeaders();
+    this->pushHeaders_();
+  } catch (std::runtime_error &e) {
+    // just printing the error code for now
+    std::cerr << "Error: " << e.what() << std::endl;
+  }
+  // std::cout << "|" << this->tockenizer_->getHeaders()<< "|" << std::endl;
 }
 
-int Request::get_version() const
-{
-	return (this->_version);
+void Request::parseMetadata_(const std::string &metadata) {
+  std::string token;
+  Tockenizer tok(metadata);
+  token = tok.getNextToken();
+  this->setMethod(token);
+  token = tok.getNextToken();
+  this->setRequestUri(token);
+  token = tok.getNextToken();
+  this->setHttpVersion(token);
 }
 
-std::string Request::media_type(std::string extension) //to be removed, handeled by parsing config file
-{		
-    std::string ext[] = {"css", "csv", "gif", "htm", "html", "ico", "jpeg", "jpg", "js", "json", "png", "pdf", "mp4", "txt", "ico"};
-    std::string med[] = {"text/css" , "text/csv", "image/gif", "text/html", "text/html", "image/x-con", "image/jpeg", "image/jpeg", "application/javascript", "application/json", "image/png", "application/pdf", "video/mp4", "text/plain", "image/vnd.microsoft.icon"};
-    std::map<std::string, std::string> media;
-    for (int i = 0; i < 15; i++)
-            media.insert(std::make_pair(ext[i], med[i]));
-	if (media.find(extension) != media.end())
-    	return (media[extension]);
-	return ("binary/octet-stream");
-}
-void Request::set_file(char *file)
-{
-	std::string extension;
-	this->_file.filename = file;
-	if (strlen(file) == 1)
-		this->_file.media = "text/html";
-	else if (strchr(file, '.'))
-	{	
-		int pos = (this->_file.filename).find('.') + 1;
-		extension = (this->_file.filename).substr(pos, (this->_file.filename).length() - pos);
-		this->_file.media = media_type(extension);
-	}
-	else
-		this->_file.media = "binary/octet-stream";
-
-	this->_file.filename = file + 1;
-	if ((this->_file.filename).length() == 0)
-		this->_file.filename = "ressources/index.html";
+void Request::pushHeaders_() {
+  Tockenizer tok(this->header_string_);
+  while (!tok.end())
+    this->request_headers_.insert(std::make_pair(
+        tok.getNextToken(':'), helpers::trim(tok.getNoneEmptyLine())));
+  // std::cout << this->request_uri_ << std::endl;
 }
 
-void	Request::parse_request_line(char *line)
-{
-	char *method;
-	char *version;
+/*
+ * setters
+ */
 
-	method = strtok(line, " ");
-	set_file(strtok(NULL, " "));
-	version = strtok(NULL, " ");
+void Request::setHeaderString() {
+  this->header_string_ = this->tockenizer_->getHeaders();
+}
 
-	if (strcmp(method, "GET") == 0)
-		this->_method = 1;
-	else if (strcmp(method, "POST") == 0)
-		this->_method = 2;
-	else if (strcmp(method, "DELETE") == 0)
-		this->_method = 3;
-	
-	if (strcmp(version, "HTTP/1.0") == 0)
-		this->_version = 1;
-	else if (strcmp(version, "HTTP/1.1") == 0)
-		this->_version = 2;
+void Request::setMethod(const std::string &method) {
+  if (method == "")
+    throw BadRequestException();
+  try {
+    Settings::get()->indexOfRequestMethod(method);
+  } catch (std::runtime_error &e) {
+    // for now as place hoder i will print the error
+    std::cerr << e.what() << std::endl;
+    // lather on i will throw the right exception
+    // that will retur the right status code to the client
+  }
+}
+
+void Request::setRequestUri(const std::string &uri) {
+  if (uri == "")
+    throw BadRequestException();
+  this->request_uri_ = uri;
+}
+
+void Request::setHttpVersion(const std::string &version) {
+  if (version == "")
+    throw BadRequestException();
+  this->http_version_ = version;
+}
+
+void Request::setContentLength() {
+  std::map<std::string, std::string>::iterator it =
+      this->request_headers_.find("Content-Length");
+  if (it == this->request_headers_.end())
+    throw std::runtime_error("Content-Length header does not exist");
+  this->content_length = std::stoi(it->second);
+}
+
+/*
+ * Getters
+ */
+
+int Request::getRequestMethod() const { return this->request_method_; }
+
+s_file Request::getFile() {
+  // all this **** is temprary to make the **** works
+  this->file_.filename =
+      "/Users/hchakoub/cursus/webserv/ressources" + this->request_uri_;
+  std::string extention =
+      this->file_.filename.substr(this->file_.filename.find(".") + 1);
+  std::map<std::string, std::string>::iterator it;
+  it = Config::get()->getMimeTypes().find(extention);
+  if (it == Config::get()->getMimeTypes().end())
+    this->file_.media = "application/octet-stream";
+  else
+    this->file_.media = it->second;
+  return this->file_;
+}
+
+Request::size_type Request::getContentLength() {
+  // temp till i figure out where to put it
+  this->setContentLength();
+  return this->content_length;
+}
+
+/*
+ * tests
+ */
+
+void Request::test() {
+  // std::cout << this->request_string_ << std::endl;
+  this->parseHeader();
 }
