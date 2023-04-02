@@ -1,5 +1,6 @@
 #include "Includes/Client.hpp"
 #include "Includes/ClientSelect.hpp"
+#include "Includes/ClientPoll.hpp"
 
 
 class servero
@@ -11,8 +12,9 @@ class servero
 };
 
 
+
 //.kqueue.....................................................................................
-int event_loop(int kq, std::vector<Client*> servers_data)
+int kqueue_event_loop(int kq, std::vector<Client*> servers_data)
 {
 	while (1)
 	{
@@ -57,7 +59,7 @@ int event_loop(int kq, std::vector<Client*> servers_data)
 	}
 
 }
-void serving(std::vector<servero> servers)
+void kqueue_module(std::vector<servero> servers)
 {
 	int kq = kqueue();
 	std::vector<Client *> servers_data;
@@ -108,12 +110,12 @@ void serving(std::vector<servero> servers)
 		}
 		servers_data.push_back(server_data);
 	}
-	event_loop(kq, servers_data);
+	kqueue_event_loop(kq, servers_data);
 }
 //............................................................................................
 
 //.select.....................................................................................
-void main_loop(std::map<int, clientSelect *> clients_data, fd_set read_master, int fd_max)
+void select_main_loop(std::map<int, clientSelect *> clients_data, fd_set read_master, int fd_max)
 {
 	fd_set write_master;
 	FD_ZERO(&write_master);
@@ -241,10 +243,130 @@ void select_module(std::vector<servero> servers)
 		fd_max = server_data->getSockFd();
 		servers_data.insert(std::make_pair(server_data->getSockFd(), server_data));
 	}
-	main_loop(servers_data, master_read, fd_max);
+	select_main_loop(servers_data, master_read, fd_max);
 }
 //............................................................................................
 
+//.poll.....................................................................................
+void poll_main_loop(std::map<int, clientPoll *> clients_data, std::vector<struct pollfd> poll_fds)
+{
+	while (true)
+	{
+		int ready_num = poll(&poll_fds[0], poll_fds.size() , -1);
+		if (ready_num < 0)
+		{
+			std::cerr << "error : poll  " << errno <<  std::endl;
+			exit (1);
+		}
+		for (size_t i = 0; i < poll_fds.size(); i++) //! decrement the ready_num each time 
+		{
+			std::map<int, clientPoll *>::iterator it = clients_data.find(poll_fds[i].fd);
+			if (poll_fds[i].revents & POLLIN)
+			{
+				if (it->second->getIsServerSock())
+				{
+					int client_sock = accept(it->second->getSockFd(), reinterpret_cast<sockaddr *>(&(it->second->getHostAddr())),
+						reinterpret_cast<socklen_t *>(&(it->second->getHostAddrlen())));
+					if (client_sock == -1)
+						std::cerr << "error: accept server " << std::endl;
+					else
+					{
+						clientPoll *new_client = new clientPoll(client_sock, 0);
+						clients_data.insert(std::make_pair(client_sock, new_client));
+						struct pollfd pfd;
+						pfd.fd = client_sock;
+						pfd.events = POLLIN;
+						poll_fds.push_back(pfd);
+					}
+				}
+				else
+				{
+					try {
+						it->second->reading(&poll_fds, i);
+					}
+					catch(std::exception &e)
+					{
+						close (it->first);
+						clients_data.erase(it->first);
+						poll_fds.erase(poll_fds.begin() + i);
+					}
+				}
+			}
+			else if (poll_fds[i].revents & POLLOUT)
+			{
+				bool finito;
+				try
+				{
+					finito = it->second->sending();
+				}
+				catch(std::exception &e)
+				{
+					close (it->first);
+					clients_data.erase(it->first);
+					poll_fds.erase(poll_fds.begin() + i);
+				}
+				if (finito)
+				{
+					close (it->first);
+					clients_data.erase(it->first);
+					poll_fds.erase(poll_fds.begin() + i);
+				}
+			}
+		}
+	}
+
+}
+void poll_module(std::vector<servero> servers)
+{
+	std::map<int, clientPoll *> servers_data;
+	std::vector<struct pollfd> poll_fds;
+    for (size_t j = 0; j < servers.size(); j++)
+	{
+		clientPoll *server_data = new clientPoll;
+		struct pollfd	pfd;
+		server_data->setSockFd(-2);
+		if (server_data->getSockFd() == -1)
+		{
+			std::cerr << "error: socket" << std::endl;
+			continue;
+		}
+		fcntl(server_data->getSockFd(), F_SETFL, O_NONBLOCK); // if not the connection will block
+		server_data->setHostAddrlen(sizeof(server_data->getHostAddr()));
+		server_data->setHostAddr(servers[j]._port);
+		// .allowing the socket to be reusable..................................
+		int opt = 1;
+		if (setsockopt(server_data->getSockFd(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+		{
+			std::cerr << "error: setsockopt" << std::endl;
+			continue;
+		}
+		opt = 1;
+		if (setsockopt(server_data->getSockFd(), SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0)
+		{
+			std::cerr << "error: setsockopt" << std::endl;
+			continue;
+		}
+		// .binding the socket with an adress...................................
+		if (bind(server_data->getSockFd(), reinterpret_cast<struct sockaddr *>(&(server_data->getHostAddr())),
+			server_data->getHostAddrlen()) != 0) //? sockaddr is just an interface, is a sort of polymorphism
+		{
+			std::cerr << "error: bind" << std::endl;
+			continue;
+		}
+		if (listen(server_data->getSockFd(), SOMAXCONN) == -1)
+		{
+			std::cerr << "error: listen" << std::endl;
+			continue;
+		}
+		server_data->setIsServerSock(1);
+		servers_data.insert(std::make_pair(server_data->getSockFd(), server_data));
+		pfd.fd = server_data->getSockFd();
+		pfd.events = POLLIN;
+		poll_fds.push_back(pfd);
+	}
+	poll_main_loop(servers_data, poll_fds);
+}
+//..........................................................................................
 
 
 int main ()
@@ -257,6 +379,7 @@ int main ()
 	// servers.push_back(s2);
 	// servers.push_back(s3);
 
-	// serving(servers);
+	// kqueue_module(servers);
 	select_module(servers);
+	// poll_module(servers);
 }
