@@ -1,4 +1,6 @@
 #include "Includes/Client.hpp"
+#include "Includes/Settings.hpp"
+#include "Includes/Config.hpp"
 
 
 class servero
@@ -114,6 +116,8 @@ int main ()
 	servero s1(8080);
 	servero s2(8081);
 	servero s3(8082);
+  Config::boot();
+  Settings::boot();
 	std::vector<servero> servers;
 	servers.push_back(s1);
 	servers.push_back(s2);
