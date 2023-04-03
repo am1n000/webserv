@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 22:14:56 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/23 14:24:07 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/03/29 22:30:14 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ public:
   data_type  getLine();
   data_type getNoneEmptyLine();
   data_type getNextToken(char c = ' ');
+  data_type getHeaders();
   data_type getNextScope();
   data_type data();
   bool  end();
