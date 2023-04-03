@@ -14,7 +14,7 @@ class servero
 
 
 //.kqueue.....................................................................................
-int kqueue_event_loop(int kq, std::vector<Client*> servers_data)
+int kqueue_event_loop(int kq)
 {
 	while (1)
 	{
@@ -25,35 +25,32 @@ int kqueue_event_loop(int kq, std::vector<Client*> servers_data)
 		for (int j = 0; j < nevents; j++)
 		{
 			Client *temp_data = (Client *)events[j].udata;
-			for (size_t i = 0; i < servers_data.size(); i++) //! you don't need to loop just check isServerSock variable
+			if (temp_data->getIsListeningSock())
 			{
-				if (temp_data->getSockFd() == servers_data[i]->getSockFd())
+				int client_sock = accept(temp_data->getSockFd(), reinterpret_cast<sockaddr *>(&(temp_data->getHostAddr())), reinterpret_cast<socklen_t *>(&(temp_data->getHostAddrlen())));
+				if (client_sock == -1)
+					std::cerr << "error: accept server " << std::endl;
+				else
 				{
-					int client_sock = accept(servers_data[i]->getSockFd(), reinterpret_cast<sockaddr *>(&(servers_data[i]->getHostAddr())), reinterpret_cast<socklen_t *>(&(servers_data[i]->getHostAddrlen())));
-					if (client_sock == -1)
-						std::cerr << "error: accept server " << std::endl;
-					else
-					{
-						Client *u_data = new Client(client_sock, EVFILT_READ, 0);
-						EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
-						if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
-							std::cerr << "error: kevent registration 2" << std::endl;
-					}
-					break;
+					Client *u_data = new Client(client_sock, EVFILT_READ, 0);
+					EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
+					if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
+						std::cerr << "error: kevent registration 2" << std::endl;
 				}
-				else if (!temp_data->getIsListeningSock())
+				break;
+			}
+			else if (!temp_data->getIsListeningSock())
+			{
+				if (temp_data->getFilter() == EVFILT_READ)
 				{
-					if (temp_data->getFilter() == EVFILT_READ)
-					{
-						temp_data->reading(kq);
-					}
-					else
-					{
-						if (temp_data->sending(kq))
-							delete (temp_data);
-					}
-					break;
+					temp_data->reading(kq);
 				}
+				else
+				{
+					if (temp_data->sending(kq))
+						delete (temp_data);
+				}
+				break;
 			}
 		}
 	}
@@ -62,7 +59,6 @@ int kqueue_event_loop(int kq, std::vector<Client*> servers_data)
 void kqueue_module(std::vector<servero> servers)
 {
 	int kq = kqueue();
-	std::vector<Client *> servers_data;
 	if (kq == -1)
 		std::cerr << "error: kqueue" << std::endl;
 	for (size_t j = 0; j < servers.size(); j++)
@@ -101,16 +97,15 @@ void kqueue_module(std::vector<servero> servers)
 			std::cerr << "error: listen" << std::endl;
 			continue;
 		}
-		// server_data->getChangePtr() = new struct kevent;
+		server_data->setIsListeningSock(1);
 		EV_SET(server_data->getChangePtr(), server_data->getSockFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
 		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 		{
 			std::cerr << "error: kevent registration 1" << std::endl;
 			continue;
 		}
-		servers_data.push_back(server_data);
 	}
-	kqueue_event_loop(kq, servers_data);
+	kqueue_event_loop(kq);
 }
 //............................................................................................
 
@@ -373,13 +368,13 @@ void poll_module(std::vector<servero> servers)
 //!change map to vector for both select and poll clients
 int main ()
 {
-	// servero s1(8080);
+	servero s1(8080);
 	servero s2(8081);
-	// servero s3(8082);
+	servero s3(8082);
 	std::vector<servero> servers;
-	// servers.push_back(s1);
+	servers.push_back(s1);
 	servers.push_back(s2);
-	// servers.push_back(s3);
+	servers.push_back(s3);
 
 	kqueue_module(servers);
 	// select_module(servers);
