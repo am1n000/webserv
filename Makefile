@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/04/04 16:58:12 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/04/04 17:02:50 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,9 @@ TEST_OBJ := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(TEST_SRC))
 
 all: makedir $(NAME)
 
-test: $(TEST_OBJ)  
+test: makedir build_test
+
+build_test: $(TEST_OBJ)  
 	$(CPP) $^ -o $(NAME) 
 	@clear
 	@./$(NAME)
@@ -51,6 +53,9 @@ makedir:
 	mkdir -p objects/dev/
 	mkdir -p objects/App/Settings/
 	mkdir -p objects/Bootstrap/
+	mkdir -p objects/HTTP/
+	mkdir -p objects/Local/
+	mkdir -p objects/HTTP/Exceptions/
 
 rmdir:
 	rm -rf objects
