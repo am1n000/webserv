@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/29 15:32:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/29 17:49:42 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/04 15:59:13 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void Settings::setRequestMethods_() {
   const char **begin = std::begin(request_methods);
   const char **end = std::end(request_methods);
   while(begin != end) {
-    this->request_methods_.insert(std::make_pair(std::string(*begin), i));
+    this->request_methods_.insert(std::make_pair(std::string(*begin), static_cast<Request_Method_e>(i)));
     begin++;
     i++;
   }
@@ -62,8 +62,8 @@ Settings* Settings::get(){
   return Settings::object_;
 }
 
-int Settings::indexOfRequestMethod(const std::string &method) {
-  std::map<std::string, int>::iterator it;
+Request_Method_e Settings::indexOfRequestMethod(const std::string &method) {
+  std::map<std::string, Request_Method_e>::iterator it;
   it = this->request_methods_.find(method);
   if(it == this->request_methods_.end())
     throw std::runtime_error("method does not exist");

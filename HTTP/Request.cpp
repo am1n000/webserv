@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/01 23:49:39 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/04 16:00:09 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,8 @@ bool Request::isHeaderCompleted() {
 
 void Request::parseHeader() {
   if (!this->header_completed_)
-    throw std::runtime_error("header not completed");
+    return;
+    // throw std::runtime_error("header not completed");
   std::string token;
   this->tockenizer_ = new Tockenizer(this->request_string_);
   token = this->tockenizer_->getLine();
@@ -108,7 +109,7 @@ void Request::setMethod(const std::string &method) {
   if (method == "")
     throw BadRequestException();
   try {
-    Settings::get()->indexOfRequestMethod(method);
+    this->request_method_ = Settings::get()->indexOfRequestMethod(method);
   } catch (std::runtime_error &e) {
     // for now as place hoder i will print the error
     std::cerr << e.what() << std::endl;
