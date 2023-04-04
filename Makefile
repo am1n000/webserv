@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/04/02 18:39:31 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/04/04 16:58:12 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ OBJ_DIR=objects
 OBJ := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(BUILD_SRC))
 TEST_OBJ := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(TEST_SRC))
 
-all: $(NAME)
+all: makedir $(NAME)
 
 test: $(TEST_OBJ)  
 	$(CPP) $^ -o $(NAME) 
@@ -44,12 +44,22 @@ debug: $(SRC)
 	clear
 	lldb debug
 
+makedir:
+	mkdir -p objects
+	mkdir -p objects/App/
+	mkdir -p objects/Utils/
+	mkdir -p objects/dev/
+	mkdir -p objects/App/Settings/
+	mkdir -p objects/Bootstrap/
+
+rmdir:
+	rm -rf objects
 
 clean:
 	rm -rf $(OBJ)
 	rm -rf debug
 
-fclean: clean
+fclean: clean rmdir
 	rm -rf $(NAME)
 
 re: fclean all
