@@ -147,7 +147,7 @@ int Request::getRequestMethod() const { return this->request_method_; }
 s_file Request::getFile() {
   // all this **** is temprary to make the **** works
   this->file_.filename =
-      "/Users/hchakoub/cursus/webserv/ressources" + this->request_uri_;
+      "/Users/ael-rhai/Desktop/webserv/ressources" + this->request_uri_;
   std::string extention =
       this->file_.filename.substr(this->file_.filename.find(".") + 1);
   std::map<std::string, std::string>::iterator it;
