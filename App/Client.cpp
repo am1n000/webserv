@@ -64,6 +64,7 @@ void Client::reading(int kq) {
     this->req->parseHeader();
     if (this->req->getRequestMethod() != POST)
       this->prepareResponse();
+    std::cout << "post request : " << std::endl << buffer << std::endl;
 
     // end of test
     //  if (this->req->getContentLength() == 0 && (recieved_size == 0 ||
