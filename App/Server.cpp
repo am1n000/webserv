@@ -13,13 +13,6 @@
 
 #include "../Includes/Server.hpp"
 #include "../Includes/helpers.hpp"
-#include <cstddef>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <utility>
 // for dev only
 #include "../dev/dev.hpp"
 
@@ -302,3 +295,12 @@ void Location::setProp(const std::string &prop, const std::string &val) {
 		}
 		return (false);
 	}
+int&	Server::getHostAddrlen()
+{
+	return (this->_hostAddrlen);
+}
+
+struct sockaddr_in&	Server::getHostAddr()
+{
+	return (this->_hostAddr);
+}

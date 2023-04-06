@@ -30,9 +30,4 @@ class SendFailedException : public std::runtime_error
 	public:
 	SendFailedException() : std::runtime_error("Send operation failed") {}
 };
-class FileNotFound : public std::ios_base::failure
-{
-	public:
-	FileNotFound() : std::ios_base::failure("File not found") {}
-};
 #endif

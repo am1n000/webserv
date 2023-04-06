@@ -1,17 +1,23 @@
 #include <dirent.h>
 #include <iostream>
 
+class test
+{
+	private:
+		static int _kq;
+		test() {};
+		
+	public :
+		~test() {};
+		static void print() {std::cout << _kq << std::endl;};
+		static void	event_loop() { _kq += 5;};
+};
+    int test::_kq = 5;
 int main()
 {
-    DIR* dirp = opendir("ressources");
-    if (dirp == NULL) {
-        std::cerr << "Error: failed to open directory" << std::endl;
-        return 1;
-    }
-    struct dirent* dp;
-    while ((dp = readdir(dirp)) != NULL) {
-        std::cout << dp->d_name << std::endl;
-    }
-    closedir(dirp);
+    test::print();
+    test::event_loop();
+    test::print();
+
     return 0;
 }

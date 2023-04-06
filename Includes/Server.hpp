@@ -17,9 +17,20 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include "Client.hpp"
 #include <map>
+#include <fstream>
+#include <sys/socket.h>
+#include <iostream>
+#include <fcntl.h>
+#include <netdb.h>
 
+// #include <cstddef>
+// #include <cstdlib>
+// #include <cstring>
+// #include <iostream>
+// #include <stdexcept>
+// #include <string>
+// #include <utility>
 class Location
 {
 	public:
@@ -117,9 +128,12 @@ class Server
 		struct sockaddr_in	_hostAddr;
 
 	public:
-		int		createSocket();
-		bool	bindSocket(int sock);
-		bool	listenToConnections(int sock);
+		int					createSocket();
+		bool				bindSocket(int sock);
+		bool				listenToConnections(int sock);
+		int					&getHostAddrlen();
+		struct sockaddr_in	&getHostAddr();
+
 };
 
 #endif

@@ -14,5 +14,6 @@
 #define HTTP_EXCEPTIONS_HPP
 
 #include "BadRequestException.hpp"
+#include "FileNotFound.hpp"
 
 #endif // !HTTP_EXCEPTIONS_HPP
