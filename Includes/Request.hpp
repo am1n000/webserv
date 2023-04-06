@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/05 01:25:34 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/06 17:36:58 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ public:
   int appendBuffer(char *buffer, size_type recieved_size);
   bool isHeaderCompleted();
   bool isBodyCompleted();
+  bool isRequestCompleted();
   void parseHeader();
 
   /*

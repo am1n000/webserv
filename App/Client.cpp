@@ -1,6 +1,7 @@
 #include "../Includes/Client.hpp"
 #include <stdexcept>
 #include <string>
+#include "../dev/dev.hpp"
 
 Client::Client() {
   this->_changePtr = new struct kevent;
@@ -61,69 +62,33 @@ void Client::reading(int kq) {
     this->req->appendBuffer(buffer, recieved_size);
     // begin test
     // this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
-    this->req->parseHeader();
-    if (this->req->getRequestMethod() != POST)
+    if (this->req->isHeaderCompleted())
+    {
+      this->req->parseHeader();
       this->prepareResponse();
-    std::cout << "post request : " << std::endl << buffer << std::endl;
-
-    // end of test
-    //  if (this->req->getContentLength() == 0 && (recieved_size == 0 ||
-    //  std::strstr(buffer, "\r\n\r\n")))
-    //  {
-
-    //     std::cout << "here the game begans" << std::endl;
-    // 	// this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
-    //     this->req->parseHeader();
-    // 	if (this->req->getRequestMethod() != 2)
-    // 		this->prepare_response();
-    // 	// this->req->content_lenght = 135154;
-    // }
+    }
+    // std::cout << "post request : " << std::endl << buffer << std::endl;
   } catch (std::exception &e) {
     EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
     kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
     close(this->_sockFd);
   }
-  // if(this->req->get_method() == 2)
-  // {
-  // 	if (this->_postFileCreated == 0)
-  // 	{
-  // 		try
-  // 		{
-  // 			this->req->post_file.open("ressources/post/test2.txt");
-  // 			if (!this->req->post_file.is_open())
-  // 			{
-  // 				std::cerr << "post file open error" <<
-  // std::endl; 				throw(FileNotFound());
-  // 			}
-  // 		}
-  // 		catch(std::exception &e)
-  // 		{
-  // 			EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE,
-  // 0, 0, this); 			kevent(kq, this->_changePtr, 1, NULL, 0,
-  // NULL); 			close(this->_sockFd);
-  // 		}
-  // 		char *bod = std::strstr(temp_buff, "\r\n\r\n");
-  // 		this->req->post_file.write(bod, std::strlen(bod));
-  // 		this->req->content_lenght -= std::strlen(bod);
-  // 		this->_postFileCreated = 1;
-  // 	}
-  // 	else
-  // 	{
-  // 		this->req->post_file.write(temp_buff, val_read);
-  // 		this->req->content_lenght -= val_read;
-  // 	}
-  // }
-  // if (this->req->getContentLength() <= 0)
-  // {
-  EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
-  if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)
-    std::cerr << "error: kevent 3" << std::endl;
-  EV_SET(this->_changePtr, this->_sockFd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0,
-         0, this);
-  if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)
-    std::cerr << "error: kevent 33" << std::endl;
-  this->_filter = EVFILT_WRITE;
-  // }
+  dev::br();
+  std::cout << this->req->getBodyString() << std::endl;
+  dev::br();
+    std::cout << this->req->getContentLength() << std::endl;
+  std::cout << this->req->isRequestCompleted() << std::endl;
+  if (this->req->isRequestCompleted()) {
+    std::cout << "dkhal hna" << std::endl;
+    EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
+    if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)
+      std::cerr << "error: kevent 3" << std::endl;
+    EV_SET(this->_changePtr, this->_sockFd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0,
+           0, this);
+    if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)
+      std::cerr << "error: kevent 33" << std::endl;
+    this->_filter = EVFILT_WRITE;
+  }
 }
 
 //.getters

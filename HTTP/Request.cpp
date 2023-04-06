@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/05 01:25:58 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/06 17:55:16 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,9 @@ int Request::appendBuffer(char *buffer, size_type recieved_size) {
     this->request_string_.append(buffer, recieved_size);
     std::string::size_type pos = this->request_string_.find(REQUEST_SEPARATOR);
     if (pos != std::string::npos) {
-      this->body_string_.append(this->request_string_.begin() + pos + 2,
+      this->body_string_.append(this->request_string_.begin() + pos + 4,
                                 this->request_string_.end());
-      this->request_string_.erase(this->request_string_.begin() + pos,
+      this->request_string_.erase(this->request_string_.begin() + pos + 4,
                                   this->request_string_.end());
       this->header_completed_ = true;
     }
@@ -69,11 +69,17 @@ bool Request::isHeaderCompleted() {
 }
 
 bool Request::isBodyCompleted() {
+  if(this->request_method_ != POST)
+    return true;
   if (this->body_completed_)
     return this->body_completed_;
-  if(this->body_string_.length() == this->getContentLength())
+  if(this->body_string_.length() >= this->getContentLength())
     this->body_completed_ = true;
   return this->body_completed_;
+}
+
+bool Request::isRequestCompleted() {
+  return this->isHeaderCompleted() && this->isBodyCompleted();
 }
 
 /*
@@ -81,10 +87,11 @@ bool Request::isBodyCompleted() {
  */
 
 void Request::parseHeader() {
-  if (!this->header_completed_)
+  if (!this->isHeaderCompleted())
     return;
     // throw std::runtime_error("header not completed");
   std::string token;
+  std::cout << this->request_string_ << std::endl;
   this->tockenizer_ = new Tockenizer(this->request_string_);
   token = this->tockenizer_->getLine();
   this->parseMetadata_(token);
