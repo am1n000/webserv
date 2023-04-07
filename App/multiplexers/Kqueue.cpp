@@ -49,7 +49,7 @@ void Kqueue::event_loop()
 				acceptConnections(tempData);
 			else
 			{
-				if (tempData->getFilter() == EVFILT_READ)
+				if (events[j].filter == EVFILT_READ)
 					read(tempData);
 				else
 					write(tempData);
@@ -68,7 +68,7 @@ void Kqueue::acceptConnections(Client *clientData)
 		std::cerr << "error: accept server " << std::endl;
 	else
 	{
-		Client *u_data = new Client(client_sock, EVFILT_READ, 0);
+		Client *u_data = new Client(client_sock, 0);
 		EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
 		if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 			std::cerr << "error: kevent registration 2" << std::endl;
@@ -90,7 +90,6 @@ void	Kqueue::read(Client *clientData)
 					EV_ADD | EV_ENABLE,0,0, clientData);
 			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
 			std::cerr << "error: kevent 33" << std::endl;
-			clientData->setFilter(EVFILT_WRITE);
 		}
 
 	}

@@ -12,14 +12,13 @@ class Client
 {
 	private : //.variables
 		int 				_sockFd;
-		int					_filter;
 		bool				_isListeningSock;
 		bool				_postFileCreated;
 		struct kevent		*_changePtr;
 
 	public :
 		Client();
-		Client(int sockfd, int filtr, bool listen_sock);
+		Client(int sockfd, bool listen_sock);
 		~Client();
 		Request 			*req;
 		Response			*resp;
@@ -31,14 +30,12 @@ class Client
 
 		//.getters
 		int					getSockFd();
-		int					getFilter();
 		bool				getIsListeningSock();
 		bool				getpostFileCreated();
 		struct kevent*		getChangePtr();
 
 		//.setters
 		void				setSockFd(int sockFd);
-		void				setFilter(int filter);
 		void				setIsListeningSock(int isListeningSock);
 		void				setpostFileCreated(bool postFileCreated);
 		void				setChangePtr();

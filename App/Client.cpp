@@ -8,8 +8,8 @@ Client::Client() {
 	this->resp = new Response;
 }
 
-Client::Client(int sockfd, int filtr, bool listen_sock)
-	: _sockFd(sockfd), _filter(filtr), _isListeningSock(listen_sock),
+Client::Client(int sockfd, bool listen_sock)
+	: _sockFd(sockfd), _isListeningSock(listen_sock),
 		_postFileCreated(0) {
 	this->_changePtr = new struct kevent;
 	this->req = new Request;
@@ -58,8 +58,6 @@ bool Client::reading()
 //.getters
 int Client::getSockFd() { return (this->_sockFd); }
 
-int Client::getFilter() { return (this->_filter); }
-
 bool Client::getIsListeningSock() { return (this->_isListeningSock); }
 
 bool Client::getpostFileCreated() { return (this->_postFileCreated); }
@@ -74,12 +72,6 @@ void Client::setSockFd(int sockFd)
 	if (this->_sockFd == -2)
 	this->_sockFd = socket(AF_INET, SOCK_STREAM, 0);
 }
-
-void Client::setFilter(int filter)
-{
-	this->_filter = filter;
-}
-
 
 void Client::setIsListeningSock(int isListeningSock)
 {

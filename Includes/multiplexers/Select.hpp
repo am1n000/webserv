@@ -1,20 +1,20 @@
 #ifndef SELECT_HPP
 #define SELECT_HPP
 
-
-#include <sys/types.h>
-#include <sys/event.h>
-#include <sys/time.h>
-#include <iostream>
+#include <sys/select.h>
 #include "../Client.hpp"
 
 class Select
 {
 	private:
+        static  int 					fd_max;
+		static	int						erasePosition;
+        static  fd_set 					readMaster;
+        static  fd_set 					writeMaster;
+        static  std::vector<Client *>	clientsData;
 		Select();
-		static int kq;
 		static void setUpServerConnections(std::vector<Server *> servers);
-		static void	event_loop();
+		static void	MonitoringLoop();
 		static void acceptConnections(Client *tempData);
 		static void	read(Client *tempData);
 		static void	write(Client *tempData);

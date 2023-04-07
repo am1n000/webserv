@@ -19,7 +19,8 @@ SRC=App/Config.cpp App/Server.cpp HTTP/Request.cpp HTTP/Response.cpp \
 		Utils/helpers.cpp dev/dev.cpp Utils/Tockenizer.cpp  App/Client.cpp \
 		App/Settings/Settings.cpp App/multiplexers/Kqueue.cpp\
 		HTTP/Exceptions/BadRequestException.cpp \
-		Bootstrap/app.cpp
+		Bootstrap/app.cpp App/multiplexers/Select.cpp \
+		App/multiplexers/Poll.cpp
 BUILD_SRC=$(INTRY) $(SRC)
 TEST_SRC=$(TEST_ENTRY) $(SRC)
 OBJ_DIR=objects
@@ -49,6 +50,7 @@ debug: $(SRC)
 makedir:
 	mkdir -p objects
 	mkdir -p objects/App/
+	mkdir -p objects/App/multiplexers
 	mkdir -p objects/Utils/
 	mkdir -p objects/dev/
 	mkdir -p objects/App/Settings/
