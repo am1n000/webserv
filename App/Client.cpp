@@ -65,7 +65,6 @@ void Client::reading(int kq) {
     if (this->req->isHeaderCompleted())
     {
       this->req->parseHeader();
-      this->prepareResponse();
     }
     // std::cout << "post request : " << std::endl << buffer << std::endl;
   } catch (std::exception &e) {
@@ -73,12 +72,13 @@ void Client::reading(int kq) {
     kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
     close(this->_sockFd);
   }
-  dev::br();
+  // dev::br();
   std::cout << this->req->getBodyString() << std::endl;
-  dev::br();
-    std::cout << this->req->getContentLength() << std::endl;
+  // dev::br();
+    // std::cout << this->req->getContentLength() << std::endl;
   std::cout << this->req->isRequestCompleted() << std::endl;
   if (this->req->isRequestCompleted()) {
+      this->prepareResponse();
     std::cout << "dkhal hna" << std::endl;
     EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
     if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)

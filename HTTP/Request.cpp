@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/06 17:55:16 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/07 00:54:35 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,6 @@ void Request::setContentLength() {
       this->request_headers_.find("Content-Length");
   if (it == this->request_headers_.end())
     this->content_length = 0;
-    // throw std::runtime_error("Content-Length header does not exist");
   this->content_length = std::stoi(it->second);
 }
 
@@ -189,6 +188,8 @@ s_file Request::getFile() {
 
 Request::size_type Request::getContentLength() {
   // temp till i figure out where to put it
+  if(this->request_method_ != POST)
+    return 0;
   this->setContentLength();
   return this->content_length;
 }
