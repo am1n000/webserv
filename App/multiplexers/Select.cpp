@@ -10,6 +10,15 @@ int                     Select::erasePosition;
 fd_set                  Select::readMaster;
 fd_set                  Select::writeMaster;
 std::vector<Client *>   Select::clientsData;
+Select*					Select::instance = nullptr;
+
+
+Select*	Select::getInstance()
+{
+	if (instance == nullptr)
+		instance = new Select;
+	return (instance);
+}
 
 void Select::setUpServerConnections(std::vector<Server *> servers)
 {
@@ -31,7 +40,7 @@ void Select::setUpServerConnections(std::vector<Server *> servers)
 		fd_max = server_data->getSockFd();
 	}
 }
-void Select::MonitoringLoop()
+void Select::monitoringLoop()
 {
 	FD_ZERO(&writeMaster);
 	fd_set read_fds;
@@ -134,5 +143,5 @@ void	Select::write(Client *clientData)
 void Select::serve(std::vector<Server *> servers)
 {
 	setUpServerConnections(servers);
-	MonitoringLoop();
+	monitoringLoop();
 }

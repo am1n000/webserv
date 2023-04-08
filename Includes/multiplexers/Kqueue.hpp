@@ -6,22 +6,28 @@
 #include <sys/event.h>
 #include <sys/time.h>
 #include <iostream>
-#include "../Client.hpp"
+#include "Multiplexer.hpp"
 
-class Kqueue
+class Kqueue : public Multiplexer
 {
 	private:
+		static int 		kq;
+		static	Kqueue*	instance;
+
 		Kqueue();
-		static int kq;
-		static void setUpServerConnections(std::vector<Server *> servers);
-		static void	event_loop();
-		static void acceptConnections(Client *tempData);
-		static void	read(Client *tempData);
-		static void	write(Client *tempData);
+		
+		void 	setUpServerConnections(std::vector<Server *> servers);
+		void	monitoringLoop();
+		void 	acceptConnections(Client *tempData);
+		void	read(Client *tempData);
+		void	write(Client *tempData);
+
 
 	public :
 		~Kqueue();
-		static void serve(std::vector<Server *> servers);
+
+		static	Kqueue* getInstance();
+		void 			serve(std::vector<Server *> servers);
 };
 
 #endif

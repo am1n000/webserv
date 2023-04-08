@@ -4,10 +4,18 @@ Poll::Poll() {}
 
 Poll::~Poll() {}
 
+int                     Poll::position;
 std::vector<pollfd>     Poll::pollFds;
 std::vector<Client *>   Poll::clientsData;
-int                     Poll::position;
+Poll*	Poll::instance = nullptr;
 
+
+Poll*	Poll::getInstance()
+{
+	if (instance == nullptr)
+		instance = new Poll;
+	return (instance);
+}
 void Poll::setUpServerConnections(std::vector<Server *> servers)
 {
 	for (size_t i = 0; i < servers.size(); i++)
@@ -30,7 +38,7 @@ void Poll::setUpServerConnections(std::vector<Server *> servers)
 		pollFds.push_back(pfd);
 	}
 }
-void Poll::MonitoringLoop()
+void Poll::monitoringLoop()
 {
 	while (true)
 	{
@@ -118,5 +126,5 @@ void	Poll::write(Client *clientData)
 void Poll::serve(std::vector<Server *> servers)
 {
 	setUpServerConnections(servers);
-	MonitoringLoop();
+	monitoringLoop();
 }

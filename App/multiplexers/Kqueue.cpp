@@ -1,10 +1,18 @@
 #include "../../Includes/multiplexers/Kqueue.hpp"
 
 int	Kqueue::kq = kqueue();
+Kqueue*	Kqueue::instance = nullptr;
+
 Kqueue::Kqueue() {}
 
 Kqueue::~Kqueue() {}
 
+Kqueue*	Kqueue::getInstance()
+{
+	if (instance == nullptr)
+		instance = new Kqueue;
+	return (instance);
+}
 
 void Kqueue::setUpServerConnections(std::vector<Server *> servers)
 {
@@ -34,7 +42,7 @@ void Kqueue::setUpServerConnections(std::vector<Server *> servers)
     }
 }
 
-void Kqueue::event_loop()
+void Kqueue::monitoringLoop()
 {
 	while (1)
 	{
@@ -125,5 +133,5 @@ void	Kqueue::write(Client *clientData)
 void Kqueue::serve(std::vector<Server *> servers)
 {
 	setUpServerConnections(servers);
-	event_loop();
+	monitoringLoop();
 }

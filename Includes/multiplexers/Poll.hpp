@@ -2,24 +2,29 @@
 #define POLL_HPP
 
 #include <poll.h>
-#include "../Client.hpp"
+#include "Multiplexer.hpp"
 
-class Poll
+class Poll : public Multiplexer
 {
 	private:
 		static	int							position;
         static  std::vector<Client *>		clientsData;
 		static	std::vector<struct pollfd>	pollFds;
+		static	Poll*						instance;
+
 		Poll();
-		static void setUpServerConnections(std::vector<Server *> servers);
-		static void	MonitoringLoop();
-		static void acceptConnections(Client *tempData);
-		static void	read(Client *tempData);
-		static void	write(Client *tempData);
+
+		void 	setUpServerConnections(std::vector<Server *> servers);
+		void	monitoringLoop();
+		void 	acceptConnections(Client *tempData);
+		void	read(Client *tempData);
+		void	write(Client *tempData);
 
 	public :
+
 		~Poll();
-		static void serve(std::vector<Server *> servers);
+		static	Poll*	getInstance();
+		void 			serve(std::vector<Server *> servers);
 };
 
 #endif

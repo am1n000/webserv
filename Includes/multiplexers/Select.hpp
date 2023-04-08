@@ -2,9 +2,9 @@
 #define SELECT_HPP
 
 #include <sys/select.h>
-#include "../Client.hpp"
+#include "Multiplexer.hpp"
 
-class Select
+class Select : public Multiplexer
 {
 	private:
         static  int 					fd_max;
@@ -12,16 +12,21 @@ class Select
         static  fd_set 					readMaster;
         static  fd_set 					writeMaster;
         static  std::vector<Client *>	clientsData;
+		static	Select*					instance;
+
 		Select();
-		static void setUpServerConnections(std::vector<Server *> servers);
-		static void	MonitoringLoop();
-		static void acceptConnections(Client *tempData);
-		static void	read(Client *tempData);
-		static void	write(Client *tempData);
+
+		void 	setUpServerConnections(std::vector<Server *> servers);
+		void	monitoringLoop();
+		void 	acceptConnections(Client *tempData);
+		void	read(Client *tempData);
+		void	write(Client *tempData);
 
 	public :
+
 		~Select();
-		static void serve(std::vector<Server *> servers);
+		static	Select* getInstance();
+		void 			serve(std::vector<Server *> servers);
 };
 
 #endif
