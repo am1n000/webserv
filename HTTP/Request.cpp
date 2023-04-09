@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/07 00:54:35 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/09 04:46:33 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "../Includes/Config.hpp"
 #include "../dev/dev.hpp"
 #include <cstdlib>
+#include <fstream>
 #include <stdexcept>
 #include <utility>
 
@@ -73,8 +74,10 @@ bool Request::isBodyCompleted() {
     return true;
   if (this->body_completed_)
     return this->body_completed_;
-  if(this->body_string_.length() >= this->getContentLength())
+  if(this->body_string_.length() >= this->getContentLength()) {
     this->body_completed_ = true;
+    this->test();
+  }
   return this->body_completed_;
 }
 
@@ -91,7 +94,7 @@ void Request::parseHeader() {
     return;
     // throw std::runtime_error("header not completed");
   std::string token;
-  std::cout << this->request_string_ << std::endl;
+  // std::cout << this->request_string_ << std::endl;
   this->tockenizer_ = new Tockenizer(this->request_string_);
   token = this->tockenizer_->getLine();
   this->parseMetadata_(token);
@@ -205,6 +208,13 @@ std::string Request::getHeaderString() const { return this->header_string_; }
  */
 
 void Request::test() {
-  // std::cout << this->request_string_ << std::endl;
-  this->parseHeader();
+  if(this->request_method_ == POST) {
+    std::cout << "writing on file" << std::endl;
+  std::fstream file("/Users/hchakoub/cursus/webserv/ressources/uploads/file.out", std::fstream::out);
+  file.write(this->body_string_.data(), this->body_string_.length());
+    std::cout << "writing on file end" << std::endl;
+    dev::br();
+    std::cout << this->header_string_ << std::endl;
+    dev::br();
+  }
 }

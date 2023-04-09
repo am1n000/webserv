@@ -1,22 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/29 17:18:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/09 02:58:10 by hchakoub         ###   ########.fr       */
+/*   Created: 2023/04/08 23:58:07 by hchakoub          #+#    #+#             */
+/*   Updated: 2023/04/09 02:45:34 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Includes/Webserv.hpp"
-#include "../Includes/Cgi.hpp"
-#include <iostream>
+#ifndef CGI_HPP
+#define CGI_HPP
 
-typedef std::map<std::string, std::string> strmap;
-int main ()
-{
-  Cgi c;
-  c.testCgi("walo");
-}
+#include <fstream>
+#include <iostream>
+#include <sys/_types/_size_t.h>
+
+class Cgi {
+  private:
+    std::fstream file_;
+    std::string cgi_path_;
+  public:
+    Cgi();
+    Cgi(const std::string& path);
+    ~Cgi();
+    
+    void openFile(const std::string& path);
+    void appendStream(const char *buffer, size_t buffer_size);
+    void testCgi(std::string file);
+};
+#endif
