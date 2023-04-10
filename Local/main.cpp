@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/29 17:18:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/09 02:58:10 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/09 19:33:11 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <iostream>
 
 typedef std::map<std::string, std::string> strmap;
+
 int main ()
 {
   Cgi c;
