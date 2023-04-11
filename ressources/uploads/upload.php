@@ -18,6 +18,8 @@ $target_dir = "/Users/hchakoub/cursus/webserv/ressources/uploads/";
 // }
 //
 
+print_r($_POST);
+// return;
 print_r($_FILES["file"]);
    if(isset($_FILES['file'])){
       $errors= array();

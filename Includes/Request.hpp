@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/07 01:48:24 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/11 00:18:46 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 
 #define BUFFER_SIZE 4096
 #define REQUEST_SEPARATOR "\r\n\r\n"
+#define TMP_FILE_NAME "/Users/hchakoub/cursus/webserv/ressources/uploads/tmp/request.out"
 
 // must be included on the response, i defined it here to avoid conflit
 // also fstream header must be included on response header
@@ -60,6 +61,8 @@ private:
   std::string http_version_;
   std::map<std::string, std::string> request_headers_;
   size_type content_length;
+  std::fstream *body_file_;
+  size_type body_size_;
   //the file is temporary just to work with amine's code
   // to be changed lather
   s_file file_;
@@ -75,17 +78,35 @@ public:
   Request();
   Request(size_type buffer_size);
   Request(char *buffer, size_type read_size, size_type buffer_size = BUFFER_SIZE);
+  ~Request();
 
   size_type buffer_size;
-  int appendBuffer(char *buffer, size_type recieved_size);
+
+/*
+ * parsers
+ */
+
+  void parseHeader();
+
+  /*
+   * checkers
+   */
+
   bool isHeaderCompleted();
   bool isBodyCompleted();
   bool isRequestCompleted();
-  void parseHeader();
+
+  /*
+   * modifiers
+   */
+
+  int appendBuffer(char *buffer, size_type recieved_size);
+  void appendBodyFile(const char *buffer, size_type buffer_size);
 
   /*
   * setters
   */
+
   void setMethod(const std::string& method);
   void setRequestUri(const std::string& uri);
   void setHttpVersion(const std::string& version);
@@ -103,6 +124,8 @@ public:
   std::string getRequestString() const;
   std::string getBodyString() const;
   std::string getHeaderString() const;
+  size_type getBodySize() const;
+  std::map<std::string, std::string> &getHeaders();
 
 
   /*

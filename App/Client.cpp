@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <string>
 #include "../dev/dev.hpp"
+#include "../Includes/Cgi.hpp"
 
 Client::Client() {
   this->_changePtr = new struct kevent;
@@ -63,23 +64,30 @@ void Client::reading(int kq) {
     // begin test
     // this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
     if (this->req->isHeaderCompleted())
-    {
       this->req->parseHeader();
-    }
-    // std::cout << "post request : " << std::endl << buffer << std::endl;
   } catch (std::exception &e) {
     EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
     kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
     close(this->_sockFd);
   }
-  // dev::br();
-  std::cout << this->req->getBodyString() << std::endl;
-  // dev::br();
-    // std::cout << this->req->getContentLength() << std::endl;
-  std::cout << this->req->isRequestCompleted() << std::endl;
   if (this->req->isRequestCompleted()) {
-      this->prepareResponse();
-    std::cout << "dkhal hna" << std::endl;
+    /*
+      * test cgi
+      */
+      if(this->req->getRequestMethod() == POST) {
+      Cgi cgi; 
+      
+      try {
+      cgi.testCgi(this->req->getHeaders().find("Content-Type")->second, this->req->getHeaders().find("Content-Length")->second);
+
+      } catch (...) {
+        std::cerr << "could not find Content-Type " << std::endl;
+      }
+    }
+      /*
+      * test cgi end
+      */
+    this->prepareResponse();
     EV_SET(this->_changePtr, this->_sockFd, EVFILT_READ, EV_DELETE, 0, 0, this);
     if (kevent(kq, this->_changePtr, 1, NULL, 0, NULL) == -1)
       std::cerr << "error: kevent 3" << std::endl;

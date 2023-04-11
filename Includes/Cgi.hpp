@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:58:07 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/09 02:45:34 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/11 00:40:46 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,6 @@ class Cgi {
     
     void openFile(const std::string& path);
     void appendStream(const char *buffer, size_t buffer_size);
-    void testCgi(std::string file);
+    void testCgi(std::string file, std::string  cl);
 };
 #endif

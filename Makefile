@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/04/09 04:47:44 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/04/10 18:31:22 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ CPP=c++
 FLAGS=-Wall -Wextra -Werror -std=c++98
 NAME=webserv
 INTRY=main.cpp
-TEST_ENTRY=Local/main.cpp
+TEST_ENTRY=Local/localMain.cpp
 SRC=App/Config.cpp App/Server.cpp HTTP/Request.cpp HTTP/Response.cpp \
 		Utils/helpers.cpp dev/dev.cpp Utils/Tockenizer.cpp  App/Client.cpp \
 		App/Settings/Settings.cpp \

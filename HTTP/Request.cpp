@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/09 04:46:33 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/11 02:34:04 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,11 @@
 
 Request::Request()
     : header_completed_(false), body_completed_(false),
-      buffer_size(BUFFER_SIZE) {}
+      body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE) {
+}
 
 Request::Request(Request::size_type buffer_size)
-    : header_completed_(false), body_completed_(false),
+    : header_completed_(false), body_completed_(false), body_size_(0),
       buffer_size(buffer_size) {}
 
 Request::Request(char *buffer, Request::size_type recieved_size,
@@ -36,25 +37,65 @@ Request::Request(char *buffer, Request::size_type recieved_size,
     : request_string_(buffer, recieved_size), header_completed_(false),
       body_completed_(false), buffer_size(buffer_size) {}
 
+Request::~Request() {
+  if(this->body_file_) {
+    if(this->body_file_->is_open())
+      this->body_file_->close();
+    delete this->body_file_;
+  }
+}
 /*
  * modifiers
  */
 
 int Request::appendBuffer(char *buffer, size_type recieved_size) {
   if(this->isHeaderCompleted())
+    // this->appendBodyFile(buffer, recieved_size);
     this->body_string_.append(buffer, recieved_size);
   else {
     this->request_string_.append(buffer, recieved_size);
     std::string::size_type pos = this->request_string_.find(REQUEST_SEPARATOR);
     if (pos != std::string::npos) {
+      if  (this->request_method_ != POST)
+        return 1;
+      this->header_completed_ = true;
       this->body_string_.append(this->request_string_.begin() + pos + 4,
                                 this->request_string_.end());
+      // std::string body_chunk(this->request_string_.begin() + pos + 4, this->request_string_.end());
+        // this->appendBodyFile(&body_chunk[0], body_chunk.length());
       this->request_string_.erase(this->request_string_.begin() + pos + 4,
                                   this->request_string_.end());
-      this->header_completed_ = true;
     }
   }
+  if(isBodyCompleted() )
+    std::cout << "body is completed" << std::endl;
+if(this->request_method_ == POST && isBodyCompleted()){
+    if(!this->body_file_)
+      this->body_file_ = new std::fstream;
+    if(!this->body_file_->is_open())
+      this->body_file_->open(TMP_FILE_NAME, std::ios::out);
+
+    if (this->body_file_->is_open())
+      std::cout << "file is openned" << std::endl;
+    this->body_file_->write(static_cast<const char *>(&this->body_string_[0]), this->body_string_.length());
+    this->body_file_->close();
+  }
   return this->isHeaderCompleted();
+}
+
+void Request::appendBodyFile(const char *buffer, Request::size_type size) {
+  if(this->request_method_ != POST)
+    return;
+  if(!this->body_file_) {
+    try {
+    this->body_file_ = new std::fstream;
+      this->body_file_->open(TMP_FILE_NAME, std::fstream::out);
+    } catch (...) {
+      std::cerr << "internal server error will goes here" << std::endl;
+    }
+  }
+  this->body_file_->write(buffer, size);
+  this->body_size_ += size;
 }
 
 /*
@@ -74,9 +115,10 @@ bool Request::isBodyCompleted() {
     return true;
   if (this->body_completed_)
     return this->body_completed_;
+  // if(this->body_size_ >= this->getContentLength()) {
   if(this->body_string_.length() >= this->getContentLength()) {
     this->body_completed_ = true;
-    this->test();
+    // this->test();
   }
   return this->body_completed_;
 }
@@ -94,7 +136,6 @@ void Request::parseHeader() {
     return;
     // throw std::runtime_error("header not completed");
   std::string token;
-  // std::cout << this->request_string_ << std::endl;
   this->tockenizer_ = new Tockenizer(this->request_string_);
   token = this->tockenizer_->getLine();
   this->parseMetadata_(token);
@@ -105,7 +146,6 @@ void Request::parseHeader() {
     // just printing the error code for now
     std::cerr << "Error: " << e.what() << std::endl;
   }
-  // std::cout << "|" << this->tockenizer_->getHeaders()<< "|" << std::endl;
 }
 
 void Request::parseMetadata_(const std::string &metadata) {
@@ -124,7 +164,6 @@ void Request::pushHeaders_() {
   while (!tok.end())
     this->request_headers_.insert(std::make_pair(
         tok.getNextToken(':'), helpers::trim(tok.getNoneEmptyLine())));
-  // std::cout << this->request_uri_ << std::endl;
 }
 
 /*
@@ -203,18 +242,21 @@ std::string Request::getBodyString() const { return this->body_string_; }
 
 std::string Request::getHeaderString() const { return this->header_string_; }
 
+Request::size_type Request::getBodySize() const { return this->body_size_; }
+
+std::map<std::string, std::string>& Request::getHeaders() {
+return this->request_headers_;
+}
+
 /*
  * tests
  */
 
 void Request::test() {
-  if(this->request_method_ == POST) {
-    std::cout << "writing on file" << std::endl;
-  std::fstream file("/Users/hchakoub/cursus/webserv/ressources/uploads/file.out", std::fstream::out);
-  file.write(this->body_string_.data(), this->body_string_.length());
-    std::cout << "writing on file end" << std::endl;
-    dev::br();
-    std::cout << this->header_string_ << std::endl;
-    dev::br();
-  }
+  // if(this->request_method_ == POST) {
+  // std::fstream file("/Users/hchakoub/cursus/webserv/ressources/uploads/file.out", std::fstream::out);
+  // file.write(this->body_string_.data(), this->body_string_.length());
+  //   dev::br();
+  //   dev::br();
+  // }
 }
