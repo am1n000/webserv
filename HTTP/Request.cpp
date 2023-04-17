@@ -50,45 +50,28 @@ Request::~Request() {
 
 int Request::appendBuffer(char *buffer, size_type recieved_size) {
   if(this->isHeaderCompleted())
-    // this->appendBodyFile(buffer, recieved_size);
-    this->body_string_.append(buffer, recieved_size);
+    this->appendBodyFile(buffer, recieved_size);
   else {
     this->request_string_.append(buffer, recieved_size);
     std::string::size_type pos = this->request_string_.find(REQUEST_SEPARATOR);
     if (pos != std::string::npos) {
-      if  (this->request_method_ != POST)
-        return 1;
       this->header_completed_ = true;
-      this->body_string_.append(this->request_string_.begin() + pos + 4,
-                                this->request_string_.end());
-      // std::string body_chunk(this->request_string_.begin() + pos + 4, this->request_string_.end());
-        // this->appendBodyFile(&body_chunk[0], body_chunk.length());
+
+      std::string body_chunk(this->request_string_.begin() + pos + 4, this->request_string_.end());
+      this->appendBodyFile(&body_chunk[0], body_chunk.size());
       this->request_string_.erase(this->request_string_.begin() + pos + 4,
                                   this->request_string_.end());
     }
   }
   if(isBodyCompleted() )
     std::cout << "body is completed" << std::endl;
-if(this->request_method_ == POST && isBodyCompleted()){
-    if(!this->body_file_)
-      this->body_file_ = new std::fstream;
-    if(!this->body_file_->is_open())
-      this->body_file_->open(TMP_FILE_NAME, std::ios::out);
-
-    if (this->body_file_->is_open())
-      std::cout << "file is openned" << std::endl;
-    this->body_file_->write(static_cast<const char *>(&this->body_string_[0]), this->body_string_.length());
-    this->body_file_->close();
-  }
   return this->isHeaderCompleted();
 }
 
 void Request::appendBodyFile(const char *buffer, Request::size_type size) {
-  if(this->request_method_ != POST)
-    return;
   if(!this->body_file_) {
     try {
-    this->body_file_ = new std::fstream;
+      this->body_file_ = new std::fstream;
       this->body_file_->open(TMP_FILE_NAME, std::fstream::out);
     } catch (...) {
       std::cerr << "internal server error will goes here" << std::endl;
@@ -111,14 +94,12 @@ bool Request::isHeaderCompleted() {
 }
 
 bool Request::isBodyCompleted() {
-  if(this->request_method_ != POST)
+  if(this->request_method_ != POST || this->body_completed_)
     return true;
-  if (this->body_completed_)
-    return this->body_completed_;
-  // if(this->body_size_ >= this->getContentLength()) {
-  if(this->body_string_.length() >= this->getContentLength()) {
+  // if(this->body_string_.length() >= this->getContentLength()) {
+  if(this->body_size_ >= this->getContentLength()) {
     this->body_completed_ = true;
-    // this->test();
+    this->body_file_->close();
   }
   return this->body_completed_;
 }
@@ -248,15 +229,15 @@ std::map<std::string, std::string>& Request::getHeaders() {
 return this->request_headers_;
 }
 
+const std::string& Request::getRequestUri() {
+  return this->request_uri_;
+}
+
 /*
  * tests
  */
 
 void Request::test() {
-  // if(this->request_method_ == POST) {
-  // std::fstream file("/Users/hchakoub/cursus/webserv/ressources/uploads/file.out", std::fstream::out);
-  // file.write(this->body_string_.data(), this->body_string_.length());
-  //   dev::br();
-  //   dev::br();
-  // }
+  for(std::map<std::string, std::string>::iterator it = this->getHeaders().begin(); it != this->getHeaders().end(); it++)
+    std::cout << it->first << "  " << it->second << std::endl;
 }

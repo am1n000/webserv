@@ -126,6 +126,7 @@ public:
   std::string getHeaderString() const;
   size_type getBodySize() const;
   std::map<std::string, std::string> &getHeaders();
+  const std::string &getRequestUri();
 
 
   /*

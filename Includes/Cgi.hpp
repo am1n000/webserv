@@ -13,21 +13,29 @@
 #ifndef CGI_HPP
 #define CGI_HPP
 
+#include "Request.hpp"
 #include <fstream>
 #include <iostream>
 #include <sys/_types/_size_t.h>
+#include <vector>
 
 class Cgi {
   private:
+    Request request_;
     std::fstream file_;
     std::string cgi_path_;
+    std::vector<char *> env_;
+    std::vector<char*> args_;  
   public:
     Cgi();
-    Cgi(const std::string& path);
+    Cgi(Request& request);
     ~Cgi();
     
     void openFile(const std::string& path);
     void appendStream(const char *buffer, size_t buffer_size);
-    void testCgi(std::string file, std::string  cl);
+    void testCgi();
+
+    void prepareEnv();
+    void prepareArgs();
 };
 #endif

@@ -48,7 +48,7 @@ Config::Config(const std::string &path) : path_(path) {
 
 std::string Config::read() {
   if (!this->file_->is_open())
-    throw std::runtime_error("file is not openned");
+    throw std::runtime_error("can't read config, file is not openned");
   this->buffer_.resize(this->file_size_);
   this->file_->read(&this->buffer_[0], this->file_size_);
   return this->buffer_;
@@ -56,7 +56,7 @@ std::string Config::read() {
 
 void Config::setFileSize() {
   if (!this->file_->is_open())
-    throw std::runtime_error("file is not openned");
+    throw std::runtime_error("can't read config, file is not openned");
   this->file_->seekg(0, std::ios::end);
   this->file_size_ = this->file_->tellg();
   this->file_->seekg(0, std::ios::beg);
@@ -200,7 +200,7 @@ void ConfigFile::readFile() {
   size_t stream_size;
   // checking file is oppened
   if (!this->file_.is_open())
-    throw std::runtime_error("file is not openned");
+    throw std::runtime_error("can't read file size, file is not openned");
 
   // getting the byte size of the file
   this->file_.seekg(0, std::ios::end);

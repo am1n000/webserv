@@ -11,6 +11,8 @@
 /* ************************************************************************** */
 
 #include "../Includes/Cgi.hpp"
+#include <cstdlib>
+#include <cstring>
 #include <fcntl.h>
 #include <fstream>
 #include <stdexcept>
@@ -19,17 +21,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
+#include "../dev/dev.hpp"
 
-Cgi::Cgi(): cgi_path_("/Users/hchakoub/.local/bin/php-cgi") {}
+#define root "/Users/hchakoub/cursus/webserv/ressources"
+#define cgi_path "/Users/hchakoub/.local/bin/php-cgi"
 
-Cgi::Cgi(const std::string& path) {
-  try {
+// Cgi::Cgi(): cgi_path_("/Users/hchakoub/.local/bin/php-cgi") {}
 
-    this->file_.open(path, std::fstream::out);
-  } catch(...) {
-    // printing error for now as placeholder
-    std::cerr << "Error openning body file in cgi" << std::endl;
-  }
+Cgi::Cgi(Request& request): request_(request) {
+  // std::cout << "from cgi constructor" << std::endl;
+  // std::cout << request.getRequestUri() << std::endl;
 }
 
 Cgi::~Cgi() {}
@@ -51,39 +52,75 @@ void Cgi::appendStream(const char *buffer, size_t buffer_size) {
   this->file_.write(buffer, buffer_size);
 }
 
-void Cgi::testCgi(std::string file, std::string cl) {
+void printheaders(std::vector<char *> v) {
+
+  for(size_t i = 0; i < v.size() - 1; i++)
+    std::cout << v[i] << std::endl;
+}
+
+void Cgi::testCgi() {
   
-  // (void)cl;
+  this->prepareEnv();
+  printheaders(this->env_);
   int pid = fork();
-  if (pid < 0)
+  if (pid < 0) {
     std::cerr << "Fork error" << std::endl;
+    exit(1);
+  }
 
   if(pid == 0) {
 
     int fd = open("/Users/hchakoub/cursus/webserv/ressources/uploads/tmp/request.out", O_RDONLY);
-    if(fd < 0)
+    if(fd < 0) {
       std::cerr << "error openning input file" << std::endl;
-    std::vector<char *> env;
+      exit(1);
+    }
+
     std::vector<char *> args;
     args.push_back(const_cast<char *>("/Users/hchakoub/.local/bin/php-cgi"));
-    args.push_back(const_cast<char *>("/Users/hchakoub/cursus/webserv/ressources/uploads/upload.php"));
-    // args.push_back(const_cast<char *>("/Users/hchakoub/cursus/webserv/ressources/uploads/upload.php"));
+    // args.push_back(const_cast<char *>("/Users/hchakoub/cursus/webserv/ressources/post/data.php"));
+
+      std::string sfn = root;
+    sfn += request_.getRequestUri();
+    args.push_back(const_cast<char *>(sfn.data()));
     args.push_back(NULL);
-    env.push_back(const_cast<char *>("REQUEST_METHOD=POST"));
-    env.push_back(const_cast<char *>("REDIRECT_STATUS=200"));
-
-    struct stat st;
-    fstat(fd, &st);
-    // std::string content_length = "CONTENT_LENGTH=" + std::to_string(st.st_size);
-    std::string content_length = "CONTENT_LENGTH=" + cl;
-    env.push_back(const_cast<char *>(content_length.c_str()));
-    env.push_back(const_cast<char *>(std::string("CONTENT_TYPE=" + file).c_str()));
-    env.push_back(const_cast<char *>("SCRIPT_FILENAME=./ressources/uploads/upload.php"));
-    env.push_back(NULL);
-
     dup2(fd, 0);
-    if (execve(this->cgi_path_.data(), &args[0], &env[0]))
+    if (execve(args[0], &args[0], &env_[0])) {
     std::cerr << "execve failed" << std::endl;
+      std::cerr << strerror(errno) << std::endl;
+      exit(1);
+    }
   }
   wait(NULL);
+}
+
+
+/*
+* prepare cgi
+*/
+
+void Cgi::prepareEnv() {
+  // this->request_.test();
+  try {
+    std::string tmp = "CONTENT_LENGTH=" + request_.getHeaders().find("Content-Length")->second;
+    this->env_.push_back(strdup(tmp.data()));
+    tmp = "CONTENT_TYPE=" + request_.getHeaders().find("Content-Type")->second;
+    this->env_.push_back(strdup(tmp.data()));
+      std::string sfn("SCRIPT_FILENAME=");
+    sfn += root + request_.getRequestUri();
+
+    this->env_.push_back(strdup(sfn.data()));
+
+    //for now this is hardcoded
+    this->env_.push_back(const_cast<char *>("REQUEST_METHOD=POST"));
+    this->env_.push_back(const_cast<char *>("REDIRECT_STATUS=200"));
+    // this->env_.push_back(const_cast<char *>("=POST"));
+    this->env_.push_back(NULL);
+  } catch (...) {
+    std::cerr << "bad request goes here " << std::endl;
+  }
+}
+
+void Cgi::prepareArgs() {
+
 }

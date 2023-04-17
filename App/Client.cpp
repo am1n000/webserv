@@ -61,8 +61,6 @@ void Client::reading(int kq) {
     if (recieved_size < 0)
       throw std::runtime_error("recv failed");
     this->req->appendBuffer(buffer, recieved_size);
-    // begin test
-    // this->req->parse_request_line(strtok(buffer, "\r\n\r\n"));
     if (this->req->isHeaderCompleted())
       this->req->parseHeader();
   } catch (std::exception &e) {
@@ -70,19 +68,15 @@ void Client::reading(int kq) {
     kevent(kq, this->_changePtr, 1, NULL, 0, NULL);
     close(this->_sockFd);
   }
+
   if (this->req->isRequestCompleted()) {
     /*
       * test cgi
       */
       if(this->req->getRequestMethod() == POST) {
-      Cgi cgi; 
-      
-      try {
-      cgi.testCgi(this->req->getHeaders().find("Content-Type")->second, this->req->getHeaders().find("Content-Length")->second);
+      Cgi cgi(*this->req); 
 
-      } catch (...) {
-        std::cerr << "could not find Content-Type " << std::endl;
-      }
+      cgi.testCgi();
     }
       /*
       * test cgi end
