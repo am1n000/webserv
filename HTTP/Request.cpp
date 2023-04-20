@@ -129,6 +129,10 @@ void Request::parseHeader() {
   }
 }
 
+/*
+ * private methods
+ */
+
 void Request::parseMetadata_(const std::string &metadata) {
   std::string token;
   Tockenizer tok(metadata);
@@ -145,6 +149,18 @@ void Request::pushHeaders_() {
   while (!tok.end())
     this->request_headers_.insert(std::make_pair(
         tok.getNextToken(':'), helpers::trim(tok.getNoneEmptyLine())));
+}
+
+void Request::setExtention_() {
+  size_type pos;
+
+  pos = this->request_uri_.rfind("/");
+  if(pos != std::string::npos) {
+    this->filename_ = this->request_uri_.substr(pos + 1);
+    pos = this->filename_.rfind(".");
+    if(pos != std::string::npos)
+      this->extention_ = this->filename_.substr(pos + 1);
+  }
 }
 
 /*
@@ -172,6 +188,7 @@ void Request::setRequestUri(const std::string &uri) {
   if (uri == "")
     throw BadRequestException();
   this->request_uri_ = uri;
+  this->setExtention_();
 }
 
 void Request::setHttpVersion(const std::string &version) {
@@ -232,6 +249,8 @@ return this->request_headers_;
 const std::string& Request::getRequestUri() {
   return this->request_uri_;
 }
+
+std::string Request::getExtention() const { return this->extention_; }
 
 /*
  * tests

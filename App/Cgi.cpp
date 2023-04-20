@@ -71,7 +71,8 @@ void Cgi::testCgi() {
   if(pid == 0) {
 
     int fd = open("/Users/hchakoub/cursus/webserv/ressources/uploads/tmp/request.out", O_RDONLY);
-    if(fd < 0) {
+    int resfd = open("/Users/hchakoub/cursus/webserv/ressources/uploads/tmp/response.out", O_RDWR | O_CREAT);
+    if(fd < 0 || resfd < 0) {
       std::cerr << "error openning input file" << std::endl;
       exit(1);
     }
@@ -85,6 +86,7 @@ void Cgi::testCgi() {
     args.push_back(const_cast<char *>(sfn.data()));
     args.push_back(NULL);
     dup2(fd, 0);
+    // dup2(resfd, 1);
     if (execve(args[0], &args[0], &env_[0])) {
     std::cerr << "execve failed" << std::endl;
       std::cerr << strerror(errno) << std::endl;
@@ -106,15 +108,14 @@ void Cgi::prepareEnv() {
     this->env_.push_back(strdup(tmp.data()));
     tmp = "CONTENT_TYPE=" + request_.getHeaders().find("Content-Type")->second;
     this->env_.push_back(strdup(tmp.data()));
-      std::string sfn("SCRIPT_FILENAME=");
-    sfn += root + request_.getRequestUri();
-
-    this->env_.push_back(strdup(sfn.data()));
+    tmp = "REQUEST_METHOD=" + Settings::methodString(request_.getRequestMethod());
+    this->env_.push_back(strdup(tmp.data()));
+    tmp = "SCRIPT_FILENAME=";
+    tmp += root + request_.getRequestUri();
+    this->env_.push_back(strdup(tmp.data()));
 
     //for now this is hardcoded
-    this->env_.push_back(const_cast<char *>("REQUEST_METHOD=POST"));
     this->env_.push_back(const_cast<char *>("REDIRECT_STATUS=200"));
-    // this->env_.push_back(const_cast<char *>("=POST"));
     this->env_.push_back(NULL);
   } catch (...) {
     std::cerr << "bad request goes here " << std::endl;

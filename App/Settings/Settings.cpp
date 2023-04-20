@@ -69,3 +69,7 @@ Request_Method_e Settings::indexOfRequestMethod(const std::string &method) {
     throw std::runtime_error("method does not exist");
   return it->second;
 }
+
+std::string Settings::methodString(int emethod) {
+  return request_methods[emethod];
+}

@@ -63,6 +63,8 @@ private:
   size_type content_length;
   std::fstream *body_file_;
   size_type body_size_;
+  std::string extention_;
+  std::string filename_;
   //the file is temporary just to work with amine's code
   // to be changed lather
   s_file file_;
@@ -72,6 +74,7 @@ private:
   */
   void parseMetadata_(const std::string& metadata);
   void pushHeaders_();
+  void setExtention_();
   
 
 public:
@@ -127,6 +130,7 @@ public:
   size_type getBodySize() const;
   std::map<std::string, std::string> &getHeaders();
   const std::string &getRequestUri();
+  std::string getExtention() const;
 
 
   /*

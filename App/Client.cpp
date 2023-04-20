@@ -78,6 +78,10 @@ void Client::reading(int kq) {
 
       cgi.testCgi();
     }
+
+    // test extention
+    std::cout << this->req->getExtention() << std::endl;
+
       /*
       * test cgi end
       */
