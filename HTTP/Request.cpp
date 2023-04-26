@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/04 16:00:09 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/07 00:54:35 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,19 @@ Request::Request(char *buffer, Request::size_type recieved_size,
  */
 
 int Request::appendBuffer(char *buffer, size_type recieved_size) {
-  this->request_string_.append(buffer, recieved_size);
+  if(this->isHeaderCompleted())
+    this->body_string_.append(buffer, recieved_size);
+  else {
+    this->request_string_.append(buffer, recieved_size);
+    std::string::size_type pos = this->request_string_.find(REQUEST_SEPARATOR);
+    if (pos != std::string::npos) {
+      this->body_string_.append(this->request_string_.begin() + pos + 4,
+                                this->request_string_.end());
+      this->request_string_.erase(this->request_string_.begin() + pos + 4,
+                                  this->request_string_.end());
+      this->header_completed_ = true;
+    }
+  }
   return this->isHeaderCompleted();
 }
 
@@ -56,15 +68,30 @@ bool Request::isHeaderCompleted() {
   return this->header_completed_;
 }
 
+bool Request::isBodyCompleted() {
+  if(this->request_method_ != POST)
+    return true;
+  if (this->body_completed_)
+    return this->body_completed_;
+  if(this->body_string_.length() >= this->getContentLength())
+    this->body_completed_ = true;
+  return this->body_completed_;
+}
+
+bool Request::isRequestCompleted() {
+  return this->isHeaderCompleted() && this->isBodyCompleted();
+}
+
 /*
  * parsers
  */
 
 void Request::parseHeader() {
-  if (!this->header_completed_)
+  if (!this->isHeaderCompleted())
     return;
     // throw std::runtime_error("header not completed");
   std::string token;
+  std::cout << this->request_string_ << std::endl;
   this->tockenizer_ = new Tockenizer(this->request_string_);
   token = this->tockenizer_->getLine();
   this->parseMetadata_(token);
@@ -134,7 +161,7 @@ void Request::setContentLength() {
   std::map<std::string, std::string>::iterator it =
       this->request_headers_.find("Content-Length");
   if (it == this->request_headers_.end())
-    throw std::runtime_error("Content-Length header does not exist");
+    this->content_length = 0;
   this->content_length = std::stoi(it->second);
 }
 
@@ -147,7 +174,7 @@ int Request::getRequestMethod() const { return this->request_method_; }
 s_file Request::getFile() {
   // all this **** is temprary to make the **** works
   this->file_.filename =
-      "/Users/hchakoub/cursus/webserv/ressources" + this->request_uri_;
+      "/Users/ael-rhai/Desktop/webserv/ressources" + this->request_uri_;
   std::string extention =
       this->file_.filename.substr(this->file_.filename.find(".") + 1);
   std::map<std::string, std::string>::iterator it;
@@ -161,9 +188,17 @@ s_file Request::getFile() {
 
 Request::size_type Request::getContentLength() {
   // temp till i figure out where to put it
+  if(this->request_method_ != POST)
+    return 0;
   this->setContentLength();
   return this->content_length;
 }
+
+std::string Request::getRequestString() const { return this->request_string_; }
+
+std::string Request::getBodyString() const { return this->body_string_; }
+
+std::string Request::getHeaderString() const { return this->header_string_; }
 
 /*
  * tests

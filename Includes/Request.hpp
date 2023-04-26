@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/30 15:48:08 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/07 01:48:24 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ private:
   Tockenizer *tockenizer_;
   std::string request_string_;
   std::string header_string_;
+  std::string body_string_;
   bool header_completed_;
   bool body_completed_;
   method_type request_method_;
@@ -79,6 +80,7 @@ public:
   int appendBuffer(char *buffer, size_type recieved_size);
   bool isHeaderCompleted();
   bool isBodyCompleted();
+  bool isRequestCompleted();
   void parseHeader();
 
   /*
@@ -98,11 +100,16 @@ public:
   int getRequestMethod() const;
   // temoraty to be changed with the file struct
   s_file getFile();
+  std::string getRequestString() const;
+  std::string getBodyString() const;
+  std::string getHeaderString() const;
+
 
   /*
   * test function will be removed lather
   */
   void test();
+  void printHeaders();
 };
 
 #endif
