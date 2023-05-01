@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/01 14:06:13 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/01 20:35:10 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,6 @@ int Request::appendBuffer(char *buffer, size_type recieved_size) {
                                   this->request_string_.end());
     }
   }
-  if(isBodyCompleted() )
-    std::cout << "body is completed" << std::endl;
   return this->isHeaderCompleted();
 }
 
@@ -106,6 +104,20 @@ bool Request::isBodyCompleted() {
 
 bool Request::isRequestCompleted() {
   return this->isHeaderCompleted() && this->isBodyCompleted();
+}
+
+Location* Request::matchLocation() {
+  size_type pos;
+  std::string locationString;
+  Server::location_type location = this->server_->getLocations();
+  for(Server::location_iterator it = location.begin(); it != location.end(); it++) {
+    pos = this->request_uri_.find(it->first);
+    if(pos != std::string::npos && locationString.length() < it->first.length())
+      locationString = it->first;
+  }
+  if(locationString.length() > 0)
+    return this->server_->getLocations().find(locationString)->second;
+  return NULL;
 }
 
 /*
@@ -187,7 +199,16 @@ void Request::setMethod(const std::string &method) {
 void Request::setRequestUri(const std::string &uri) {
   if (uri == "")
     throw BadRequestException();
-  this->request_uri_ = uri;
+  size_type pos = uri.find("?");
+  if(pos != std::string::npos) {
+    this->request_uri_ = uri.substr(0, pos);
+    this->query_parameters_ = uri.substr(pos + 1);
+    std::cout << this->query_parameters_ << std::endl;
+    std::cout << this->request_uri_ << std::endl;
+  } else {
+    this->request_uri_ = uri;
+    this->query_parameters_ = "";
+  }
   this->setExtention_();
 }
 
@@ -217,7 +238,7 @@ int Request::getRequestMethod() const { return this->request_method_; }
 
 s_file Request::getFile() {
   this->file_.filename = this->server_->getRoot() + this->request_uri_;
-  std::cout << file_.filename << std::endl;
+  // std::cout << file_.filename << std::endl;
   std::string extention =
       this->file_.filename.substr(this->file_.filename.rfind(".") + 1);
   std::map<std::string, std::string>::iterator it;
@@ -245,25 +266,29 @@ std::string Request::getHeaderString() const { return this->header_string_; }
 
 Request::size_type Request::getBodySize() const { return this->body_size_; }
 
-std::map<std::string, std::string>& Request::getHeaders() {
-return this->request_headers_;
+std::map<std::string, std::string> &Request::getHeaders() {
+  return this->request_headers_;
 }
 
-const std::string& Request::getRequestUri() {
-  return this->request_uri_;
-}
+const std::string &Request::getRequestUri() { return this->request_uri_; }
 
 std::string Request::getExtention() const { return this->extention_; }
 
-Server* Request::getServer() const {
-  return this->server_;
-}
+Server *Request::getServer() const { return this->server_; }
+
+std::map<std::string, Location *> &Server::getLocations() { return this->locations_; }
 
 /*
  * tests
  */
 
 void Request::test() {
-  for(std::map<std::string, std::string>::iterator it = this->getHeaders().begin(); it != this->getHeaders().end(); it++)
-    std::cout << it->first << "  " << it->second << std::endl;
+  // log server locations
+  //
+  Location* location = this->matchLocation();
+  if (!location)
+    std::cout << "no match" << std::endl;
+  else {
+      std::cout << location->getCgi().begin()->first << std::endl;
+    }
 }

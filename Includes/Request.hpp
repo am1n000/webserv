@@ -7,6 +7,7 @@
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
 /*   Updated: 2023/05/01 13:25:08 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/01 16:54:49 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +32,14 @@
 // also fstream header must be included on response header
 
 // adding Server class header to avoid recursive inclusion
+// adding classes header to avoid recursive inclusion
 class Server;
+class Location;
 typedef  struct t_file {
   std::string  filename; 
 std::string media;
 } s_file;
+
 // also must be included on the global header 
 #include <sys/event.h>
 #include <sys/time.h>
@@ -61,6 +65,7 @@ private:
   bool body_completed_;
   method_type request_method_;
   std::string request_uri_;
+  std::string query_parameters_;
   std::string http_version_;
   std::map<std::string, std::string> request_headers_;
   size_type content_length;
@@ -102,6 +107,7 @@ public:
   bool isHeaderCompleted();
   bool isBodyCompleted();
   bool isRequestCompleted();
+  Location* matchLocation();
 
   /*
    * modifiers
