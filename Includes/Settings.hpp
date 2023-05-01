@@ -36,5 +36,6 @@ class Settings {
     static Settings* boot();
     static Settings* get();
     Request_Method_e indexOfRequestMethod(const std::string& method);
+    static std::string methodString(int emethod);
 };
 #endif

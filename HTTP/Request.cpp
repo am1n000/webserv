@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/07 00:54:35 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/04/11 02:34:04 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "../Includes/Config.hpp"
 #include "../dev/dev.hpp"
 #include <cstdlib>
+#include <fstream>
 #include <stdexcept>
 #include <utility>
 
@@ -24,10 +25,11 @@
 
 Request::Request()
     : header_completed_(false), body_completed_(false),
-      buffer_size(BUFFER_SIZE) {}
+      body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE) {
+}
 
 Request::Request(Request::size_type buffer_size)
-    : header_completed_(false), body_completed_(false),
+    : header_completed_(false), body_completed_(false), body_size_(0),
       buffer_size(buffer_size) {}
 
 Request::Request(char *buffer, Request::size_type recieved_size,
@@ -35,25 +37,48 @@ Request::Request(char *buffer, Request::size_type recieved_size,
     : request_string_(buffer, recieved_size), header_completed_(false),
       body_completed_(false), buffer_size(buffer_size) {}
 
+Request::~Request() {
+  if(this->body_file_) {
+    if(this->body_file_->is_open())
+      this->body_file_->close();
+    delete this->body_file_;
+  }
+}
 /*
  * modifiers
  */
 
 int Request::appendBuffer(char *buffer, size_type recieved_size) {
   if(this->isHeaderCompleted())
-    this->body_string_.append(buffer, recieved_size);
+    this->appendBodyFile(buffer, recieved_size);
   else {
     this->request_string_.append(buffer, recieved_size);
     std::string::size_type pos = this->request_string_.find(REQUEST_SEPARATOR);
     if (pos != std::string::npos) {
-      this->body_string_.append(this->request_string_.begin() + pos + 4,
-                                this->request_string_.end());
+      this->header_completed_ = true;
+
+      std::string body_chunk(this->request_string_.begin() + pos + 4, this->request_string_.end());
+      this->appendBodyFile(&body_chunk[0], body_chunk.size());
       this->request_string_.erase(this->request_string_.begin() + pos + 4,
                                   this->request_string_.end());
-      this->header_completed_ = true;
     }
   }
+  if(isBodyCompleted() )
+    std::cout << "body is completed" << std::endl;
   return this->isHeaderCompleted();
+}
+
+void Request::appendBodyFile(const char *buffer, Request::size_type size) {
+  if(!this->body_file_) {
+    try {
+      this->body_file_ = new std::fstream;
+      this->body_file_->open(TMP_FILE_NAME, std::fstream::out);
+    } catch (...) {
+      std::cerr << "internal server error will goes here" << std::endl;
+    }
+  }
+  this->body_file_->write(buffer, size);
+  this->body_size_ += size;
 }
 
 /*
@@ -69,12 +94,13 @@ bool Request::isHeaderCompleted() {
 }
 
 bool Request::isBodyCompleted() {
-  if(this->request_method_ != POST)
+  if(this->request_method_ != POST || this->body_completed_)
     return true;
-  if (this->body_completed_)
-    return this->body_completed_;
-  if(this->body_string_.length() >= this->getContentLength())
+  // if(this->body_string_.length() >= this->getContentLength()) {
+  if(this->body_size_ >= this->getContentLength()) {
     this->body_completed_ = true;
+    this->body_file_->close();
+  }
   return this->body_completed_;
 }
 
@@ -91,7 +117,6 @@ void Request::parseHeader() {
     return;
     // throw std::runtime_error("header not completed");
   std::string token;
-  std::cout << this->request_string_ << std::endl;
   this->tockenizer_ = new Tockenizer(this->request_string_);
   token = this->tockenizer_->getLine();
   this->parseMetadata_(token);
@@ -102,8 +127,11 @@ void Request::parseHeader() {
     // just printing the error code for now
     std::cerr << "Error: " << e.what() << std::endl;
   }
-  // std::cout << "|" << this->tockenizer_->getHeaders()<< "|" << std::endl;
 }
+
+/*
+ * private methods
+ */
 
 void Request::parseMetadata_(const std::string &metadata) {
   std::string token;
@@ -121,7 +149,18 @@ void Request::pushHeaders_() {
   while (!tok.end())
     this->request_headers_.insert(std::make_pair(
         tok.getNextToken(':'), helpers::trim(tok.getNoneEmptyLine())));
-  // std::cout << this->request_uri_ << std::endl;
+}
+
+void Request::setExtention_() {
+  size_type pos;
+
+  pos = this->request_uri_.rfind("/");
+  if(pos != std::string::npos) {
+    this->filename_ = this->request_uri_.substr(pos + 1);
+    pos = this->filename_.rfind(".");
+    if(pos != std::string::npos)
+      this->extention_ = this->filename_.substr(pos + 1);
+  }
 }
 
 /*
@@ -149,6 +188,7 @@ void Request::setRequestUri(const std::string &uri) {
   if (uri == "")
     throw BadRequestException();
   this->request_uri_ = uri;
+  this->setExtention_();
 }
 
 void Request::setHttpVersion(const std::string &version) {
@@ -200,11 +240,23 @@ std::string Request::getBodyString() const { return this->body_string_; }
 
 std::string Request::getHeaderString() const { return this->header_string_; }
 
+Request::size_type Request::getBodySize() const { return this->body_size_; }
+
+std::map<std::string, std::string>& Request::getHeaders() {
+return this->request_headers_;
+}
+
+const std::string& Request::getRequestUri() {
+  return this->request_uri_;
+}
+
+std::string Request::getExtention() const { return this->extention_; }
+
 /*
  * tests
  */
 
 void Request::test() {
-  // std::cout << this->request_string_ << std::endl;
-  this->parseHeader();
+  for(std::map<std::string, std::string>::iterator it = this->getHeaders().begin(); it != this->getHeaders().end(); it++)
+    std::cout << it->first << "  " << it->second << std::endl;
 }

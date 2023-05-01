@@ -20,7 +20,9 @@ SRC=App/Config.cpp App/Server.cpp HTTP/Request.cpp HTTP/Response.cpp \
 		App/Settings/Settings.cpp App/multiplexers/Kqueue.cpp\
 		HTTP/Exceptions/BadRequestException.cpp \
 		Bootstrap/app.cpp App/multiplexers/Select.cpp \
-		App/multiplexers/Poll.cpp
+		App/multiplexers/Poll.cpp \
+		Bootstrap/app.cpp \
+		App/Cgi.cpp
 BUILD_SRC=$(INTRY) $(SRC)
 TEST_SRC=$(TEST_ENTRY) $(SRC)
 OBJ_DIR=objects

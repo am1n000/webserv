@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <string>
 #include "../dev/dev.hpp"
+#include "../Includes/Cgi.hpp"
 
 Client::Client() {
 	this->_changePtr = new struct kevent;
