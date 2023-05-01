@@ -149,7 +149,7 @@ Config *Config::boot(const std::string &path) {
   return Config::object_;
 }
 
-std::vector<Server *> Config::getServers() { return this->servers_; }
+std::vector<Server *> &Config::getServers() { return this->servers_; }
 
 std::map<std::string, std::string>& Config::getMimeTypes() {
   return this->mime_types_;

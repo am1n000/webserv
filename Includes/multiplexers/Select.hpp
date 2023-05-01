@@ -16,7 +16,7 @@ class Select : public Multiplexer
 
 		Select();
 
-		void 	setUpServerConnections(std::vector<Server *> servers);
+		void 	setUpServerConnections();
 		void	monitoringLoop();
 		void 	acceptConnections(Client *tempData);
 		void	read(Client *tempData);
@@ -26,7 +26,7 @@ class Select : public Multiplexer
 
 		~Select();
 		static	Select* getInstance();
-		void 			serve(std::vector<Server *> servers);
+		void 			serve();
 };
 
 #endif

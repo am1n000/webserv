@@ -71,7 +71,7 @@ class Config {
     void parseMimeTypes(const std::string& scope);
     std::string getConfigBuffer() const;
     void pushServer(const std::string& serverString);
-    std::vector<Server*> getServers();
+    std::vector<Server*> &getServers();
     std::map<std::string, std::string>& getMimeTypes();
     ~Config();
   /*

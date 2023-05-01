@@ -14,13 +14,9 @@ Kqueue*	Kqueue::getInstance()
 	return (instance);
 }
 
-void Kqueue::setUpServerConnections(std::vector<Server *> servers)
+void Kqueue::setUpServerConnections()
 {
-    if (kq == -1)
-    {
-		std::cerr << "error: kqueue" << std::endl;
-        exit (1);
-    }
+	std::vector<Server*> &servers = Config::get()->getServers();
 	for (size_t i = 0; i < servers.size(); i++)
 	{
 		Client *server_data = new Client;
@@ -32,7 +28,8 @@ void Kqueue::setUpServerConnections(std::vector<Server *> servers)
 		if (servers[i]->listenToConnections(server_data->getSockFd()))
 			continue;
 		server_data->setIsListeningSock(1);
-		server_data->server = servers[i];
+		server_data->server = Config::get()->getServers()[i];
+		std::cout << server_data->server->getRoot() << std::endl;
 		EV_SET(server_data->getChangePtr(), server_data->getSockFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
 		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 		{
@@ -77,6 +74,7 @@ void Kqueue::acceptConnections(Client *clientData)
 	else
 	{
 		Client *u_data = new Client(client_sock, 0);
+		u_data->server = clientData->server;
 		EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
 		if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 			std::cerr << "error: kevent registration 2" << std::endl;
@@ -130,8 +128,13 @@ void	Kqueue::write(Client *clientData)
 }
 
 
-void Kqueue::serve(std::vector<Server *> servers)
+void Kqueue::serve()
 {
-	setUpServerConnections(servers);
+    if (kq == -1)
+	{
+		std::cerr << "error: kqueue" << std::endl;
+		return;
+	}
+	setUpServerConnections();
 	monitoringLoop();
 }

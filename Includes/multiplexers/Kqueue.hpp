@@ -16,7 +16,7 @@ class Kqueue : public Multiplexer
 
 		Kqueue();
 		
-		void 	setUpServerConnections(std::vector<Server *> servers);
+		void 	setUpServerConnections();
 		void	monitoringLoop();
 		void 	acceptConnections(Client *tempData);
 		void	read(Client *tempData);
@@ -27,7 +27,7 @@ class Kqueue : public Multiplexer
 		~Kqueue();
 
 		static	Kqueue* getInstance();
-		void 			serve(std::vector<Server *> servers);
+		void 			serve();
 };
 
 #endif

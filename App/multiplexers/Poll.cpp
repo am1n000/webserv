@@ -16,8 +16,9 @@ Poll*	Poll::getInstance()
 		instance = new Poll;
 	return (instance);
 }
-void Poll::setUpServerConnections(std::vector<Server *> servers)
+void Poll::setUpServerConnections()
 {
+	std::vector<Server*> &servers = Config::get()->getServers();
 	for (size_t i = 0; i < servers.size(); i++)
 	{
 		Client *server_data = new Client;
@@ -123,8 +124,8 @@ void	Poll::write(Client *clientData)
 }
 
 
-void Poll::serve(std::vector<Server *> servers)
+void Poll::serve()
 {
-	setUpServerConnections(servers);
+	setUpServerConnections();
 	monitoringLoop();
 }

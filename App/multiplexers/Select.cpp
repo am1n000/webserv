@@ -20,8 +20,9 @@ Select*	Select::getInstance()
 	return (instance);
 }
 
-void Select::setUpServerConnections(std::vector<Server *> servers)
+void Select::setUpServerConnections()
 {
+	std::vector<Server*> &servers = Config::get()->getServers();
 	FD_ZERO(&readMaster);
 	for (size_t i = 0; i < servers.size(); i++)
 	{
@@ -140,8 +141,8 @@ void	Select::write(Client *clientData)
 }
 
 
-void Select::serve(std::vector<Server *> servers)
+void Select::serve()
 {
-	setUpServerConnections(servers);
+	setUpServerConnections();
 	monitoringLoop();
 }

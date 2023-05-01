@@ -14,7 +14,7 @@ class Poll : public Multiplexer
 
 		Poll();
 
-		void 	setUpServerConnections(std::vector<Server *> servers);
+		void 	setUpServerConnections();
 		void	monitoringLoop();
 		void 	acceptConnections(Client *tempData);
 		void	read(Client *tempData);
@@ -24,7 +24,7 @@ class Poll : public Multiplexer
 
 		~Poll();
 		static	Poll*	getInstance();
-		void 			serve(std::vector<Server *> servers);
+		void 			serve();
 };
 
 #endif
