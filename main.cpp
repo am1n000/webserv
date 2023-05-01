@@ -9,9 +9,9 @@ int main ()
 	app();
   	std::vector<Server *> servers = Config::get()->getServers();
 	Kqueue *K = Kqueue::getInstance();
-	K->serve(servers);
+	K->serve();
 	Select *S = Select::getInstance();
-	S->serve(servers);
+	S->serve();
 	Poll *P = Poll::getInstance();
-	P->serve(servers);
+	P->serve();
 }     

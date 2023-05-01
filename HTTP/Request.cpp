@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/11 02:34:04 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/01 13:37:45 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,6 +205,10 @@ void Request::setContentLength() {
   this->content_length = std::stoi(it->second);
 }
 
+void Request::setServer(Server *server) {
+  this->server_ = server;
+}
+
 /*
  * Getters
  */
@@ -214,9 +218,15 @@ int Request::getRequestMethod() const { return this->request_method_; }
 s_file Request::getFile() {
   // all this **** is temprary to make the **** works
   this->file_.filename =
-      "/Users/ael-rhai/Desktop/webserv/ressources" + this->request_uri_;
+      "/Users/hchakoub/cursus/webserv/ressources" + this->request_uri_;
+    if(!this->server_)
+    std::cout << "walo a khay dialii" << std::endl;
+  else
+  std::cout << this->server_->getRoot() << std::endl;
+  // this->file_.filename = this->server_->getRoot() + this->request_uri_;
   std::string extention =
       this->file_.filename.substr(this->file_.filename.find(".") + 1);
+  // std::cout << this->file_.filename << std::endl;;
   std::map<std::string, std::string>::iterator it;
   it = Config::get()->getMimeTypes().find(extention);
   if (it == Config::get()->getMimeTypes().end())
@@ -251,6 +261,10 @@ const std::string& Request::getRequestUri() {
 }
 
 std::string Request::getExtention() const { return this->extention_; }
+
+Server* Request::getServer() const {
+  return this->server_;
+}
 
 /*
  * tests

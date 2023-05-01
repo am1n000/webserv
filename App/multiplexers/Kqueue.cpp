@@ -29,7 +29,7 @@ void Kqueue::setUpServerConnections()
 			continue;
 		server_data->setIsListeningSock(1);
 		server_data->server = Config::get()->getServers()[i];
-		std::cout << server_data->server->getRoot() << std::endl;
+    server_data->req->setServer(server_data->server);
 		EV_SET(server_data->getChangePtr(), server_data->getSockFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
 		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 		{

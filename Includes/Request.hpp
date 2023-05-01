@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/11 00:18:46 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/01 13:25:08 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,9 @@
 
 // must be included on the response, i defined it here to avoid conflit
 // also fstream header must be included on response header
+
+// adding Server class header to avoid recursive inclusion
+class Server;
 typedef  struct t_file {
   std::string  filename; 
 std::string media;
@@ -65,6 +68,7 @@ private:
   size_type body_size_;
   std::string extention_;
   std::string filename_;
+  Server *server_;
   //the file is temporary just to work with amine's code
   // to be changed lather
   s_file file_;
@@ -115,6 +119,7 @@ public:
   void setHttpVersion(const std::string& version);
   void setHeaderString();
   void setContentLength();
+  void setServer(Server *server);
 
   /*
    * getters
@@ -131,6 +136,7 @@ public:
   std::map<std::string, std::string> &getHeaders();
   const std::string &getRequestUri();
   std::string getExtention() const;
+  Server* getServer() const;
 
 
   /*
