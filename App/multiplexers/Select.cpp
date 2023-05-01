@@ -1,0 +1,147 @@
+#include "../../Includes/multiplexers/Select.hpp"
+
+Select::Select() {}
+
+Select::~Select() {}
+
+
+int                     Select::fd_max;
+int                     Select::erasePosition;
+fd_set                  Select::readMaster;
+fd_set                  Select::writeMaster;
+std::vector<Client *>   Select::clientsData;
+Select*					Select::instance = nullptr;
+
+
+Select*	Select::getInstance()
+{
+	if (instance == nullptr)
+		instance = new Select;
+	return (instance);
+}
+
+void Select::setUpServerConnections(std::vector<Server *> servers)
+{
+	FD_ZERO(&readMaster);
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		Client *server_data = new Client;
+		server_data->setSockFd(servers[i]->createSocket());
+		if (server_data->getSockFd() == -1)
+			continue;
+		if (servers[i]->bindSocket(server_data->getSockFd()))
+			continue;
+		if (servers[i]->listenToConnections(server_data->getSockFd()))
+			continue;
+		server_data->setIsListeningSock(1);
+		server_data->server = servers[i];
+		FD_SET(server_data->getSockFd(), &readMaster);
+		clientsData.push_back(server_data);
+		fd_max = server_data->getSockFd();
+	}
+}
+void Select::monitoringLoop()
+{
+	FD_ZERO(&writeMaster);
+	fd_set read_fds;
+	fd_set write_fds;
+	while (true)
+	{
+		FD_ZERO(&read_fds);
+		FD_ZERO(&write_fds);
+		read_fds = readMaster;
+		write_fds = writeMaster;
+		int ready_num = select(fd_max + 1, &read_fds, &write_fds, NULL, NULL);
+		if (ready_num < 0)
+		{
+			std::cerr << "error : select  " << errno <<  std::endl;
+			exit (1);
+		}
+		for (size_t i = 0; i < clientsData.size() && ready_num > 0; i++)
+		{
+			erasePosition = i;
+			if (FD_ISSET(clientsData[i]->getSockFd(), &read_fds))
+			{
+				if (clientsData[i]->getIsListeningSock())
+					acceptConnections(clientsData[i]);
+				else
+					read(clientsData[i]);
+				ready_num--;
+			}
+			else if (FD_ISSET(clientsData[i]->getSockFd(), &write_fds))
+			{
+				write(clientsData[i]);
+				ready_num--;
+			}
+			while (fd_max > 2)
+			{
+				if (FD_ISSET(fd_max, &readMaster) || FD_ISSET(fd_max, &writeMaster))
+					break;
+				fd_max--;
+			}
+		}
+	}
+}
+
+void Select::acceptConnections(Client *clientData)
+{				
+    int client_sock = accept(clientData->getSockFd(),
+        reinterpret_cast<sockaddr *>(&(clientData->server->getHostAddr())),
+        reinterpret_cast<socklen_t *>(&(clientData->server->getHostAddrlen())));
+    if (client_sock == -1)
+        std::cerr << "error: accept server " << std::endl;
+    else
+    {
+        Client *new_client = new Client(client_sock, 0);
+        clientsData.push_back(new_client);
+        FD_SET(client_sock, &readMaster);
+        if (client_sock > fd_max)
+            fd_max = client_sock;
+    }
+}
+
+
+void	Select::read(Client *clientData)
+{					
+	try
+	{
+		if (clientData->reading())
+		{
+			FD_CLR(clientData->getSockFd(), &readMaster);
+			FD_SET(clientData->getSockFd(), &writeMaster);
+		}
+	}
+	catch(std::exception &e)
+	{
+		FD_CLR(clientData->getSockFd(), &readMaster);
+		close (clientData->getSockFd());
+		clientsData.erase(clientsData.begin() + erasePosition);
+	}
+}
+
+void	Select::write(Client *clientData)
+{
+
+	try
+	{
+		if (clientData->sending())
+		{
+			FD_CLR(clientData->getSockFd(), &writeMaster);
+			close (clientData->getSockFd());
+			clientsData.erase(clientsData.begin() + erasePosition);
+		}
+	}
+	catch(std::exception &e)
+	{
+		FD_CLR(clientData->getSockFd(), &writeMaster);
+		close (clientData->getSockFd());
+		clientsData.erase(clientsData.begin() + erasePosition);
+	}
+}
+
+
+void Select::serve(std::vector<Server *> servers)
+{
+	setUpServerConnections(servers);
+	monitoringLoop();
+}

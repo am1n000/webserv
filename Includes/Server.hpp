@@ -18,96 +18,122 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <fstream>
+#include <sys/socket.h>
+#include <iostream>
+#include <fcntl.h>
+#include <netdb.h>
 
-class Location {
-public:
-  typedef void (Location::*memberPointer)(const std::string&);
+// #include <cstddef>
+// #include <cstdlib>
+// #include <cstring>
+// #include <iostream>
+// #include <stdexcept>
+// #include <string>
+// #include <utility>
+class Location
+{
+	public:
+		typedef void (Location::*memberPointer)(const std::string&);
 
-private:
-  std::string location_;
-  std::vector<std::string> allowed_methods_;
-  std::string redirection_;
-  std::string root_;
-  bool auto_index_;
-  std::vector<std::string> indexs_;
-  std::map<std::string, std::string> cgis_;
-  std::string upload_dir_;
-  Tockenizer *tockenizer_;
+	private:
+		std::string location_;
+		std::vector<std::string> allowed_methods_;
+		std::string redirection_;
+		std::string root_;
+		bool auto_index_;
+		std::vector<std::string> indexs_;
+		std::map<std::string, std::string> cgis_;
+		std::string upload_dir_;
+		Tockenizer *tockenizer_;
 
 
-public:
-  Location();
-  Location(const std::string &location, const std::string& locationScope);
+	public:
+		Location();
+		Location(const std::string &location, const std::string& locationScope);
 
-  void setIndex(const std::string& val);
-  void setCgi(const std::string& val);
-  void setRedirection(const std::string& val);
-  void setAutoIndex(const std::string& val);
-  void setAllowedMethods(const std::string& val);
-  void setRoot(const std::string& val);
-  void setProp(const std::string& prop, const std::string& val);
+		void setIndex(const std::string& val);
+		void setCgi(const std::string& val);
+		void setRedirection(const std::string& val);
+		void setAutoIndex(const std::string& val);
+		void setAllowedMethods(const std::string& val);
+		void setRoot(const std::string& val);
+		void setProp(const std::string& prop, const std::string& val);
 
-  std::string getIndex() const;
-  std::string getCgi() const;
-  std::string getRedirection() const;
-  bool getAutoIndex() const;
-  static std::map<std::string, memberPointer> location_members_;
-  static void setMembers();
+		std::string getIndex() const;
+		std::string getCgi() const;
+		std::string getRedirection() const;
+		bool getAutoIndex() const;
+		static std::map<std::string, memberPointer> location_members_;
+		static void setMembers();
 
-  void  parse();
-  ~Location();
+		void	parse();
+		~Location();
 };
 
-class Server {
-public:
-  typedef void (Server::*memberPointer)(const std::string&);
+class Server
+{
+	public:
+		typedef void (Server::*memberPointer)(const std::string&);
 
-  private:
-    std::string server_string_;
-    std::string root_;
-    std::string host_;
-    std::string port_;
-    std::string server_name_;
-    std::string error_page_;
-    std::size_t client_body_size_limit_;
-    std::vector<std::string> indexs_;
-    std::vector<Location*> locations_;
-    std::map<std::string, memberPointer> members_;
-    Tockenizer *tockenizer_;
-    static void setDictionary();
+		private:
+		std::string server_string_;
+		std::string root_;
+		std::string host_;
+		std::string port_;
+		std::string server_name_;
+		std::string error_page_;
+		std::size_t client_body_size_limit_;
+		std::vector<std::string> indexs_;
+		std::vector<Location*> locations_;
+		std::map<std::string, memberPointer> members_;
+		Tockenizer *tockenizer_;
+		static void setDictionary();
 
-  public:
-    Server();
-    Server(const std::string &serverString);
+	public:
+		Server();
+		Server(const std::string &serverString);
+		~Server();
 
-    static std::vector<std::string> dictionary_;
-    static const char* pdictionary_[];
-    static bool inDictinary(const std::string& token);
-    void parseServer();
-    void setRoot(const std::string &val);
-    void setHost(const std::string &val);
-    void setPort(const std::string &val);
-    void setServerName(const std::string &val);
-    void setErrorPage(const std::string &val);
-    void setClientBodySize(const std::string &val);
-    void setIndex(const std::string &index);
-    void setListen(const std::string &val);
-    void pushLocation(const std::string &locationString);
-    void setMembers();
-    // getters
-    std::string &getRoot();
+		static std::vector<std::string> dictionary_;
+		static const char* pdictionary_[];
+		static bool inDictinary(const std::string& token);
+		void parseServer();
+		void setRoot(const std::string &val);
+		void setHost(const std::string &val);
+		void setPort(const std::string &val);
+		void setServerName(const std::string &val);
+		void setErrorPage(const std::string &val);
+		void setClientBodySize(const std::string &val);
+		void setIndex(const std::string &index);
+		void setListen(const std::string &val);
+		void pushLocation(const std::string &locationString);
+		void setMembers();
+		void setProp(const std::string& prop, const std::string& val);
+		// getters
+		std::string &getRoot();
 
-    std::string &getHost();
-    std::string &getPort();
-    std::string &getServerName();
-    std::string &getErrorPage();
-    std::size_t &getClienBodySizeLimit();
-    std::vector<std::string> &getIndexes();
-  // only for testing 
-  void test();
+		std::string &getHost();
+		std::string &getPort();
+		std::string &getServerName();
+		std::string &getErrorPage();
+		std::size_t &getClienBodySizeLimit();
+		std::vector<std::string> &getIndexes();
+		// only for testing 
+		void test();
 
-  void setProp(const std::string& prop, const std::string& val);
-  ~Server();
+	// socket related functions
+	private :
+		int					_hostAddrlen;
+		struct sockaddr_in	_hostAddr;
+
+	public:
+		int					createSocket();
+		bool				bindSocket(int sock);
+		bool				listenToConnections(int sock);
+		int					&getHostAddrlen();
+		struct sockaddr_in	&getHostAddr();
+
 };
 
 #endif
