@@ -29,7 +29,6 @@ void Kqueue::setUpServerConnections()
 			continue;
 		server_data->setIsListeningSock(1);
 		server_data->server = Config::get()->getServers()[i];
-    server_data->req->setServer(server_data->server);
 		EV_SET(server_data->getChangePtr(), server_data->getSockFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
 		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 		{
@@ -75,6 +74,7 @@ void Kqueue::acceptConnections(Client *clientData)
 	{
 		Client *u_data = new Client(client_sock, 0);
 		u_data->server = clientData->server;
+    u_data->req->setServer(clientData->server);
 		EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
 		if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 			std::cerr << "error: kevent registration 2" << std::endl;

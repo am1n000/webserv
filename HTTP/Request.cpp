@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/01 13:37:45 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/01 14:06:13 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,21 +216,14 @@ void Request::setServer(Server *server) {
 int Request::getRequestMethod() const { return this->request_method_; }
 
 s_file Request::getFile() {
-  // all this **** is temprary to make the **** works
-  this->file_.filename =
-      "/Users/hchakoub/cursus/webserv/ressources" + this->request_uri_;
-    if(!this->server_)
-    std::cout << "walo a khay dialii" << std::endl;
-  else
-  std::cout << this->server_->getRoot() << std::endl;
-  // this->file_.filename = this->server_->getRoot() + this->request_uri_;
+  this->file_.filename = this->server_->getRoot() + this->request_uri_;
+  std::cout << file_.filename << std::endl;
   std::string extention =
-      this->file_.filename.substr(this->file_.filename.find(".") + 1);
-  // std::cout << this->file_.filename << std::endl;;
+      this->file_.filename.substr(this->file_.filename.rfind(".") + 1);
   std::map<std::string, std::string>::iterator it;
   it = Config::get()->getMimeTypes().find(extention);
   if (it == Config::get()->getMimeTypes().end())
-    this->file_.media = "application/octet-stream";
+    this->file_.media = "text/plain";
   else
     this->file_.media = it->second;
   return this->file_;
