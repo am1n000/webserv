@@ -88,7 +88,7 @@ void Server::test() {
 void Server::pushLocation(const std::string &locationString) {
 	Location *location =
 		new Location(locationString, this->tockenizer_->getNextScope());
-	this->locations_.push_back(location);
+	this->locations_.insert(std::make_pair(locationString, location));
 }
 
 void Server::setProp(const std::string &prop, const std::string &val) {
@@ -114,7 +114,9 @@ void Server::parseServer() {
 	};
 }
 
-// getters
+/*
+ * getters
+ */
 std::string &Server::getRoot() { return this->root_; }
 std::string &Server::getHost() { return this->host_; }
 std::string &Server::getPort() { return this->port_; }
@@ -142,6 +144,11 @@ bool Server::inDictinary(const std::string &token) {
 	}
 	return false;
 }
+
+
+/*
+ * checkers
+ */
 
 /*
  * Location members
@@ -207,7 +214,7 @@ void Location::setCgi(const std::string &val) {
 	cgi = tok.getNextToken();
 	if (extention.length() == 0 || cgi.length() == 0)
 	throw std::runtime_error("bad cgi directive");
-	this->cgis_.insert(std::make_pair(extention, cgi));
+        this->cgis_.insert(std::make_pair(extention, cgi));
 }
 
 void Location::setRedirection(const std::string &val) {
@@ -217,7 +224,7 @@ void Location::setRedirection(const std::string &val) {
 void Location::setAutoIndex(const std::string &val) {
 	if (val != "on" && val != "off")
 	throw std::runtime_error("invalid value for auto_indexing");
-	this->auto_index_ = val == "on" ? true : false;
+        this->auto_index_ = val == "on" ? true : false;
 }
 
 void Location::setAllowedMethods(const std::string &val) {
@@ -235,6 +242,15 @@ void Location::setRoot(const std::string &val) {
 
 void Location::setProp(const std::string &prop, const std::string &val) {
 	(this->*Location::location_members_[prop])(helpers::trim(val));
+}
+
+
+/*
+* location getters
+*/
+
+std::map<std::string, std::string> Location::getCgi() const {
+  return this->cgis_;
 }
 
 // socket related functions

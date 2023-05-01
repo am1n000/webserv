@@ -7,6 +7,7 @@
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
 /*   Updated: 2023/03/25 02:39:50 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/01 20:24:55 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +68,10 @@ class Location
 		static std::map<std::string, memberPointer> location_members_;
 		static void setMembers();
 
+    /*
+    * checkers
+    */
+
 		void	parse();
 		~Location();
 };
@@ -75,6 +80,8 @@ class Server
 {
 	public:
 		typedef void (Server::*memberPointer)(const std::string&);
+    typedef std::map<std::string, Location*> location_type;
+    typedef std::map<std::string, Location*>::iterator location_iterator;
 
 		private:
 		std::string server_string_;
@@ -86,6 +93,7 @@ class Server
 		std::size_t client_body_size_limit_;
 		std::vector<std::string> indexs_;
 		std::vector<Location*> locations_;
+		std::map<std::string, Location*> locations_;
 		std::map<std::string, memberPointer> members_;
 		Tockenizer *tockenizer_;
 		static void setDictionary();
@@ -111,6 +119,9 @@ class Server
 		void setMembers();
 		void setProp(const std::string& prop, const std::string& val);
 		// getters
+    /*
+     * getters
+     */
 		std::string &getRoot();
 
 		std::string &getHost();
@@ -119,9 +130,13 @@ class Server
 		std::string &getErrorPage();
 		std::size_t &getClienBodySizeLimit();
 		std::vector<std::string> &getIndexes();
+    std::map<std::string, Location*> &getLocations();
 		// only for testing 
 		void test();
 
+    /*
+    * checkers
+    */
 	// socket related functions
 	private :
 		int					_hostAddrlen;
