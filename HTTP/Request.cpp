@@ -292,6 +292,13 @@ std::string Request::getRequestRoot() const {
   return this->server_->getRoot();
 }
 
+std::string Request::getRequestedFileFullPath() const {
+  std::string root = this->getRequestRoot();
+  if (root[root.length() - 1] == '/')
+    return root.substr(0, root.length() - 1) + this->request_uri_;
+  return root + this->request_uri_;
+}
+
 /*
  * tests
  */
