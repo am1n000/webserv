@@ -6,8 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/25 02:39:50 by hchakoub         ###   ########.fr       */
-/*   Updated: 2023/05/01 20:24:55 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/02 13:23:31 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +24,6 @@
 #include <fcntl.h>
 #include <netdb.h>
 
-// #include <cstddef>
-// #include <cstdlib>
-// #include <cstring>
-// #include <iostream>
-// #include <stdexcept>
-// #include <string>
-// #include <utility>
 class Location
 {
 	public:
@@ -50,9 +42,22 @@ class Location
 
 
 	public:
+
+    /*
+     * location constructors
+     */
 		Location();
 		Location(const std::string &location, const std::string& locationScope);
+		~Location();
 
+    /*
+     * location public data
+     */
+		static std::map<std::string, memberPointer> location_members_;
+
+    /*
+     * location setters
+     */
 		void setIndex(const std::string& val);
 		void setCgi(const std::string& val);
 		void setRedirection(const std::string& val);
@@ -60,20 +65,24 @@ class Location
 		void setAllowedMethods(const std::string& val);
 		void setRoot(const std::string& val);
 		void setProp(const std::string& prop, const std::string& val);
+		static void setMembers();
 
+
+    /*
+     * location getters
+     */
 		std::string getIndex() const;
-		std::string getCgi() const;
+		std::map<std::string, std::string> getCgi() const;
 		std::string getRedirection() const;
 		bool getAutoIndex() const;
-		static std::map<std::string, memberPointer> location_members_;
-		static void setMembers();
+    std::string getRoot() const;
 
     /*
     * checkers
     */
 
+    bool hasCgi() const;
 		void	parse();
-		~Location();
 };
 
 class Server
@@ -92,7 +101,6 @@ class Server
 		std::string error_page_;
 		std::size_t client_body_size_limit_;
 		std::vector<std::string> indexs_;
-		std::vector<Location*> locations_;
 		std::map<std::string, Location*> locations_;
 		std::map<std::string, memberPointer> members_;
 		Tockenizer *tockenizer_;
@@ -118,25 +126,36 @@ class Server
 		void pushLocation(const std::string &locationString);
 		void setMembers();
 		void setProp(const std::string& prop, const std::string& val);
-		// getters
+
     /*
      * getters
      */
+
 		std::string &getRoot();
 
 		std::string &getHost();
+
 		std::string &getPort();
+
 		std::string &getServerName();
+
 		std::string &getErrorPage();
+
 		std::size_t &getClienBodySizeLimit();
+
 		std::vector<std::string> &getIndexes();
+
     std::map<std::string, Location*> &getLocations();
 		// only for testing 
 		void test();
 
+
     /*
     * checkers
     */
+
+    bool hasCgi() const;
+
 	// socket related functions
 	private :
 		int					_hostAddrlen;
