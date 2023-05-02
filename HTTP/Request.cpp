@@ -304,6 +304,14 @@ std::string Request::getRequestedFileFullPath() const {
   return root + this->request_uri_;
 }
 
+std::string Request::getMimeType() const {
+  std::map<std::string, std::string>::iterator it;
+  it = Config::get()->getMimeTypes().find(this->getExtention());
+  if (it == Config::get()->getMimeTypes().end())
+    return "text/plain";
+  return it->second;
+}
+
 /*
  * tests
  */

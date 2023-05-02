@@ -146,6 +146,7 @@ public:
 
   std::string getRequestRoot() const;
   std::string getRequestedFileFullPath() const;
+  std::string getMimeType() const;
 
   /*
   * test function will be removed lather
