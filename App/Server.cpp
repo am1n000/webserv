@@ -117,6 +117,7 @@ void Server::parseServer() {
 /*
  * getters
  */
+
 std::string &Server::getRoot() { return this->root_; }
 std::string &Server::getHost() { return this->host_; }
 std::string &Server::getPort() { return this->port_; }
@@ -166,6 +167,8 @@ Location::Location(const std::string &location,
 	this->parse();
 };
 
+Location::~Location() {}
+
 void Location::parse() {
 	std::string key;
 	std::string value;
@@ -178,8 +181,6 @@ void Location::parse() {
 		this->setProp(key, value);
 	}
 }
-
-Location::~Location() {}
 
 std::map<std::string, Location::memberPointer> Location::location_members_;
 
@@ -197,8 +198,9 @@ void Location::setMembers() {
 		std::make_pair("auto_indexing", &Location::setAutoIndex));
 }
 
-// setters
-
+/*
+ * location setters
+ */
 void Location::setIndex(const std::string &val) {
 	Tockenizer tok(val);
 	while (!tok.end()) {
@@ -252,6 +254,8 @@ void Location::setProp(const std::string &prop, const std::string &val) {
 std::map<std::string, std::string> Location::getCgi() const {
   return this->cgis_;
 }
+
+std::string Location::getRoot() const { return this->root_; }
 
 // socket related functions
 

@@ -1,16 +1,21 @@
 #include "../Includes/Response.hpp"
 #include <cstdio>
 
-Response::Response() : _bytes_sent(0), _finished(0), _started(0)
+Response::Response(const Request* request) : _request(request), _bytes_sent(0), _finished(0), _started(0)
 {};
+
+Response::Response() :_bytes_sent(0), _finished(0), _started(0)
+{};
+
 Response::~Response() {};
 
-void Response::set_file(s_file file, int sock_fd)
+void Response::set_file(int sock_fd)
 {
-    this->_filename = file.filename;
-    this->_file.open((_filename).c_str(), std::ios::binary | std::ios::ate);
+  std::cout << this->_request->getRequestedFileFullPath() << std::endl;
+    this->_file.open((this->_request->getRequestedFileFullPath()).c_str(), std::ios::binary | std::ios::ate);
     if (!this->_file.is_open())
 	{
+    // if the file failed to be opened here an httpException will be thrown here, it will handle reterning not found error page on the response
 		std::string header = "HTTP/1.1 404 NOT Found\r\nServer: webserver-c";
 		header += "\r\n\r\n";
 		header += "<!DOCTYPE html>\n<html>\n<body>\n<h1>Skafandri: The requested URL was not found on this server.</h1>\n</body>\n</html>\r\n";
@@ -18,7 +23,7 @@ void Response::set_file(s_file file, int sock_fd)
             throw(SendFailedException());
         throw(FileNotFound());
 	}
-    this->_mime_type = file.media;
+    this->_mime_type = this->_request->getMimeType();
     this->_bytes_to_send = _file.tellg();
     this->_file.seekg(0, std::ios::beg);
 }

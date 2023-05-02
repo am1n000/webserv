@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/05/01 15:11:23 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/05/02 13:40:46 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,7 +45,7 @@ $(NAME): $(OBJ)
 	$(CPP) $^ -o $@
 
 debug: $(SRC)
-	$(CPP) -g $^  -o $@
+	$(CPP) -g $^ main.cpp  -o $@
 	clear
 	lldb debug
 

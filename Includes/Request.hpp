@@ -6,8 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/01 13:25:08 by hchakoub         ###   ########.fr       */
-/*   Updated: 2023/05/01 16:54:49 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/02 13:51:33 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +30,6 @@
 // must be included on the response, i defined it here to avoid conflit
 // also fstream header must be included on response header
 
-// adding Server class header to avoid recursive inclusion
 // adding classes header to avoid recursive inclusion
 class Server;
 class Location;
@@ -74,6 +72,7 @@ private:
   std::string extention_;
   std::string filename_;
   Server *server_;
+  Location *request_location_;
   //the file is temporary just to work with amine's code
   // to be changed lather
   s_file file_;
@@ -115,6 +114,7 @@ public:
 
   int appendBuffer(char *buffer, size_type recieved_size);
   void appendBodyFile(const char *buffer, size_type buffer_size);
+  void prepareRequest();
 
   /*
   * setters
@@ -144,6 +144,9 @@ public:
   std::string getExtention() const;
   Server* getServer() const;
 
+  std::string getRequestRoot() const;
+  std::string getRequestedFileFullPath() const;
+  std::string getMimeType() const;
 
   /*
   * test function will be removed lather

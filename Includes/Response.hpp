@@ -8,6 +8,7 @@
 class Response
 {
 	private:
+    const Request  *_request;
 		int             _bytes_to_send;
 		int             _bytes_sent;
 		bool            _finished;
@@ -17,8 +18,9 @@ class Response
 		std::ifstream   _file;
 	public:
 		Response();
+		Response(const Request *request);
 		~Response();
-		void	set_file(s_file file, int sock_fd);
+		void	set_file(int sock_fd);
 		int     handle_get(int sock_fd);
 		int     handle_post(int sock_fd);
 		int     handle_delete(int sock_fd);

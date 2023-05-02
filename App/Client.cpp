@@ -7,7 +7,7 @@
 Client::Client() {
 	this->_changePtr = new struct kevent;
 	this->req = new Request;
-	this->resp = new Response;
+	this->resp = new Response(this->req);
 }
 
 Client::Client(int sockfd, bool listen_sock)
@@ -15,13 +15,13 @@ Client::Client(int sockfd, bool listen_sock)
 		_postFileCreated(0) {
 	this->_changePtr = new struct kevent;
 	this->req = new Request;
-	this->resp = new Response;
+	this->resp = new Response(this->req);
 }
 
 Client::~Client() { delete (this->_changePtr); }
 
 void Client::prepareResponse() {
-	this->resp->set_file(this->req->getFile(), this->_sockFd);
+	this->resp->set_file(this->_sockFd);
 }
 
 bool Client::sending()
@@ -40,6 +40,7 @@ bool Client::sending()
 
 bool Client::reading()
 {
+  // std::cout << "from reading method | : " << this->server->getRoot() << std::endl;
 	char buffer[BUFFER_SIZE];
 	int recieved_size;
 	recieved_size = recv(this->_sockFd, buffer, BUFFER_SIZE, 0);

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/01 20:35:10 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/02 15:34:24 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,12 @@ void Request::appendBodyFile(const char *buffer, Request::size_type size) {
   this->body_size_ += size;
 }
 
+void Request::prepareRequest() {
+
+  // setting up location if any match otherwise will be setted to null
+  this->request_location_ =  this->matchLocation();
+}
+
 /*
  * checkers
  */
@@ -115,8 +121,12 @@ Location* Request::matchLocation() {
     if(pos != std::string::npos && locationString.length() < it->first.length())
       locationString = it->first;
   }
-  if(locationString.length() > 0)
-    return this->server_->getLocations().find(locationString)->second;
+  if(locationString.length() > 0) {
+    Server::location_iterator lit = this->server_->getLocations().find(locationString);
+    // removing mathed location from the request uri
+    this->request_uri_.erase(0, lit->first.length());
+    return lit->second;
+  }
   return NULL;
 }
 
@@ -209,6 +219,7 @@ void Request::setRequestUri(const std::string &uri) {
     this->request_uri_ = uri;
     this->query_parameters_ = "";
   }
+  // will be setted on the request completed hook
   this->setExtention_();
 }
 
@@ -277,6 +288,29 @@ std::string Request::getExtention() const { return this->extention_; }
 Server *Request::getServer() const { return this->server_; }
 
 std::map<std::string, Location *> &Server::getLocations() { return this->locations_; }
+
+std::string Request::getRequestRoot() const {
+  if (this->request_location_ != NULL) {
+    if (this->request_location_->getRoot().size() != 0)
+      return this->request_location_->getRoot();
+  }
+  return this->server_->getRoot();
+}
+
+std::string Request::getRequestedFileFullPath() const {
+  std::string root = this->getRequestRoot();
+  if (root[root.length() - 1] == '/')
+    return root.substr(0, root.length() - 1) + this->request_uri_;
+  return root + this->request_uri_;
+}
+
+std::string Request::getMimeType() const {
+  std::map<std::string, std::string>::iterator it;
+  it = Config::get()->getMimeTypes().find(this->getExtention());
+  if (it == Config::get()->getMimeTypes().end())
+    return "text/plain";
+  return it->second;
+}
 
 /*
  * tests
