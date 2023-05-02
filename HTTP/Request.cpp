@@ -284,6 +284,14 @@ Server *Request::getServer() const { return this->server_; }
 
 std::map<std::string, Location *> &Server::getLocations() { return this->locations_; }
 
+std::string Request::getRequestRoot() const {
+  if (this->request_location_ != NULL) {
+    if (this->request_location_->getRoot().size() != 0)
+      return this->request_location_->getRoot();
+  }
+  return this->server_->getRoot();
+}
+
 /*
  * tests
  */
