@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/01 20:35:10 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/02 13:56:17 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,12 @@ void Request::appendBodyFile(const char *buffer, Request::size_type size) {
   }
   this->body_file_->write(buffer, size);
   this->body_size_ += size;
+}
+
+void Request::prepareRequest() {
+
+  // setting up location if any match otherwise will be setted to null
+  this->request_location_ =  this->matchLocation();
 }
 
 /*
