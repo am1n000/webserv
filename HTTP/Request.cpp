@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/02 13:56:17 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/02 15:34:24 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,8 +121,12 @@ Location* Request::matchLocation() {
     if(pos != std::string::npos && locationString.length() < it->first.length())
       locationString = it->first;
   }
-  if(locationString.length() > 0)
-    return this->server_->getLocations().find(locationString)->second;
+  if(locationString.length() > 0) {
+    Server::location_iterator lit = this->server_->getLocations().find(locationString);
+    // removing mathed location from the request uri
+    this->request_uri_.erase(0, lit->first.length());
+    return lit->second;
+  }
   return NULL;
 }
 
@@ -215,6 +219,7 @@ void Request::setRequestUri(const std::string &uri) {
     this->request_uri_ = uri;
     this->query_parameters_ = "";
   }
+  // will be setted on the request completed hook
   this->setExtention_();
 }
 
