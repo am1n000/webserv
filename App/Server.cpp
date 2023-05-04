@@ -251,7 +251,7 @@ void Location::setProp(const std::string &prop, const std::string &val) {
 * location getters
 */
 
-std::map<std::string, std::string> Location::getCgi() const {
+std::map<std::string, std::string> &Location::getCgis()  {
   return this->cgis_;
 }
 

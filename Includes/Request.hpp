@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/02 13:51:33 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/04 11:14:55 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@
 
 #define BUFFER_SIZE 4096
 #define REQUEST_SEPARATOR "\r\n\r\n"
-#define TMP_FILE_NAME "/Users/hchakoub/cursus/webserv/ressources/uploads/tmp/request.out"
+#define TMP_VAR_PATH "/Users/hchakoub/cursus/webserv/var/tmp/"
+ 
 
 // must be included on the response, i defined it here to avoid conflit
 // also fstream header must be included on response header
@@ -68,10 +69,12 @@ private:
   std::map<std::string, std::string> request_headers_;
   size_type content_length;
   std::fstream *body_file_;
+  std::string   body_file_name_;
   size_type body_size_;
   std::string extention_;
   std::string filename_;
   Server *server_;
+  std::map<std::string, std::string> request_configuration_;
   Location *request_location_;
   //the file is temporary just to work with amine's code
   // to be changed lather
@@ -106,6 +109,7 @@ public:
   bool isHeaderCompleted();
   bool isBodyCompleted();
   bool isRequestCompleted();
+  bool hasCgi() const;
   Location* matchLocation();
 
   /*
@@ -143,10 +147,12 @@ public:
   const std::string &getRequestUri();
   std::string getExtention() const;
   Server* getServer() const;
-
   std::string getRequestRoot() const;
   std::string getRequestedFileFullPath() const;
   std::string getMimeType() const;
+  std::string &getRequestCgi() const;
+  std::fstream *getBodyFile();
+  std::string& getBodyFileName();
 
   /*
   * test function will be removed lather

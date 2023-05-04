@@ -163,3 +163,17 @@ std::string helpers::unscope(const std::string& scope) {
       throw std::runtime_error("invalid scope");
   return scope.substr(start, size - start);
 }
+
+
+std::string helpers::timeBasedName(std::string extenssion = "") {
+  time_t t = time(0);
+  struct tm* now = localtime(&t);
+
+  char tmp[80];
+  time_t x = clock();
+  srand(x);
+  strftime(tmp, 80, "%Y-%m-%d-%H%M%S", now);
+
+  std::string name = std::to_string(rand()) + "_" + tmp + extenssion;
+  return name;
+}

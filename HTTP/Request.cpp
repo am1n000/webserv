@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/02 15:34:24 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/04 16:41:05 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 // for test only, to be removed lather
 #include "../Includes/Config.hpp"
 #include "../dev/dev.hpp"
+#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <stdexcept>
@@ -42,6 +43,7 @@ Request::~Request() {
     if(this->body_file_->is_open())
       this->body_file_->close();
     delete this->body_file_;
+    remove(this->body_file_name_.c_str());
   }
 }
 /*
@@ -67,10 +69,16 @@ int Request::appendBuffer(char *buffer, size_type recieved_size) {
 }
 
 void Request::appendBodyFile(const char *buffer, Request::size_type size) {
+  if (this->request_method_ != POST) {
+    std::cout << "get request ignored"  << std::endl;
+    return ;
+  }
   if(!this->body_file_) {
+    std::cout << "creating a body file" << std::endl;
     try {
+      this->body_file_name_ = std::string(TMP_VAR_PATH) + helpers::timeBasedName(".request");
       this->body_file_ = new std::fstream;
-      this->body_file_->open(TMP_FILE_NAME, std::fstream::out);
+      this->body_file_->open(this->body_file_name_, std::fstream::out);
     } catch (...) {
       std::cerr << "internal server error will goes here" << std::endl;
     }
@@ -110,6 +118,16 @@ bool Request::isBodyCompleted() {
 
 bool Request::isRequestCompleted() {
   return this->isHeaderCompleted() && this->isBodyCompleted();
+}
+
+bool Request::hasCgi() const {
+  if(this->request_location_) {
+    std::map<std::string, std::string>::iterator it =
+        this->request_location_->getCgis().find(this->extention_);
+    if(it != this->request_location_->getCgis().end())
+      return true;
+  }
+  return false;
 }
 
 Location* Request::matchLocation() {
@@ -221,6 +239,7 @@ void Request::setRequestUri(const std::string &uri) {
   }
   // will be setted on the request completed hook
   this->setExtention_();
+  this->test();
 }
 
 void Request::setHttpVersion(const std::string &version) {
@@ -299,8 +318,8 @@ std::string Request::getRequestRoot() const {
 
 std::string Request::getRequestedFileFullPath() const {
   std::string root = this->getRequestRoot();
-  if (root[root.length() - 1] == '/')
-    return root.substr(0, root.length() - 1) + this->request_uri_;
+  // if (root[root.length() - 1] == '/')
+  //   return root.substr(0, root.length() - 1) + this->request_uri_;
   return root + this->request_uri_;
 }
 
@@ -312,17 +331,24 @@ std::string Request::getMimeType() const {
   return it->second;
 }
 
+std::string &Request::getRequestCgi() const {
+  if(this->request_location_) {
+    std::map<std::string, std::string>::iterator it =
+        this->request_location_->getCgis().find(this->extention_);
+    if(it != this->request_location_->getCgis().end())
+      return it->second;
+  }
+  throw std::runtime_error("trying to get cgi but not set, check config file or contact otossa for more details");
+}
+
+std::fstream *Request::getBodyFile() { return this->body_file_; }
+
+std::string &Request::getBodyFileName() { return this->body_file_name_; }
+
 /*
  * tests
  */
 
 void Request::test() {
-  // log server locations
-  //
-  Location* location = this->matchLocation();
-  if (!location)
-    std::cout << "no match" << std::endl;
-  else {
-      std::cout << location->getCgi().begin()->first << std::endl;
-    }
+  this->prepareRequest();
 }
