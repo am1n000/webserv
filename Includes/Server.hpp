@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/02 13:23:31 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/02 16:39:26 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ class Location
      * location getters
      */
 		std::string getIndex() const;
-		std::map<std::string, std::string> getCgi() const;
+		std::map<std::string, std::string> &getCgis();
 		std::string getRedirection() const;
 		bool getAutoIndex() const;
     std::string getRoot() const;

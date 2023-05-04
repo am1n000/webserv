@@ -8,7 +8,7 @@
 class Response
 {
 	private:
-    const Request  *_request;
+    Request  *_request;
 		int             _bytes_to_send;
 		int             _bytes_sent;
 		bool            _finished;
@@ -16,14 +16,16 @@ class Response
 		std::string     _filename;
 		std::string     _mime_type;
 		std::ifstream   _file;
+    bool            _hasCgi;
 	public:
 		Response();
-		Response(const Request *request);
+		Response(Request *request);
 		~Response();
 		void	set_file(int sock_fd);
 		int     handle_get(int sock_fd);
 		int     handle_post(int sock_fd);
 		int     handle_delete(int sock_fd);
+    void    handleCgi(int sock_fd);
 
 };
 

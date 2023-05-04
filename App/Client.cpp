@@ -18,7 +18,11 @@ Client::Client(int sockfd, bool listen_sock)
 	this->resp = new Response(this->req);
 }
 
-Client::~Client() { delete (this->_changePtr); }
+Client::~Client() { 
+  delete (this->_changePtr);
+  delete this->req;
+  delete this->resp;
+}
 
 void Client::prepareResponse() {
 	this->resp->set_file(this->_sockFd);
@@ -53,8 +57,8 @@ bool Client::reading()
 		this->prepareResponse();
 		return (1);
 	}
-	// if (reading the whole body of post request)
-		// return (true);
+	if (this->req->isRequestCompleted())
+		return (true);
 	return (false);
 }
 
