@@ -92,6 +92,7 @@ void Cgi::executeCgi() {
 
 void Cgi::prepareEnv() {
   // this->request_.test();
+  // the strdup thing will be handled lather it is just a tmp thing
   try {
     std::string tmp = "CONTENT_LENGTH=" + request_->getHeaders().find("Content-Length")->second;
     this->env_.push_back(strdup(tmp.data()));
@@ -102,6 +103,8 @@ void Cgi::prepareEnv() {
     tmp = "SCRIPT_FILENAME=";
     tmp += this->request_->getRequestedFileFullPath();
     this->env_.push_back(strdup(tmp.data()));
+    tmp = "QUERY_STRING=" + this->request_->getQueryParams();
+    this->env_.push_back(strdup(tmp.c_str()));
 
     //for now this is hardcoded
     this->env_.push_back(strdup("REDIRECT_STATUS=200"));
