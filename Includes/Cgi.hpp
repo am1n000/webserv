@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:58:07 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/04 19:43:25 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/05 15:57:03 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define CGI_HPP
 
 #include "Request.hpp"
+#include "Server.hpp"
 #include <fstream>
 #include <iostream>
 #include <sys/_types/_size_t.h>

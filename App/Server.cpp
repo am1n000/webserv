@@ -196,6 +196,8 @@ void Location::setMembers() {
 		std::make_pair("redirection", &Location::setRedirection));
 	Location::location_members_.insert(
 		std::make_pair("auto_indexing", &Location::setAutoIndex));
+	Location::location_members_.insert(
+		std::make_pair("upload_dir", &Location::setUploadDir));
 }
 
 /*
@@ -246,6 +248,7 @@ void Location::setProp(const std::string &prop, const std::string &val) {
 	(this->*Location::location_members_[prop])(helpers::trim(val));
 }
 
+void Location::setUploadDir(const std::string &val) { this->upload_dir_ = val; }
 
 /*
 * location getters
@@ -257,6 +260,11 @@ std::map<std::string, std::string> &Location::getCgis()  {
 
 std::string Location::getRoot() const { return this->root_; }
 
+std::string Location::getUploadDir() const { return this->upload_dir_; }
+
+/*
+* location getters end
+*/
 // socket related functions
 
 	int		Server::createSocket()

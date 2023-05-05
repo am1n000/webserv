@@ -345,6 +345,13 @@ std::fstream *Request::getBodyFile() { return this->body_file_; }
 
 std::string &Request::getBodyFileName() { return this->body_file_name_; }
 
+std::string& Request::getQueryParams() { return this->query_parameters_; }
+
+Location *Request::getLocation() { return this->request_location_; }
+/*
+ * END getters
+ */
+
 /*
  * tests
  */

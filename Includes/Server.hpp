@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/02 16:39:26 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/05 15:26:30 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ class Location
 		void setAllowedMethods(const std::string& val);
 		void setRoot(const std::string& val);
 		void setProp(const std::string& prop, const std::string& val);
+    void setUploadDir(const std::string& val);
 		static void setMembers();
 
 
@@ -76,6 +77,7 @@ class Location
 		std::string getRedirection() const;
 		bool getAutoIndex() const;
     std::string getRoot() const;
+    std::string getUploadDir() const;
 
     /*
     * checkers
