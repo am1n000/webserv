@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/01 23:47:50 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/06 10:08:51 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,10 @@ void Config::parseFile(const std::string &path) {
     token = file.tockenizer()->getNextToken();
     if (token == "types")
       this->parseMimeTypes(file.tockenizer()->getNextScope());
-    // std::cout << file.tockenizer()->getNextScope() << std::endl;
+    else if (token == "server")
+        this->pushServer(file.tockenizer()->getNextScope());
+    else if (token == "include")
+          this->parseFile(file.tockenizer()->getNoneEmptyLine());
   }
 }
 

@@ -1,4 +1,3 @@
-
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -7,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/01 02:42:54 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/06 09:58:18 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +14,7 @@
 #include "../Includes/helpers.hpp"
 // for dev only
 #include "../dev/dev.hpp"
+#include <utility>
 
 Server::Server() { this->setMembers(); }
 
@@ -27,6 +27,9 @@ Server::Server(const std::string &serverString) : server_string_(serverString) {
 
 Server::~Server() {}
 
+/*
+ * server setters
+ */
 void Server::setRoot(const std::string &val) { this->root_ = val; }
 
 void Server::setClientBodySize(const std::string &val) {
@@ -47,10 +50,8 @@ void Server::setIndex(const std::string &val) {
 	}
 }
 
-void Server::setServerName(const std::string &val) {
-	std::cout << "set	server name has been called" << std::endl;
-	(void)val;
-}
+void Server::setServerName(const std::string &val) { this->server_name_ = val; }
+
 void Server::setListen(const std::string &val) {
 	std::size_t i = val.find(":");
 	if (i == std::string::npos) {
@@ -61,10 +62,8 @@ void Server::setListen(const std::string &val) {
 	this->port_ = val.substr(i + 1, val.length());
 	}
 }
-void Server::setErrorPage(const std::string &val) {
-	std::cout << "set error page has been called" << std::endl;
-	(void)val;
-}
+
+void Server::setErrorPage(const std::string &val) { this->error_page_ = val; }
 
 void Server::setMembers() {
 	this->members_.insert(std::make_pair("root", &Server::setRoot));
@@ -79,8 +78,6 @@ void Server::setMembers() {
 
 // only for testing
 void Server::test() {
-	// for(std::size_t i = 0; i < this->indexs_.size(); i++)
-	//	 std::cout << this->indexs_[i] << std::endl;
 	this->setProp("root", "helloroot");
 }
 // end test
@@ -126,12 +123,13 @@ std::string &Server::getErrorPage() { return this->error_page_; }
 std::size_t &Server::getClienBodySizeLimit() {
   return this->client_body_size_limit_;
 }
+
 std::vector<std::string> &Server::getIndexes() { return this->indexs_; }
 
 const char *Server::pdictionary_[] = {"root",        "index",
-									"server_name", "listen",
-									"error_page",  "client_body_limit",
-									"location"};
+                                      "server_name", "listen",
+                                      "error_page",  "client_body_limit",
+                                      "location"};
 
 std::vector<std::string> Server::dictionary_(Server::pdictionary_,
 											std::end(Server::pdictionary_));
@@ -146,10 +144,6 @@ bool Server::inDictinary(const std::string &token) {
 	return false;
 }
 
-
-/*
- * checkers
- */
 
 /*
  * Location members
@@ -183,6 +177,7 @@ void Location::parse() {
 }
 
 std::map<std::string, Location::memberPointer> Location::location_members_;
+
 
 void Location::setMembers() {
 	Location::location_members_.insert(
@@ -222,7 +217,7 @@ void Location::setCgi(const std::string &val) {
 }
 
 void Location::setRedirection(const std::string &val) {
-	std::cout << "this is redirection " << val << std::endl;
+  this->redirection_ = val;
 }
 
 void Location::setAutoIndex(const std::string &val) {

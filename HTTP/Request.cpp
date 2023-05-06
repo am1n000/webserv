@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/04 16:41:05 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/05 15:48:05 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,12 +69,11 @@ int Request::appendBuffer(char *buffer, size_type recieved_size) {
 }
 
 void Request::appendBodyFile(const char *buffer, Request::size_type size) {
-  if (this->request_method_ != POST) {
-    std::cout << "get request ignored"  << std::endl;
-    return ;
-  }
+  // if (this->request_method_ != POST) {
+  //   std::cout << "get request ignored"  << std::endl;
+  //   return ;
+  // }
   if(!this->body_file_) {
-    std::cout << "creating a body file" << std::endl;
     try {
       this->body_file_name_ = std::string(TMP_VAR_PATH) + helpers::timeBasedName(".request");
       this->body_file_ = new std::fstream;
@@ -231,8 +230,8 @@ void Request::setRequestUri(const std::string &uri) {
   if(pos != std::string::npos) {
     this->request_uri_ = uri.substr(0, pos);
     this->query_parameters_ = uri.substr(pos + 1);
-    std::cout << this->query_parameters_ << std::endl;
-    std::cout << this->request_uri_ << std::endl;
+    // std::cout << this->query_parameters_ << std::endl;
+    // std::cout << this->request_uri_ << std::endl;
   } else {
     this->request_uri_ = uri;
     this->query_parameters_ = "";
