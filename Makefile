@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/05/03 20:05:36 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/05/07 14:59:56 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,6 +48,12 @@ debug: $(SRC)
 	$(CPP) -g $^ main.cpp  -o $@
 	clear
 	lldb debug
+
+sanitize: $(TEST_OBJ)  
+	$(CPP) $^ -fsanitize=address -o $(NAME) 
+	@clear
+	@./$(NAME)
+
 
 makedir:
 	mkdir -p objects
