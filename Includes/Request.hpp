@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/05 15:47:29 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/08 10:20:15 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ private:
   std::string filename_;
   Server *server_;
   std::map<std::string, std::string> request_configuration_;
+  size_type buffer_size;
   Location *request_location_;
   //the file is temporary just to work with amine's code
   // to be changed lather
@@ -94,7 +95,6 @@ public:
   Request(char *buffer, size_type read_size, size_type buffer_size = BUFFER_SIZE);
   ~Request();
 
-  size_type buffer_size;
 
 /*
  * parsers
@@ -110,6 +110,7 @@ public:
   bool isBodyCompleted();
   bool isRequestCompleted();
   bool hasCgi() const;
+  bool isAutoIndexed();
   Location* matchLocation();
 
   /*
