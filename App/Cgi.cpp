@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/04 19:44:18 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/05 15:59:39 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void Cgi::executeCgi() {
 */
 
 void Cgi::prepareEnv() {
-  // this->request_.test();
+  // the strdup thing will be handled lather it is just a tmp thing
   try {
     std::string tmp = "CONTENT_LENGTH=" + request_->getHeaders().find("Content-Length")->second;
     this->env_.push_back(strdup(tmp.data()));
@@ -102,6 +102,14 @@ void Cgi::prepareEnv() {
     tmp = "SCRIPT_FILENAME=";
     tmp += this->request_->getRequestedFileFullPath();
     this->env_.push_back(strdup(tmp.data()));
+    tmp = "QUERY_STRING=" + this->request_->getQueryParams();
+    this->env_.push_back(strdup(tmp.c_str()));
+
+    // this will only evaluated if the request belongs to a location to avoid segfault
+    if(this->request_->getLocation()) {
+    tmp = "UPLOAD_TMP_DIR=" + this->request_->getLocation()->getUploadDir();
+    this->env_.push_back(strdup(tmp.c_str()));
+    }
 
     //for now this is hardcoded
     this->env_.push_back(strdup("REDIRECT_STATUS=200"));

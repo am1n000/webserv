@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/04 11:14:55 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/05 15:47:29 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,8 @@ public:
   std::string &getRequestCgi() const;
   std::fstream *getBodyFile();
   std::string& getBodyFileName();
+  std::string& getQueryParams();
+  Location *getLocation();
 
   /*
   * test function will be removed lather

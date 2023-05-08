@@ -177,3 +177,18 @@ std::string helpers::timeBasedName(std::string extenssion = "") {
   std::string name = std::to_string(rand()) + "_" + tmp + extenssion;
   return name;
 }
+
+void helpers::removeComments(std::string &buffer) {
+  size_t pos;
+  size_t end;
+  while ((pos = buffer.find("#")) != std::string::npos) {
+      end = std::string::npos;
+      end = buffer.find("\n", pos);
+      if (end != std::string::npos) {
+      buffer.erase(pos, end - pos);
+      } else {
+      buffer.erase(pos, buffer.length() - 1);
+      }
+  }
+}
+

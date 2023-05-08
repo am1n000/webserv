@@ -198,12 +198,15 @@
 
 <body>
   <h2>File Upload & Image Preview</h2>
-  <p class="lead">No Plugins <b>Just Javascript</b></p>
+  <p class="lead">No Plugins <b>
+    otossa
+  </b></p>
 
   <!-- Upload  -->
   <form id="file-upload-form" class="uploader" method="post" action="upload.php" enctype="multipart/form-data">
     <input id="file-upload" type="file" name="file" accept="image/*" />
 
+    <input type="text" name="name" value="" class="form-data">
     <label for="file-upload" id="file-drag">
       <img id="file-image" src="#" alt="Preview" class="hidden">
       <div id="start">

@@ -34,6 +34,11 @@ void Response::set_file(int sock_fd)
 
 int Response::handle_get(int sock_fd)
 {
+  if(this->_request->hasCgi()) {
+    this->handleCgi(sock_fd);
+    return 1;
+  }
+
 	if (this->_started == 0)
 	{
 		std::string header = "HTTP/1.1 200 OK\r\nServer: webserver-c\r\nContent-type: ";

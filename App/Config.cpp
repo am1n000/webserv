@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/01 23:47:50 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/07 18:47:06 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ std::string Config::read() {
     throw std::runtime_error("can't read config, file is not openned");
   this->buffer_.resize(this->file_size_);
   this->file_->read(&this->buffer_[0], this->file_size_);
+  helpers::removeComments(this->buffer_);
   return this->buffer_;
 }
 
@@ -109,7 +110,10 @@ void Config::parseFile(const std::string &path) {
     token = file.tockenizer()->getNextToken();
     if (token == "types")
       this->parseMimeTypes(file.tockenizer()->getNextScope());
-    // std::cout << file.tockenizer()->getNextScope() << std::endl;
+    else if (token == "server")
+        this->pushServer(file.tockenizer()->getNextScope());
+    else if (token == "include")
+          this->parseFile(file.tockenizer()->getNoneEmptyLine());
   }
 }
 
@@ -210,6 +214,7 @@ void ConfigFile::readFile() {
   char buffer[stream_size];
   this->file_.read(buffer, stream_size);
   this->stream_ = buffer;
+  helpers::removeComments(this->stream_);
 }
 
 void ConfigFile::close() { this->file_.close(); }

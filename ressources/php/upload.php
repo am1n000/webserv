@@ -264,32 +264,39 @@ if ($uploadOk == 0) {
         </div>
         <div class="info-area" id="test">
           <label class="song-info" id="song-info-1">
-            <div class="title">Bunker</div>
-            <div class="sub-line">
-              <div class="subtitle">Balthazar</div>
-              <div class="time">4.05</div>
-            </div>
-          </label>
-          <label class="song-info" id="song-info-2">
-            <div class="title">Words Remain</div>
-            <div class="sub-line">
-              <div class="subtitle">Moderator</div>
-              <div class="time">4.05</div>
-            </div>
-          </label>
-          <label class="song-info" id="song-info-3">
-            <div class="title">Falling Out</div>
-            <div class="sub-line">
-              <div class="subtitle">Otzeki</div>
-              <div class="time">4.05</div>
-            </div>
-          </label>
+            <div class="title"></div>
+            <?php
+            if (isset($_POST["name"]))
+              echo $_POST["name"];
+            else
+              echo "jhon doe";
+            ?>
         </div>
-      </div>
-      <div class="progress-bar">
-        <span class="progress"></span>
+        <div class="sub-line">
+          <div class="subtitle">Balthazar</div>
+          <div class="time">4.05</div>
+        </div>
+        </label>
+        <label class="song-info" id="song-info-2">
+          <div class="title">Words Remain</div>
+          <div class="sub-line">
+            <div class="subtitle">Moderator</div>
+            <div class="time">4.05</div>
+          </div>
+        </label>
+        <label class="song-info" id="song-info-3">
+          <div class="title">Falling Out</div>
+          <div class="sub-line">
+            <div class="subtitle">Otzeki</div>
+            <div class="time">4.05</div>
+          </div>
+        </label>
       </div>
     </div>
+    <div class="progress-bar">
+      <span class="progress"></span>
+    </div>
+  </div>
   </div>
 </body>
 <script>
