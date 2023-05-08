@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/07 14:51:46 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/08 10:19:14 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,6 +256,8 @@ std::map<std::string, std::string> &Location::getCgis()  {
 std::string Location::getRoot() const { return this->root_; }
 
 std::string Location::getUploadDir() const { return this->upload_dir_; }
+
+bool Location::getAutoIndex() const { return this->auto_index_; }
 
 /*
 * location getters end

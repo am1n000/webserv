@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/05 15:48:05 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/08 10:20:18 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,17 +26,20 @@
 
 Request::Request()
     : header_completed_(false), body_completed_(false),
-      body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE) {
+      body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE),
+      request_location_(NULL) {
 }
 
 Request::Request(Request::size_type buffer_size)
     : header_completed_(false), body_completed_(false), body_size_(0),
-      buffer_size(buffer_size) {}
+      buffer_size(buffer_size),
+      request_location_(NULL) {}
 
 Request::Request(char *buffer, Request::size_type recieved_size,
                  Request::size_type buffer_size)
     : request_string_(buffer, recieved_size), header_completed_(false),
-      body_completed_(false), buffer_size(buffer_size) {}
+      body_completed_(false), buffer_size(buffer_size),
+      request_location_(NULL) {}
 
 Request::~Request() {
   if(this->body_file_) {
@@ -107,7 +110,6 @@ bool Request::isHeaderCompleted() {
 bool Request::isBodyCompleted() {
   if(this->request_method_ != POST || this->body_completed_)
     return true;
-  // if(this->body_string_.length() >= this->getContentLength()) {
   if(this->body_size_ >= this->getContentLength()) {
     this->body_completed_ = true;
     this->body_file_->close();
@@ -128,6 +130,13 @@ bool Request::hasCgi() const {
   }
   return false;
 }
+
+bool Request::isAutoIndexed() {
+  if(!this->request_location_)
+    this->request_location_ = this->matchLocation();
+  return this->request_location_->getAutoIndex();
+}
+
 
 Location* Request::matchLocation() {
   size_type pos;
