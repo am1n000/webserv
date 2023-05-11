@@ -20,7 +20,7 @@
 #include <map>
 #include "../Includes/Tockenizer.hpp"
 #include "Settings.hpp"
-#include "../Includes/Exceptions/Exceptions.hpp"
+#include "../Includes/Exceptions.hpp"
 #include "../Includes/helpers.hpp"
 
 #define BUFFER_SIZE 4096
@@ -73,6 +73,7 @@ private:
   size_type body_size_;
   std::string extention_;
   std::string filename_;
+  std::string requestedRessource_;
   Server *server_;
   std::map<std::string, std::string> request_configuration_;
   size_type buffer_size;
@@ -127,6 +128,7 @@ public:
 
   void setMethod(const std::string& method);
   void setRequestUri(const std::string& uri);
+  void setRequestedRessource(const std::string& uri);
   void setHttpVersion(const std::string& version);
   void setHeaderString();
   void setContentLength();
@@ -146,6 +148,7 @@ public:
   size_type getBodySize() const;
   std::map<std::string, std::string> &getHeaders();
   const std::string &getRequestUri();
+  const std::string &getRequestedRessource();
   std::string getExtention() const;
   Server* getServer() const;
   std::string getRequestRoot() const;

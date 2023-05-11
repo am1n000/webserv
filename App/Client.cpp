@@ -24,10 +24,6 @@ Client::~Client() {
   delete this->resp;
 }
 
-void Client::prepareResponse() {
-	this->resp->set_file(this->_sockFd);
-}
-
 bool Client::sending()
 {
 	bool finished = false;
@@ -44,18 +40,17 @@ bool Client::sending()
 
 bool Client::reading()
 {
-  // std::cout << "from reading method | : " << this->server->getRoot() << std::endl;
-	char buffer[BUFFER_SIZE];
+	//! use .data field to initialize the buffer
+	char buffer[2048];
 	int recieved_size;
-	recieved_size = recv(this->_sockFd, buffer, BUFFER_SIZE, 0);
+	recieved_size = recv(this->_sockFd, buffer, 2048, 0);
 	if (recieved_size < 0)
 		throw std::runtime_error("recv failed");
 	this->req->appendBuffer(buffer, recieved_size);
-	this->req->parseHeader();
-	if (this->req->getRequestMethod() != POST)
+	if (this->req->getRequestMethod() != POST && this->req->isHeaderCompleted())
 	{
-		this->prepareResponse();
-		return (1);
+		this->req->parseHeader();
+		return (true);
 	}
 	if (this->req->isRequestCompleted())
 		return (true);

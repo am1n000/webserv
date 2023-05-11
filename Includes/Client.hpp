@@ -26,7 +26,6 @@ class Client
 
 		bool				sending();
 		bool				reading();
-    void prepareResponse();
 
 		//.getters
 		int					getSockFd();
