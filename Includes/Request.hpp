@@ -20,7 +20,7 @@
 #include <map>
 #include "../Includes/Tockenizer.hpp"
 #include "Settings.hpp"
-#include "../Includes/Exceptions/Exceptions.hpp"
+#include "../Includes/Exceptions.hpp"
 #include "../Includes/helpers.hpp"
 
 #define BUFFER_SIZE 4096

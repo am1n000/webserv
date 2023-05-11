@@ -21,17 +21,12 @@ class Response
 		Response();
 		Response(Request *request);
 		~Response();
-		void	set_file(int sock_fd);
-		int     handle_get(int sock_fd);
+		void	set_file();
+		int     handle_get(int bufferSize, int sock_fd);
 		int     handle_post(int sock_fd);
 		int     handle_delete(int sock_fd);
     void    handleCgi(int sock_fd);
 
 };
 
-class SendFailedException : public std::runtime_error
-{
-	public:
-	SendFailedException() : std::runtime_error("Send operation failed") {}
-};
 #endif

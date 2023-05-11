@@ -25,14 +25,14 @@ Client::~Client() {
 }
 
 void Client::prepareResponse() {
-	this->resp->set_file(this->_sockFd);
+	this->resp->set_file();
 }
 
 bool Client::sending()
 {
 	bool finished = false;
 	if (this->req->getRequestMethod() == GET)
-	finished = this->resp->handle_get(this->_sockFd);
+	finished = this->resp->handle_get(this->getPendingSize(), this->_sockFd);
 	else if (this->req->getRequestMethod() == POST)
 	finished = this->resp->handle_post(this->_sockFd);
 	else if (this->req->getRequestMethod() == DELETE)
@@ -44,10 +44,11 @@ bool Client::sending()
 
 bool Client::reading()
 {
+	//! use .data field to initialize the buffer
   // std::cout << "from reading method | : " << this->server->getRoot() << std::endl;
-	char buffer[BUFFER_SIZE];
+	char buffer[this->getPendingSize()];
 	int recieved_size;
-	recieved_size = recv(this->_sockFd, buffer, BUFFER_SIZE, 0);
+	recieved_size = recv(this->_sockFd, buffer, this->getPendingSize(), 0);
 	if (recieved_size < 0)
 		throw std::runtime_error("recv failed");
 	this->req->appendBuffer(buffer, recieved_size);
@@ -63,6 +64,10 @@ bool Client::reading()
 }
 
 //.getters
+int64_t	Client::getPendingSize()
+{
+	return (this->_pendingSize);
+}
 int Client::getSockFd() { return (this->_sockFd); }
 
 bool Client::getIsListeningSock() { return (this->_isListeningSock); }
@@ -78,6 +83,11 @@ void Client::setSockFd(int sockFd)
 	this->_sockFd = sockFd;
 	if (this->_sockFd == -2)
 	this->_sockFd = socket(AF_INET, SOCK_STREAM, 0);
+}
+
+void Client::setPendingSize(int64_t pendingSize)
+{
+	this->_pendingSize = pendingSize;
 }
 
 void Client::setIsListeningSock(int isListeningSock)

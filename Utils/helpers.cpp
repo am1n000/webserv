@@ -7,14 +7,14 @@
 
 char *my_tostring(int num)
 {
-    int i = 0, rem, len = 0, n;
+	int i = 0, rem, len = 0, n;
  
-    n = num;
-    while (n != 0)
-    {
-        len++;
-        n /= 10;
-    }
+	n = num;
+	while (n != 0)
+	{
+		len++;
+		n /= 10;
+	}
 	if  (len == 1)
 		len = 2;
 	char *str = new char[len];
@@ -23,13 +23,13 @@ char *my_tostring(int num)
 		str[0] = '0';
 		i = 1;
 	}
-    for (;i < len; i++)
-    {
-        rem = num % 10;
-        num = num / 10;
-        str[len - (i + 1)] = rem + '0';
-    }
-    str[len] = '\0';
+	for (;i < len; i++)
+	{
+		rem = num % 10;
+		num = num / 10;
+		str[len - (i + 1)] = rem + '0';
+	}
+	str[len] = '\0';
 	return (str);
 }
 
@@ -80,10 +80,10 @@ std::string helpers::trim(const std::string str, char c) {
   end = str.length();
 
   while(str[start] == c)
-    start++;
+	start++;
 
   while (str[end - 1] == c || str[end - 1] == '\r')
-    end--;
+	end--;
 
   result = str.substr(start, str.length() - (str.length() - end) - start);
   return result;
@@ -93,7 +93,7 @@ void helpers::recoverToken(char *token, char replacment) {
   int i = 0;
 
   while(token[i])
-    i++;
+	i++;
   token[i] = replacment;
 }
 
@@ -107,16 +107,16 @@ std::string helpers::getBracketsContent(char *buffer)  {
   size = 0;
   start = 0;
   while (std::isspace(buffer[start]))
-    start++;
+	start++;
   if(buffer[start] != '{')
-    throw std::exception();
+	throw std::exception();
   start++;
   while(openBrackets > 0) {
-    if(buffer[start + size] == '{')
-      openBrackets++;
-    else if (buffer[start + size] == '}')
-      openBrackets--;
-    size++;
+	if(buffer[start + size] == '{')
+	  openBrackets++;
+	else if (buffer[start + size] == '}')
+	  openBrackets--;
+	size++;
   }
   return std::string(buffer+start, buffer+start+size-1);
 }
@@ -131,19 +131,19 @@ std::string helpers::getNextScop(char *buffer)  {
   size = 0;
   start = 0;
   while (buffer[start] != '{')
-    start++;
+	start++;
   if(buffer[start] != '{')
-    throw std::exception();
+	throw std::exception();
   start++;
   while(buffer [start + size] && openBrackets > 0) {
-    if(buffer[start + size] == '{')
-      openBrackets++;
-    else if (buffer[start + size] == '}')
-      openBrackets--;
-    size++;
+	if(buffer[start + size] == '{')
+	  openBrackets++;
+	else if (buffer[start + size] == '}')
+	  openBrackets--;
+	size++;
   }
   if(!buffer [start + size])
-    throw std::runtime_error("unclosed scop");
+	throw std::runtime_error("unclosed scop");
   return std::string(buffer+start, buffer+start+size-1);
 }
 
@@ -153,14 +153,14 @@ std::string helpers::unscope(const std::string& scope) {
   size_t size(scope.length() - 1);
 
   while (std::isspace(scope[start]))
-    start++;
+	start++;
   if(scope[start] != '{')
-    throw std::runtime_error("invalid scope");
+	throw std::runtime_error("invalid scope");
   start++;
   while(std::isspace(scope[size]))
-    size--;
+	size--;
   if(scope[size] != '}')
-      throw std::runtime_error("invalid scope");
+	  throw std::runtime_error("invalid scope");
   return scope.substr(start, size - start);
 }
 
@@ -182,13 +182,37 @@ void helpers::removeComments(std::string &buffer) {
   size_t pos;
   size_t end;
   while ((pos = buffer.find("#")) != std::string::npos) {
-      end = std::string::npos;
-      end = buffer.find("\n", pos);
-      if (end != std::string::npos) {
-      buffer.erase(pos, end - pos);
-      } else {
-      buffer.erase(pos, buffer.length() - 1);
-      }
+	  end = std::string::npos;
+	  end = buffer.find("\n", pos);
+	  if (end != std::string::npos) {
+	  buffer.erase(pos, end - pos);
+	  } else {
+	  buffer.erase(pos, buffer.length() - 1);
+	  }
   }
 }
 
+void  displayStatusCodePage(statusCodeExceptions &e, int sock)
+{
+	std::string path = "/Users/ael-rhai/Desktop/webserv/HTTPStatusCodes/" + e.getValue();
+	path +=	".html";
+	
+	std::ifstream	file(path.c_str(), std::ios::ate);
+	if (!file.is_open())
+	{
+		std::cerr << "status code file " << e.getValue() << "  could not be opened!" << std::endl;
+		return;
+	}
+    int len = file.tellg();
+    file.seekg(0, std::ios::beg);
+	char buffer[len];
+	file.read(buffer, len);
+	buffer[len] = '\0';
+	std::string header = "HTTP/1.1 " + e.getValue();
+	header +=  " ";
+	header += e.what();
+	header += "\r\nServer: webserver-c\r\n\r\n";
+	std::string a = buffer;	
+	header += a;
+		send(sock, header.c_str(), header.length(), 0);
+}

@@ -15,10 +15,14 @@
 #define UTILS_HPP
 
 #include <iostream>
+#include "Exceptions.hpp"
+#include <fstream>
+#include <sys/socket.h>
 
 
 
 char *my_tostring(int num);
 std::string get_time();
+void  displayStatusCodePage(statusCodeExceptions &e, int sock);
 
 #endif

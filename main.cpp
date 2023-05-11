@@ -12,6 +12,6 @@ int main ()
 	K->serve();
 	Select *S = Select::getInstance();
 	S->serve();
-	Poll *P = Poll::getInstance();
-	P->serve();
+	// Poll *P = Poll::getInstance();
+	// P->serve();
 }     

@@ -18,7 +18,6 @@ TEST_ENTRY=main.cpp
 SRC=App/Config.cpp App/Server.cpp HTTP/Request.cpp HTTP/Response.cpp \
 		Utils/helpers.cpp dev/dev.cpp Utils/Tockenizer.cpp  App/Client.cpp \
 		App/Settings/Settings.cpp App/multiplexers/Kqueue.cpp\
-		HTTP/Exceptions/BadRequestException.cpp \
 		Bootstrap/app.cpp App/multiplexers/Select.cpp \
 		App/multiplexers/Poll.cpp \
 		Bootstrap/app.cpp \

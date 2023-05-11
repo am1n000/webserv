@@ -94,6 +94,8 @@ void Select::acceptConnections(Client *clientData)
     else
     {
         Client *new_client = new Client(client_sock, 0);
+		new_client->setPendingSize(1024);
+    	new_client->req->setServer(clientData->server);
         clientsData.push_back(new_client);
         FD_SET(client_sock, &readMaster);
         if (client_sock > fd_max)
