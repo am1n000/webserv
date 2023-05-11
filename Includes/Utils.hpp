@@ -18,11 +18,15 @@
 #include "Exceptions.hpp"
 #include <fstream>
 #include <sys/socket.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <vector>
 
 
 
 char *my_tostring(int num);
 std::string get_time();
-void  displayStatusCodePage(statusCodeExceptions &e, int sock);
+void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path);
+std::pair<int, std::string> directoryCheck(std::string path, int autoindex, std::vector<std::string> indexs_);
 
 #endif

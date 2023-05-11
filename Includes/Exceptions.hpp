@@ -55,12 +55,12 @@ class InternalServerError : public statusCodeExceptions
 
 };
 
-class BadRequestException : public statusCodeExceptions
+class BadRequest : public statusCodeExceptions
 {
 	public :
 
-		BadRequestException() : statusCodeExceptions("400") {}
-		~BadRequestException() throw() {};
+		BadRequest() : statusCodeExceptions("400") {}
+		~BadRequest() throw() {};
 		virtual const char* what() const throw()
 		{
 			return ("Internal Server Error");
@@ -68,5 +68,30 @@ class BadRequestException : public statusCodeExceptions
 
 };
 
+class Forbidden : public statusCodeExceptions
+{
+	public :
+
+		Forbidden() : statusCodeExceptions("403") {}
+		~Forbidden() throw() {};
+		virtual const char* what() const throw()
+		{
+			return ("Forbidden");
+		}
+
+};
+
+class MovedPermanently : public statusCodeExceptions
+{
+	public :
+
+		MovedPermanently() : statusCodeExceptions("301") {}
+		~MovedPermanently() throw() {};
+		virtual const char* what() const throw()
+		{
+			return ("Moved Permanently");
+		}
+
+};
 
 #endif

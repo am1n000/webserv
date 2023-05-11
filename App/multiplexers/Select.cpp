@@ -94,7 +94,6 @@ void Select::acceptConnections(Client *clientData)
     else
     {
         Client *new_client = new Client(client_sock, 0);
-		new_client->setPendingSize(1024);
     	new_client->req->setServer(clientData->server);
         clientsData.push_back(new_client);
         FD_SET(client_sock, &readMaster);
@@ -114,8 +113,9 @@ void	Select::read(Client *clientData)
 			FD_SET(clientData->getSockFd(), &writeMaster);
 		}
 	}
-	catch(std::exception &e)
+	catch(statusCodeExceptions &e)
 	{
+		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		FD_CLR(clientData->getSockFd(), &readMaster);
 		close (clientData->getSockFd());
 		clientsData.erase(clientsData.begin() + erasePosition);
@@ -134,8 +134,9 @@ void	Select::write(Client *clientData)
 			clientsData.erase(clientsData.begin() + erasePosition);
 		}
 	}
-	catch(std::exception &e)
+	catch(statusCodeExceptions &e)
 	{
+		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		FD_CLR(clientData->getSockFd(), &writeMaster);
 		close (clientData->getSockFd());
 		clientsData.erase(clientsData.begin() + erasePosition);

@@ -73,6 +73,7 @@ private:
   size_type body_size_;
   std::string extention_;
   std::string filename_;
+  std::string requestedRessource_;
   Server *server_;
   std::map<std::string, std::string> request_configuration_;
   Location *request_location_;
@@ -126,6 +127,7 @@ public:
 
   void setMethod(const std::string& method);
   void setRequestUri(const std::string& uri);
+  void setRequestedRessource(const std::string& uri);
   void setHttpVersion(const std::string& version);
   void setHeaderString();
   void setContentLength();
@@ -145,6 +147,7 @@ public:
   size_type getBodySize() const;
   std::map<std::string, std::string> &getHeaders();
   const std::string &getRequestUri();
+  const std::string &getRequestedRessource();
   std::string getExtention() const;
   Server* getServer() const;
   std::string getRequestRoot() const;

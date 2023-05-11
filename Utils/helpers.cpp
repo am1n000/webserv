@@ -192,9 +192,27 @@ void helpers::removeComments(std::string &buffer) {
   }
 }
 
-void  displayStatusCodePage(statusCodeExceptions &e, int sock)
+void  movedPermanentlyHandler(statusCodeExceptions &e, int sock, std::string path)
 {
-	std::string path = "/Users/ael-rhai/Desktop/webserv/HTTPStatusCodes/" + e.getValue();
+	std::cout << path << std::endl;
+	std::string header = "HTTP/1.1 " + e.getValue();
+	header +=  " ";
+	header += e.what();
+	header += "\r\nLocation: ";
+	header += path + "/";
+	header += "\r\nServer: webserver-c\r\n\r\n";
+	send(sock, header.c_str(), header.length(), 0);
+
+}
+
+void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path)
+{
+	if (e.getValue() == "301")
+	{
+		movedPermanentlyHandler(e, sock, path);
+		return;
+	}
+	path = "/Users/ael-rhai/Desktop/webserv/HTTPStatusCodes/" + e.getValue();
 	path +=	".html";
 	
 	std::ifstream	file(path.c_str(), std::ios::ate);
@@ -214,5 +232,5 @@ void  displayStatusCodePage(statusCodeExceptions &e, int sock)
 	header += "\r\nServer: webserver-c\r\n\r\n";
 	std::string a = buffer;	
 	header += a;
-		send(sock, header.c_str(), header.length(), 0);
+	send(sock, header.c_str(), header.length(), 0);
 }

@@ -45,7 +45,6 @@ void Kqueue::monitoringLoop()
 {
 	while (1)
 	{
-		// std::cout << "test" << std::endl;
 		struct kevent events[MAX_EVENTS];
 		int eventCount = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
 		if (eventCount == -1)
@@ -53,7 +52,6 @@ void Kqueue::monitoringLoop()
 		for (int j = 0; j < eventCount; j++)
 		{
 			Client *tempData = (Client *)events[j].udata;
-			tempData->setPendingSize(events[j].data);
 			if (tempData->getIsListeningSock())
 				acceptConnections(tempData);
 			else
@@ -112,8 +110,7 @@ void	Kqueue::read(Client *clientData)
 	}
 	catch (statusCodeExceptions &e)
 	{
-		std::cout << "1  ________________" << std::endl;
-		displayStatusCodePage(e, clientData->getSockFd());
+		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
 		kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 		close(clientData->getSockFd());
@@ -133,9 +130,8 @@ void	Kqueue::write(Client *clientData)
 		}
 	}
 	catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
-	{
-		std::cout << "2  ________________" << std::endl;
-		displayStatusCodePage(e, clientData->getSockFd());
+	{		
+		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
 		kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 		close(clientData->getSockFd());

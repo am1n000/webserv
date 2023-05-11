@@ -51,7 +51,6 @@ void Poll::monitoringLoop()
 		}
 		for (size_t i = 0; i < pollFds.size() && ready_num > 0; i++)
 		{
-			// std::cout << pollFds.size() << std::endl;
 			position = i;
 			if (pollFds[i].revents & POLLIN)
 			{
@@ -80,7 +79,6 @@ void Poll::acceptConnections(Client *clientData)
     else
     {
 		Client *new_client = new Client(client_sock, 0);
-		new_client->setPendingSize(1024);
     	new_client->req->setServer(clientData->server);
 		clientsData.push_back(new_client);
 		struct pollfd pfd;
@@ -98,8 +96,9 @@ void	Poll::read(Client *clientData)
 		if (clientData->reading())
 			pollFds[position].events = POLLOUT;
 	}
-	catch(std::exception &e)
+	catch(statusCodeExceptions &e)
 	{
+		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		close (clientData->getSockFd());
 		clientsData.erase(clientsData.begin() + position);
 		pollFds.erase(pollFds.begin() + position);
@@ -117,8 +116,9 @@ void	Poll::write(Client *clientData)
 			pollFds.erase(pollFds.begin() + position);
 		}
 	}
-	catch(std::exception &e)
-	{
+	catch(statusCodeExceptions &e)
+	{		
+		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		close (clientData->getSockFd());
 		clientsData.erase(clientsData.begin() + position);
 		pollFds.erase(pollFds.begin() + position);

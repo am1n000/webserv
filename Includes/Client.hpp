@@ -11,7 +11,6 @@
 class Client
 {
 	private : //.variables
-		int64_t				_pendingSize;
 		int 				_sockFd;
 		bool				_isListeningSock;
 		bool				_postFileCreated;
@@ -27,17 +26,14 @@ class Client
 
 		bool				sending();
 		bool				reading();
-    void prepareResponse();
 
 		//.getters
-		int64_t				getPendingSize();
 		int					getSockFd();
 		bool				getIsListeningSock();
 		bool				getpostFileCreated();
 		struct kevent*		getChangePtr();
 
 		//.setters
-		void				setPendingSize(int64_t pendingSize);
 		void				setSockFd(int sockFd);
 		void				setIsListeningSock(int isListeningSock);
 		void				setpostFileCreated(bool postFileCreated);
