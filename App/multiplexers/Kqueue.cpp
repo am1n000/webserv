@@ -29,8 +29,11 @@ void Kqueue::setUpServerConnections()
 			continue;
 		server_data->setIsListeningSock(1);
 		server_data->server = Config::get()->getServers()[i];
+		struct timespec timeout;
+		timeout.tv_sec = 2;
+		timeout.tv_nsec = 0;
 		EV_SET(server_data->getChangePtr(), server_data->getSockFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
-		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
+		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, &timeout) != 0)
 		{
 			std::cerr << "error: kevent registration 1" << std::endl;
 			continue;
@@ -52,7 +55,7 @@ void Kqueue::monitoringLoop()
 			if (tempData->getIsListeningSock())
 				acceptConnections(tempData);
 			else
-			{
+			{ 
 				if (events[j].filter == EVFILT_READ)
 					read(tempData);
 				else
@@ -72,11 +75,14 @@ void Kqueue::acceptConnections(Client *clientData)
 		std::cerr << "error: accept server " << std::endl;
 	else
 	{
+		struct timespec timeout;
+		timeout.tv_sec = 2;
+		timeout.tv_nsec = 0;
 		Client *u_data = new Client(client_sock, 0);
 		u_data->server = clientData->server;
-    u_data->req->setServer(clientData->server);
+    	u_data->req->setServer(clientData->server);
 		EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
-		if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
+		if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, &timeout) != 0)
 			std::cerr << "error: kevent registration 2" << std::endl;
 	}
 }
@@ -88,19 +94,23 @@ void	Kqueue::read(Client *clientData)
 	{
 		if (clientData->reading())
 		{
+			struct timespec timeout;
+			timeout.tv_sec = 2;
+			timeout.tv_nsec = 0;
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ,
 					EV_DELETE, 0, 0, clientData);
 			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
 			std::cerr << "error: kevent 3" << std::endl;
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE,
 					EV_ADD | EV_ENABLE,0,0, clientData);
-			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
+			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, &timeout) == -1)
 			std::cerr << "error: kevent 33" << std::endl;
 		}
 
 	}
-	catch (std::exception &e)
+	catch (statusCodeExceptions &e)
 	{
+		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
 		kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 		close(clientData->getSockFd());
@@ -119,8 +129,9 @@ void	Kqueue::write(Client *clientData)
 			delete (clientData);
 		}
 	}
-	catch (std::exception &e) //! to be modified according to every exception thrown
-	{
+	catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
+	{		
+		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
 		kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 		close(clientData->getSockFd());

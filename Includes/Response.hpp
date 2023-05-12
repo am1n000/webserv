@@ -4,24 +4,26 @@
 #include <iostream>
 #include "Request.hpp"
 #include "Utils.hpp"
+#include "Config.hpp"
 
 class Response
 {
 	private:
     Request  *_request;
-		int             _bytes_to_send;
-		int             _bytes_sent;
-		bool            _finished;
-		bool            _started;
-		std::string     _filename;
-		std::string     _mime_type;
-		std::ifstream   _file;
-    bool            _hasCgi;
+		int             			_bytes_to_send;
+		int             			_bytes_sent;
+		bool            			_finished;
+		bool            			_started;
+    	bool            			_hasCgi;
+		std::string     			_filename;
+		std::string     			_mime_type;
+		std::ifstream   			_file;
+		std::pair<int, std::string> _dirCheck;
 	public:
 		Response();
 		Response(Request *request);
 		~Response();
-		void	set_file(int sock_fd);
+		void	set_file(std::string path);
 		int     handle_get(int sock_fd);
 		int     handle_post(int sock_fd);
 		int     handle_delete(int sock_fd);
@@ -29,9 +31,4 @@ class Response
 
 };
 
-class SendFailedException : public std::runtime_error
-{
-	public:
-	SendFailedException() : std::runtime_error("Send operation failed") {}
-};
 #endif
