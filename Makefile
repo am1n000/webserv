@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/05/07 15:04:19 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/05/08 11:42:45 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,8 @@ SRC=App/Config.cpp App/Server.cpp HTTP/Request.cpp HTTP/Response.cpp \
 		Bootstrap/app.cpp App/multiplexers/Select.cpp \
 		App/multiplexers/Poll.cpp \
 		Bootstrap/app.cpp \
-		App/Cgi.cpp
+		App/Cgi.cpp \
+		HTTP/Exceptions/HttpNotImplementedException.cpp
 BUILD_SRC=$(INTRY) $(SRC)
 TEST_SRC=$(TEST_ENTRY) $(SRC)
 OBJ_DIR=objects

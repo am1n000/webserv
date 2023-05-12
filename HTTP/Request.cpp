@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/08 10:20:18 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/12 17:26:45 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <utility>
+#include "../Includes/Exceptions/HttpExceptions.hpp"
 
 /*
  * constructors
@@ -27,26 +28,34 @@
 Request::Request()
     : header_completed_(false), body_completed_(false),
       body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE),
-      request_location_(NULL) {
-}
+      request_location_(NULL),
+      chunk_size_(0), chunk_received_(0),
+      content_length(0)
+{}
 
 Request::Request(Request::size_type buffer_size)
     : header_completed_(false), body_completed_(false), body_size_(0),
       buffer_size(buffer_size),
-      request_location_(NULL) {}
+      request_location_(NULL),
+      chunk_size_(0), chunk_received_(0),
+      content_length(0)
+{}
 
 Request::Request(char *buffer, Request::size_type recieved_size,
                  Request::size_type buffer_size)
     : request_string_(buffer, recieved_size), header_completed_(false),
       body_completed_(false), buffer_size(buffer_size),
-      request_location_(NULL) {}
+      request_location_(NULL),
+      chunk_size_(0), chunk_received_(0),
+      content_length(0)
+{}
 
 Request::~Request() {
   if(this->body_file_) {
     if(this->body_file_->is_open())
       this->body_file_->close();
     delete this->body_file_;
-    remove(this->body_file_name_.c_str());
+    // remove(this->body_file_name_.c_str());
   }
 }
 /*
@@ -54,28 +63,34 @@ Request::~Request() {
  */
 
 int Request::appendBuffer(char *buffer, size_type recieved_size) {
-  if(this->isHeaderCompleted())
-    this->appendBodyFile(buffer, recieved_size);
+  if (this->isHeaderCompleted()) {
+    if(this->isChuncked()){
+      std::string stringBuffer(buffer, recieved_size);
+      this->unchunckRequest(stringBuffer);
+    } else
+      this->appendBodyFile(buffer, recieved_size);
+  }
   else {
     this->request_string_.append(buffer, recieved_size);
-    std::string::size_type pos = this->request_string_.find(REQUEST_SEPARATOR);
-    if (pos != std::string::npos) {
-      this->header_completed_ = true;
+    if (this->isHeaderCompleted()) {
+      std::string::size_type pos =
+          this->request_string_.find(REQUEST_SEPARATOR);
 
-      std::string body_chunk(this->request_string_.begin() + pos + 4, this->request_string_.end());
-      this->appendBodyFile(&body_chunk[0], body_chunk.size());
-      this->request_string_.erase(this->request_string_.begin() + pos + 4,
-                                  this->request_string_.end());
+      std::string body_chunk(this->request_string_.begin() + pos + 4,
+                             this->request_string_.end());
+      if (this->isChuncked()) {
+          this->unchunckRequest(body_chunk);
+      } else {
+          this->appendBodyFile(&body_chunk[0], body_chunk.size());
+          this->request_string_.erase(this->request_string_.begin() + pos + 4,
+                                      this->request_string_.end());
+        }
     }
   }
   return this->isHeaderCompleted();
 }
 
 void Request::appendBodyFile(const char *buffer, Request::size_type size) {
-  // if (this->request_method_ != POST) {
-  //   std::cout << "get request ignored"  << std::endl;
-  //   return ;
-  // }
   if(!this->body_file_) {
     try {
       this->body_file_name_ = std::string(TMP_VAR_PATH) + helpers::timeBasedName(".request");
@@ -87,6 +102,57 @@ void Request::appendBodyFile(const char *buffer, Request::size_type size) {
   }
   this->body_file_->write(buffer, size);
   this->body_size_ += size;
+}
+
+void Request::unchunckRequest(std::string& buffer) {
+  size_type size_to_write(0);
+  // begining of new chunk
+  if(this->chunk_received_ == 0)
+  {
+    // checking if a chunk in the middle to remove chunk separator
+    if (buffer.find("\r\n") == 0)
+    {
+      buffer.erase(0, 2);
+    }
+    size_type pos = buffer.find("\r\n");
+    this->chunk_size_ = std::stoi(buffer.substr(0, pos),0, 16);
+    // body completed if chunk size equal zero
+    buffer.erase(0, pos + 2);
+    if(this->chunk_size_ == 0)
+    {
+      this->body_completed_ = true;
+      this->content_length = body_size_;
+      return;
+    }
+    size_to_write = (this->chunk_size_ < buffer.length() + chunk_received_ ? this->chunk_size_ - this->chunk_received_ : buffer.length());
+    this->appendBodyFile(buffer.data(), size_to_write);
+    this->chunk_received_ += size_to_write;
+    if(size_to_write < buffer.length())
+    {
+      buffer.erase(0, size_to_write);
+      this->chunk_received_ = 0;
+      this->chunk_size_ = 0;
+      this->unchunckRequest(buffer);
+    }
+  }
+  // resuming old chunk
+  else
+  {
+    if (buffer.length() + this->chunk_received_ < this->chunk_size_)  
+    {
+      this->appendBodyFile(buffer.data(), buffer.length());
+      this->chunk_received_ += buffer.length();
+    }
+    else 
+    {
+      size_to_write = this->chunk_size_ - this->chunk_received_;
+      this->appendBodyFile(buffer.data(), size_to_write);
+      buffer.erase(0, size_to_write);
+      this->chunk_size_ = 0;
+      this->chunk_received_ = 0;
+      this->unchunckRequest(buffer);
+    }
+  }
 }
 
 void Request::prepareRequest() {
@@ -102,14 +168,18 @@ void Request::prepareRequest() {
 bool Request::isHeaderCompleted() {
   if (header_completed_)
     return true;
-  if (this->request_string_.find(REQUEST_SEPARATOR) != std::string::npos)
+  if (this->request_string_.find(REQUEST_SEPARATOR) != std::string::npos) {
     this->header_completed_ = true;
+    this->headerCompletedEventHook();
+  }
   return this->header_completed_;
 }
 
 bool Request::isBodyCompleted() {
   if(this->request_method_ != POST || this->body_completed_)
     return true;
+  if(this->isChuncked())
+    return this->body_completed_;
   if(this->body_size_ >= this->getContentLength()) {
     this->body_completed_ = true;
     this->body_file_->close();
@@ -137,6 +207,15 @@ bool Request::isAutoIndexed() {
   return this->request_location_->getAutoIndex();
 }
 
+bool Request::isChuncked() {
+  string_map_type::iterator it = this->request_headers_.find("Transfer-Encoding");
+  if (it != this->request_headers_.end()) {
+    if (it->second != "Chunked") 
+      throw HttpNotImplementedException();
+    return true;
+  }
+  return false;
+}
 
 Location* Request::matchLocation() {
   size_type pos;
@@ -239,8 +318,6 @@ void Request::setRequestUri(const std::string &uri) {
   if(pos != std::string::npos) {
     this->request_uri_ = uri.substr(0, pos);
     this->query_parameters_ = uri.substr(pos + 1);
-    // std::cout << this->query_parameters_ << std::endl;
-    // std::cout << this->request_uri_ << std::endl;
   } else {
     this->request_uri_ = uri;
     this->query_parameters_ = "";
@@ -261,7 +338,8 @@ void Request::setContentLength() {
       this->request_headers_.find("Content-Length");
   if (it == this->request_headers_.end())
     this->content_length = 0;
-  this->content_length = std::stoi(it->second);
+  else
+    this->content_length = std::stoi(it->second);
 }
 
 void Request::setServer(Server *server) {
@@ -276,7 +354,6 @@ int Request::getRequestMethod() const { return this->request_method_; }
 
 s_file Request::getFile() {
   this->file_.filename = this->server_->getRoot() + this->request_uri_;
-  // std::cout << file_.filename << std::endl;
   std::string extention =
       this->file_.filename.substr(this->file_.filename.rfind(".") + 1);
   std::map<std::string, std::string>::iterator it;
@@ -292,7 +369,8 @@ Request::size_type Request::getContentLength() {
   // temp till i figure out where to put it
   if(this->request_method_ != POST)
     return 0;
-  this->setContentLength();
+  if(!this->isChuncked())
+    this->setContentLength();
   return this->content_length;
 }
 
@@ -359,6 +437,22 @@ Location *Request::getLocation() { return this->request_location_; }
 /*
  * END getters
  */
+
+/*
+ * hooks
+ */
+
+void Request::headerCompletedEventHook() {
+  this->parseHeader();
+  // to test chunked request before parsing the request body
+  // if (this->isChuncked()) {
+  //   std::cout << "request chunked" << std::endl;
+  //   exit(0);
+  // } else {
+  //   std::cout << "normal request" << std::endl;
+  // }
+
+}
 
 /*
  * tests

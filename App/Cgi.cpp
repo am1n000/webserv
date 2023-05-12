@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/05 15:59:39 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/12 16:15:07 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <stdexcept>
+#include <string>
 #include <sys/_types/_size_t.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -93,7 +94,7 @@ void Cgi::executeCgi() {
 void Cgi::prepareEnv() {
   // the strdup thing will be handled lather it is just a tmp thing
   try {
-    std::string tmp = "CONTENT_LENGTH=" + request_->getHeaders().find("Content-Length")->second;
+    std::string tmp = "CONTENT_LENGTH=" + std::to_string(request_->getContentLength());
     this->env_.push_back(strdup(tmp.data()));
     tmp = "CONTENT_TYPE=" + request_->getHeaders().find("Content-Type")->second;
     this->env_.push_back(strdup(tmp.data()));

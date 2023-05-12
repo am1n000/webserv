@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/08 10:20:15 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/11 16:33:52 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class Request {
 public:
   typedef size_t size_type;
   typedef Request_Method_e method_type;
+  typedef std::map<std::string, std::string> string_map_type;
 
 private:
   Tockenizer *tockenizer_;
@@ -67,7 +68,6 @@ private:
   std::string query_parameters_;
   std::string http_version_;
   std::map<std::string, std::string> request_headers_;
-  size_type content_length;
   std::fstream *body_file_;
   std::string   body_file_name_;
   size_type body_size_;
@@ -77,6 +77,10 @@ private:
   std::map<std::string, std::string> request_configuration_;
   size_type buffer_size;
   Location *request_location_;
+  // this members for chunked request
+  size_type chunk_size_;
+  size_type chunk_received_;
+  size_type content_length;
   //the file is temporary just to work with amine's code
   // to be changed lather
   s_file file_;
@@ -111,6 +115,7 @@ public:
   bool isRequestCompleted();
   bool hasCgi() const;
   bool isAutoIndexed();
+  bool isChuncked();
   Location* matchLocation();
 
   /*
@@ -119,6 +124,7 @@ public:
 
   int appendBuffer(char *buffer, size_type recieved_size);
   void appendBodyFile(const char *buffer, size_type buffer_size);
+  void unchunckRequest(std::string& buffer);
   void prepareRequest();
 
   /*
@@ -157,6 +163,11 @@ public:
   std::string& getQueryParams();
   Location *getLocation();
 
+  /*
+   * hooks
+   */
+
+  void headerCompletedEventHook();
   /*
   * test function will be removed lather
   */
