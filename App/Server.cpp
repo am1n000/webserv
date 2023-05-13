@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/08 10:19:14 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/13 13:19:49 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,9 +83,13 @@ void Server::test() {
 // end test
 
 void Server::pushLocation(const std::string &locationString) {
+  std::string ls = locationString;
+  if(locationString[locationString.length() - 1] == '/' && locationString.length() != 1) {
+    ls.erase(locationString.length() - 1, 1);
+  }
 	Location *location =
-		new Location(locationString, this->tockenizer_->getNextScope());
-	this->locations_.insert(std::make_pair(locationString, location));
+		new Location(ls, this->tockenizer_->getNextScope());
+	this->locations_.insert(std::make_pair(ls, location));
 }
 
 void Server::setProp(const std::string &prop, const std::string &val) {
