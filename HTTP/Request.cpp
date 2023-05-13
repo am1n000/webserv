@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/12 17:26:45 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/13 14:18:34 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,8 @@ void Request::unchunckRequest(std::string& buffer) {
     {
       this->body_completed_ = true;
       this->content_length = body_size_;
+      if(this->body_file_->is_open())
+        this->body_file_->close();
       return;
     }
     size_to_write = (this->chunk_size_ < buffer.length() + chunk_received_ ? this->chunk_size_ - this->chunk_received_ : buffer.length());

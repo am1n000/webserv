@@ -1,9 +1,14 @@
 <?php
 
-if(isset($_GET))
-  print_r($_GET);
-print_r($_POST);
+
+// if(isset($_GET["name"]))
+//   echo "this is the neme from get: ". $_GET["name"];
+// if(isset($_POST["name"]))
+  // echo "this is the neme from post: ". $_POST["name"];
 
 print_r($_SERVER);
-// while (true);
-// phpinfo();
+
+echo "----------------------";
+
+print_r($_POST);
+print_r($_GET);
