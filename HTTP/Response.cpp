@@ -99,26 +99,36 @@ int Response::handle_delete(int sock_fd)
 
 void Response::handleCgi(int sock_fd) {
   int size = 1024;
-  Cgi cgi(this->_request);
-  cgi.executeCgi();
+  std::fstream f(this->_request->getRequestedFileFullPath().c_str());
+  if(!f.good()) {
+    std::cout << "file not found" << std::endl;
+    if (f.is_open())
+      f.close();
+    throw FileNotFound();
+  }
+    if (f.is_open())
+      f.close();
+    Cgi cgi(this->_request);
+    cgi.executeCgi();
 
-  cgi.closeFiles();
-  int fd = open(cgi.getResponseFileName().c_str(), O_RDONLY);
+    cgi.closeFiles();
+    int fd = open(cgi.getResponseFileName().c_str(), O_RDONLY);
 
-  char buffer[size];
-  
-  int i = 0;
-	std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
-  send(sock_fd, header.c_str(), header.length(), 0);
-  /*
-	* this loop blocking the server's multiplexing
-	* working now only for test
-	* will be handled lather
-	*/
-  do {
-	i = read(fd, buffer, size);
-	buffer[i] = 0;
-	send(sock_fd, buffer, i, 0);
+    char buffer[size];
+
+    int i = 0;
+    // hardcoded for now
+    std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
+    send(sock_fd, header.c_str(), header.length(), 0);
+    /*
+     * this loop blocking the server's multiplexing
+     * working now only for test
+     * will be handled lather
+     */
+    do {
+                i = read(fd, buffer, size);
+                buffer[i] = 0;
+                send(sock_fd, buffer, i, 0);
   } while (i > 0);
 }
 
