@@ -194,7 +194,6 @@ void helpers::removeComments(std::string &buffer) {
 
 void  movedPermanentlyHandler(statusCodeExceptions &e, int sock, std::string path)
 {
-	std::cout << path << std::endl;
 	std::string header = "HTTP/1.1 " + e.getValue();
 	header +=  " ";
 	header += e.what();

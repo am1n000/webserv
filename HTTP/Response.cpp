@@ -40,7 +40,8 @@ int Response::handle_get(int sock_fd)
 
 	if (this->_started == 0)
 	{
-		this->_dirCheck = directoryCheck(this->_request->getRequestedFileFullPath(), 1, this->_request->getServer()->getIndexes());
+		this->_dirCheck = directoryCheck(this->_request->getRequestedRessource(), this->_request->getRequestedFileFullPath(),
+						this->_request->isAutoIndexed(), this->_request->getServer()->getIndexes());
 		this->set_file(this->_dirCheck.second);
 		std::string header = "HTTP/1.1 200 OK\r\nServer: webserver-c\r\nContent-type: ";
 		header += this->_mime_type;

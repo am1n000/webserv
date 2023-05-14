@@ -27,6 +27,6 @@
 char *my_tostring(int num);
 std::string get_time();
 void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path);
-std::pair<int, std::string> directoryCheck(std::string path, int autoindex, std::vector<std::string> indexs_);
+std::pair<int, std::string> directoryCheck(std::string ressouce, std::string path, int autoindex, std::vector<std::string> indexs_);
 
 #endif
