@@ -44,25 +44,21 @@ bool checkIndex(std::string filename, std::vector<std::string> indexes)
 }
 
 
-std::pair<int, std::string> directoryCheck(std::string path, int autoindex, std::vector<std::string> indexes)
+std::pair<int, std::string> directoryCheck(std::string ressource, std::string path, int autoindex, std::vector<std::string> indexes)
 {
     struct stat fileStat;
     std::pair<int, std::string> result;
     result.first = 0;
     result.second = path;
-                std::cout << "here" << std::endl;
     if (stat(path.c_str(), &fileStat) == 0)
     {
         if (S_ISDIR(fileStat.st_mode))
         {
             DIR* dirp = opendir(path.c_str());
             if (dirp == NULL)
-                throw (Forbidden());
-            if (path[path.size() - 1] != '/')
-            {
-                std::cout << "but not here" << std::endl;
-                throw (MovedPermanently());
-            }
+                throw (ForbiddenException());
+            if (ressource[ressource.size() - 1] != '/')
+                throw (MovedPermanentlyException());
             struct dirent* dp;
             std::string indexFilename = path + "/.";
             indexFilename += uniqueFilename() + ".html";
@@ -88,9 +84,8 @@ std::pair<int, std::string> directoryCheck(std::string path, int autoindex, std:
                         std::tm* modified_tm = std::localtime(&modified_time);
                         char modified_str[20];
                         std::strftime(modified_str, sizeof(modified_str), "%Y-%m-%d %H:%M:%S", modified_tm);
-                        indexFile << "		<tr>\n			<td><a href=\"" + path;
-                        indexFile << "/" + filename; 
-                        indexFile << "\">";
+                        indexFile << "		<tr>\n			<td><a href=\"" + ressource;
+                        indexFile << filename + "\">";
                         indexFile << filename + "</a></td>\n";
                         indexFile << "			<td>";
                         indexFile << modified_str;
@@ -105,7 +100,7 @@ std::pair<int, std::string> directoryCheck(std::string path, int autoindex, std:
             if (!autoindex)
             {
                 std::remove(indexFilename.c_str());
-                throw (Forbidden());
+                throw (ForbiddenException());
             }
             result.first = 2;
             result.second = indexFilename;

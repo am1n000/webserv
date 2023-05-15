@@ -214,7 +214,7 @@ bool Request::isChuncked() {
   string_map_type::iterator it = this->request_headers_.find("Transfer-Encoding");
   if (it != this->request_headers_.end()) {
     if (it->second != "Chunked") 
-      throw HttpNotImplementedException();
+      throw NotImplementedException();
     return true;
   }
   return false;
@@ -324,7 +324,7 @@ void Request::setHeaderString() {
 
 void Request::setMethod(const std::string &method) {
   if (method == "")
-	throw BadRequest();
+	throw BadRequestException();
   try {
 	this->request_method_ = Settings::get()->indexOfRequestMethod(method);
   if(!this->isMethodAllowed())
@@ -341,7 +341,7 @@ void Request::setMethod(const std::string &method) {
 
 void Request::setRequestUri(const std::string &uri) {
   if (uri == "")
-	throw BadRequest();
+	throw BadRequestException();
   size_type pos = uri.find("?");
   if(pos != std::string::npos) {
     this->request_uri_ = uri.substr(0, pos);
@@ -352,7 +352,7 @@ void Request::setRequestUri(const std::string &uri) {
   }
   // will be setted on the request completed hook
   this->setExtention_();
-  this->test();
+  // this->test();
 }
 
 void Request::setRequestedRessource(const std::string &uri)
@@ -362,7 +362,7 @@ void Request::setRequestedRessource(const std::string &uri)
 
 void Request::setHttpVersion(const std::string &version) {
   if (version == "")
-	throw BadRequest();
+	throw BadRequestException();
   this->http_version_ = version;
 }
 

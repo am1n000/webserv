@@ -15,6 +15,7 @@ class Client
 		bool				_isListeningSock;
 		bool				_postFileCreated;
 		struct kevent		*_changePtr;
+		void	checkServerByName();
 
 	public :
 		Client();

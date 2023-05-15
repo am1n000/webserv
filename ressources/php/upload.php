@@ -1,6 +1,6 @@
 <?php
 
-$target_dir = "/Users/hchakoub/cursus/webserv/ressources/php/uploads/";
+$target_dir = "/Users/ael-rhai/Desktop/webserv/ressources/php/uploads/";
 $file_name =  basename($_FILES["file"]["name"]);
 $target_file = $target_dir . basename($_FILES["file"]["name"]);
 $uploadOk = 1;

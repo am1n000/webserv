@@ -38,6 +38,21 @@ bool Client::sending()
 	return (finished);
 }
 
+void	Client::checkServerByName()
+{
+	std::vector<Server*> &servers = Config::get()->getServers();
+	std::string host = (this->req->getHeaders())["Host"];
+	std::string domain = host.substr(0, host.find(":"));
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		if (servers[i]->getServerName() == domain)
+		{
+			this->server = Config::get()->getServers()[i];
+    		this->req->setServer(this->server);
+		}
+	}
+}
+
 bool Client::reading()
 {
 	//! use .data field to initialize the buffer
@@ -47,13 +62,18 @@ bool Client::reading()
 	if (recieved_size < 0)
 		throw std::runtime_error("recv failed");
 	this->req->appendBuffer(buffer, recieved_size);
-	if (this->req->getRequestMethod() != POST && this->req->isHeaderCompleted())
+	// if (this->req->getRequestMethod() != POST && this->req->isHeaderCompleted())
+	// {
+	// 	checkServerByName();
+	// 	this->req->prepareRequest();
+	// 	return (true);
+	// }
+	if (this->req->isRequestCompleted())
 	{
-		this->req->parseHeader();
+		checkServerByName();
+		this->req->prepareRequest();
 		return (true);
 	}
-	if (this->req->isRequestCompleted())
-		return (true);
 	return (false);
 }
 

@@ -23,6 +23,7 @@ Select*	Select::getInstance()
 void Select::setUpServerConnections()
 {
 	std::vector<Server*> &servers = Config::get()->getServers();
+	std::map<std::string, std::string> hostPort;
 	FD_ZERO(&readMaster);
 	for (size_t i = 0; i < servers.size(); i++)
 	{
@@ -31,7 +32,12 @@ void Select::setUpServerConnections()
 		if (server_data->getSockFd() == -1)
 			continue;
 		if (servers[i]->bindSocket(server_data->getSockFd()))
-			continue;
+		{
+			if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
+				continue;
+			std::cerr << "error :bind" << std::endl;
+			exit(1);
+		}
 		if (servers[i]->listenToConnections(server_data->getSockFd()))
 			continue;
 		server_data->setIsListeningSock(1);

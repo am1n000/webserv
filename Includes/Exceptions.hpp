@@ -23,75 +23,82 @@ class statusCodeExceptions : public std::exception
 		statusCodeExceptions(std::string code) : _code(code) {}
 		~statusCodeExceptions() throw() {}
 		virtual const char* what() const throw() = 0;
-		std::string getValue() const throw() {
-			return _code;
-		}
+		std::string getValue() const throw();
 	protected:
 		std::string _code;
 };
 
-class FileNotFound : public statusCodeExceptions
-{
-	public :
-		FileNotFound() : statusCodeExceptions("404") {}
-		~FileNotFound() throw() {};
-		virtual const char* what() const throw()
-		{
-			return ("Not Found");
-		}
-
-};
-
-class InternalServerError : public statusCodeExceptions
+class MovedPermanentlyException : public statusCodeExceptions
 {
 	public :
 
-		InternalServerError() : statusCodeExceptions("500") {}
-		~InternalServerError() throw() {};
-		virtual const char* what() const throw()
-		{
-			return ("Internal Server Error");
-		}
-
+		MovedPermanentlyException() : statusCodeExceptions("301") {}
+		~MovedPermanentlyException() throw() {};
+		virtual const char* what() const throw();
 };
 
-class BadRequest : public statusCodeExceptions
+class BadRequestException : public statusCodeExceptions
 {
 	public :
 
-		BadRequest() : statusCodeExceptions("400") {}
-		~BadRequest() throw() {};
-		virtual const char* what() const throw()
-		{
-			return ("Internal Server Error");
-		}
-
+		BadRequestException() : statusCodeExceptions("400") {}
+		~BadRequestException() throw() {};
+		virtual const char* what() const throw();
 };
 
-class Forbidden : public statusCodeExceptions
+class ForbiddenException : public statusCodeExceptions
 {
 	public :
 
-		Forbidden() : statusCodeExceptions("403") {}
-		~Forbidden() throw() {};
-		virtual const char* what() const throw()
-		{
-			return ("Forbidden");
-		}
-
+		ForbiddenException() : statusCodeExceptions("403") {}
+		~ForbiddenException() throw() {};
+		virtual const char* what() const throw();
 };
 
-class MovedPermanently : public statusCodeExceptions
+class FileNotFoundException : public statusCodeExceptions
+{
+	public :
+		FileNotFoundException() : statusCodeExceptions("404") {}
+		~FileNotFoundException() throw() {};
+		virtual const char* what() const throw();
+};
+
+class MethodNotAllowedException : public statusCodeExceptions
 {
 	public :
 
-		MovedPermanently() : statusCodeExceptions("301") {}
-		~MovedPermanently() throw() {};
-		virtual const char* what() const throw()
-		{
-			return ("Moved Permanently");
-		}
-
+		MethodNotAllowedException() : statusCodeExceptions("405") {}
+		~MethodNotAllowedException() throw() {};
+		virtual const char* what() const throw();
 };
+
+class RequestURITooLongException : public statusCodeExceptions
+{
+	public :
+
+		RequestURITooLongException() : statusCodeExceptions("414") {}
+		~RequestURITooLongException() throw() {};
+		virtual const char* what() const throw();
+};
+
+class InternalServerErrorException : public statusCodeExceptions
+{
+	public :
+
+		InternalServerErrorException() : statusCodeExceptions("500") {}
+		~InternalServerErrorException() throw() {};
+		virtual const char* what() const throw();
+};
+
+class NotImplementedException : public statusCodeExceptions
+{
+	public :
+
+		NotImplementedException() : statusCodeExceptions("501") {}
+		~NotImplementedException() throw() {};
+		virtual const char* what() const throw();
+};
+
+
 
 #endif
