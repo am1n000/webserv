@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/05 15:26:30 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/13 20:37:04 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define SERVER_HPP
 
 #include "Tockenizer.hpp"
+#include "Settings.hpp"
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -31,7 +32,7 @@ class Location
 
 	private:
 		std::string location_;
-		std::vector<std::string> allowed_methods_;
+		std::vector<Request_Method_e> allowed_methods_;
 		std::string redirection_;
 		std::string root_;
 		bool auto_index_;
@@ -78,6 +79,7 @@ class Location
 		bool getAutoIndex() const;
     std::string getRoot() const;
     std::string getUploadDir() const;
+    std::vector<Request_Method_e> &getAllowedMethods();
 
     /*
     * checkers

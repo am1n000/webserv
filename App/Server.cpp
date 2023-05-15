@@ -6,12 +6,13 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/13 13:19:49 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/13 20:43:19 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Server.hpp"
 #include "../Includes/helpers.hpp"
+#include "../Includes/Settings.hpp"
 // for dev only
 #include "../dev/dev.hpp"
 #include <utility>
@@ -233,7 +234,8 @@ void Location::setAutoIndex(const std::string &val) {
 void Location::setAllowedMethods(const std::string &val) {
 	Tockenizer tok = Tockenizer(val);
 	while (!tok.end()) {
-	this->allowed_methods_.push_back(helpers::trim(tok.getNextToken()));
+  Request_Method_e method = Settings::get()->indexOfRequestMethod(tok.getNextToken());
+	this->allowed_methods_.push_back(method);
 	}
 }
 void Location::setRoot(const std::string &val) {
@@ -263,6 +265,7 @@ std::string Location::getUploadDir() const { return this->upload_dir_; }
 
 bool Location::getAutoIndex() const { return this->auto_index_; }
 
+std::vector<Request_Method_e>& Location::getAllowedMethods() { return this->allowed_methods_; }
 /*
 * location getters end
 */

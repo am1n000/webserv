@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/11 16:33:52 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/13 18:50:04 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,7 @@ public:
   bool hasCgi() const;
   bool isAutoIndexed();
   bool isChuncked();
+  bool isMethodAllowed();
   Location* matchLocation();
 
   /*
