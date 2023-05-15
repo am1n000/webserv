@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/12 16:15:07 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/13 18:17:54 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void Cgi::executeCgi() {
   this->openFiles();
   this->prepareEnv();
   this->prepareArgs();
-  // printheaders(this->env_);
   int pid = fork();
   if (pid < 0) {
     std::cerr << "Fork error" << std::endl;

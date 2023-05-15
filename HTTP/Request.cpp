@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/13 14:18:34 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/15 13:13:10 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 #include <fstream>
 #include <stdexcept>
 #include <utility>
+#include "../Includes/Exceptions.hpp"
+#include "../Includes/Exceptions/HttpExceptions.hpp"
+
 /*
  * constructors
  */
@@ -217,6 +220,20 @@ bool Request::isChuncked() {
   return false;
 }
 
+bool Request::isMethodAllowed() {
+  if(this->request_location_) {
+std::vector<Request_Method_e>& allowed_methods = this->request_location_->getAllowedMethods();
+    if(allowed_methods.size() == 0)
+      return true;
+    for (std::vector<Request_Method_e>::iterator it = allowed_methods.begin(); it != allowed_methods.end(); it++) {
+      if(*it == this->request_method_)
+         return true;
+    }
+    return false;
+  }
+  return true;
+}
+
 Location* Request::matchLocation() {
   size_type pos;
   std::string locationString;
@@ -242,7 +259,6 @@ Location* Request::matchLocation() {
 void Request::parseHeader() {
   if (!this->isHeaderCompleted())
 	return;
-	// throw std::runtime_error("header not completed");
   std::string token;
   this->tockenizer_ = new Tockenizer(this->request_string_);
   token = this->tockenizer_->getLine();
@@ -261,6 +277,7 @@ void Request::parseHeader() {
  */
 
 void Request::parseMetadata_(const std::string &metadata) {
+  // form should  be checked
   std::string token;
   Tockenizer tok(metadata);
   token = tok.getNextToken();
@@ -274,9 +291,15 @@ void Request::parseMetadata_(const std::string &metadata) {
 
 void Request::pushHeaders_() {
   Tockenizer tok(this->header_string_);
-  while (!tok.end())
-	this->request_headers_.insert(std::make_pair(
-		tok.getNextToken(':'), helpers::trim(tok.getNoneEmptyLine())));
+  std::string key;
+  std::string value;
+  while (!tok.end()) {
+  key = tok.getNextToken(':'); 
+  value = helpers::trim(tok.getNoneEmptyLine());
+  if(helpers::hasSpace(key))
+      throw BadRequestException();
+	this->request_headers_.insert(std::make_pair(key, value));
+  }
 }
 
 void Request::setExtention_() {
@@ -304,6 +327,10 @@ void Request::setMethod(const std::string &method) {
 	throw BadRequestException();
   try {
 	this->request_method_ = Settings::get()->indexOfRequestMethod(method);
+  if(!this->isMethodAllowed())
+      throw InternalServerErrorException();
+  //     std::cout << "method not allowed" << std::endl;
+    // std::cerr << "method not allowed" << std::endl;
   } catch (std::runtime_error &e) {
 	// for now as place hoder i will print the error
 	std::cerr << e.what() << std::endl;

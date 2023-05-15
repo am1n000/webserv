@@ -192,6 +192,14 @@ void helpers::removeComments(std::string &buffer) {
   }
 }
 
+bool helpers::hasSpace(std::string& str) {
+  for(size_t i(0); i < str.length(); i++) {
+    if(std::isspace(str[i]))
+      return true;
+  }
+  return false;
+};
+
 void  movedPermanentlyHandler(statusCodeExceptions &e, int sock, std::string path)
 {
 	std::string header = "HTTP/1.1 " + e.getValue();
@@ -211,7 +219,7 @@ void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path)
 		movedPermanentlyHandler(e, sock, path);
 		return;
 	}
-	path = "/Users/ael-rhai/Desktop/webserv/HTTPStatusCodes/" + e.getValue();
+	path = "./HTTPStatusCodes/" + e.getValue();
 	path +=	".html";
 	
 	std::ifstream	file(path.c_str(), std::ios::ate);
