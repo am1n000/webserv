@@ -25,7 +25,7 @@
 
 #define BUFFER_SIZE 4096
 #define REQUEST_SEPARATOR "\r\n\r\n"
-#define TMP_VAR_PATH "/Users/hchakoub/cursus/webserv/var/tmp/"
+#define TMP_VAR_PATH "/Users/ael-rhai/Desktop/webserv/var/tmp/"
  
 
 // must be included on the response, i defined it here to avoid conflit

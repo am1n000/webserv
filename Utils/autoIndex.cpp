@@ -56,9 +56,9 @@ std::pair<int, std::string> directoryCheck(std::string ressource, std::string pa
         {
             DIR* dirp = opendir(path.c_str());
             if (dirp == NULL)
-                throw (Forbidden());
+                throw (ForbiddenException());
             if (ressource[ressource.size() - 1] != '/')
-                throw (MovedPermanently());
+                throw (MovedPermanentlyException());
             struct dirent* dp;
             std::string indexFilename = path + "/.";
             indexFilename += uniqueFilename() + ".html";
@@ -100,7 +100,7 @@ std::pair<int, std::string> directoryCheck(std::string ressource, std::string pa
             if (!autoindex)
             {
                 std::remove(indexFilename.c_str());
-                throw (Forbidden());
+                throw (ForbiddenException());
             }
             result.first = 2;
             result.second = indexFilename;

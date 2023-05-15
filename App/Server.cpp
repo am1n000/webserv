@@ -275,7 +275,6 @@ bool Location::getAutoIndex() const { return this->auto_index_; }
 		if (sock == -1)
 		{
 			std::cerr << "error: socket" << std::endl;
-			//! throw (status code 500)
 			return (-1);
 		}
 		fcntl(sock, F_SETFL, O_NONBLOCK); // if not the connection will block
@@ -294,23 +293,17 @@ bool Location::getAutoIndex() const { return this->auto_index_; }
 		if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 		{
 			std::cerr << "error: setsockopt" << std::endl;
-			//! throw (status code 500)
 			return (true);
 		}
 		opt = 1;
 		if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0)
 		{
 			std::cerr << "error: setsockopt" << std::endl;
-			//! throw (status code 500)
 			return (true);
 		}
 		if (bind(sock, reinterpret_cast<struct sockaddr
 				*>(&this->_hostAddr), this->_hostAddrlen) != 0)
-		{
-			std::cerr << "error: bind" << std::endl;
-			//! throw (status code 500)
 			return (true);
-		}
 		return (false);
 	}
 
@@ -319,7 +312,6 @@ bool Location::getAutoIndex() const { return this->auto_index_; }
 		if (listen(sock, SOMAXCONN) == -1)
 		{
 			std::cerr << "error: listen" << std::endl;
-			//! throw (status code 500)
 			return (true);
 		}
 		return (false);

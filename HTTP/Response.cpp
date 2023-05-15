@@ -16,7 +16,7 @@ void Response::set_file(std::string path)
 {
 	this->_file.open(path.c_str(), std::ios::binary | std::ios::ate);
 	if (!this->_file.is_open())
-		throw(FileNotFound());
+		throw(FileNotFoundException());
 	std::string extention = path.substr(path.rfind(".") + 1);
 	std::map<std::string, std::string>::iterator it;
 	it = Config::get()->getMimeTypes().find(extention);
@@ -50,7 +50,7 @@ int Response::handle_get(int sock_fd)
 		header += get_time();
 		header += "\r\n\r\n";
 		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-			throw(InternalServerError());
+			throw(InternalServerErrorException());
 		this->_started = 1;
 		return (0);
 	}
@@ -60,7 +60,7 @@ int Response::handle_get(int sock_fd)
 		char buffer[bufferSize];
 		this->_file.read(buffer, bufferSize);
 		if (send(sock_fd, buffer, bufferSize, 0) < 0)
-			throw(InternalServerError());
+			throw(InternalServerErrorException());
 		this->_bytes_sent += bufferSize;
 		if (this->_bytes_sent >= this->_bytes_to_send)
 		{
@@ -83,7 +83,7 @@ int Response::handle_post(int sock_fd)
 	std::cout << "no cgi " << std::endl;
 	std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post\t\nContent-Type: text/plain\r\n\r\nrequest has been posted";
 	if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-		throw(InternalServerError());
+		throw(InternalServerErrorException());
 	return (1);
 }
 
@@ -91,7 +91,7 @@ int Response::handle_delete(int sock_fd)
 {
 	std::string header = "HTTP/1.1 204 No Content\r\n\r\n";
 	if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-		throw(InternalServerError());
+		throw(InternalServerErrorException());
 	if (std::remove(this->_request->getRequestedFileFullPath().c_str()) != 0)
 		std::cerr << "error : file deletion" << std::endl;
 	return (1);
