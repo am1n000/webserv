@@ -30,6 +30,14 @@ void Response::set_file(std::string path)
 		this->_hasCgi = true;
 }
 
+	std::vector<std::string> Response::setIndexes()
+	{
+		if (this->_request->getLocation() != NULL && (this->_request->getLocation())->getIndex().size() != 0)
+			return ((this->_request->getLocation())->getIndex());
+		return (this->_request->getServer()->getIndexes());
+
+	}
+
 int Response::handle_get(int sock_fd)
 {
 	if(this->_request->hasCgi())
@@ -37,11 +45,11 @@ int Response::handle_get(int sock_fd)
 		this->handleCgi(sock_fd);
 		return 1;
 	}
-
 	if (this->_started == 0)
 	{
+		std::vector<std::string> indexes = setIndexes();
 		this->_dirCheck = directoryCheck(this->_request->getRequestedRessource(), this->_request->getRequestedFileFullPath(),
-						this->_request->isAutoIndexed(), this->_request->getServer()->getIndexes());
+						this->_request->isAutoIndexed(), indexes);
 		this->set_file(this->_dirCheck.second);
 		std::string header = "HTTP/1.1 200 OK\r\nServer: webserver-c\r\nContent-type: ";
 		header += this->_mime_type;

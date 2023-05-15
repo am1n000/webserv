@@ -38,7 +38,10 @@ bool checkIndex(std::string filename, std::vector<std::string> indexes)
     for (size_t i = 0; i < indexes.size(); i++)
     {
         if (indexes[i] == filename)
+        {
+            std::cout << "howa  " << indexes[i] << std::endl;
             return (1);
+        }
     }
     return (0);
 }

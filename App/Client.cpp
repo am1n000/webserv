@@ -62,14 +62,12 @@ bool Client::reading()
 	if (recieved_size < 0)
 		throw std::runtime_error("recv failed");
 	this->req->appendBuffer(buffer, recieved_size);
-	// if (this->req->getRequestMethod() != POST && this->req->isHeaderCompleted())
-	// {
-	// 	checkServerByName();
-	// 	this->req->prepareRequest();
-	// 	return (true);
-	// }
 	if (this->req->isRequestCompleted())
 	{
+		std::vector<std::string> indexes = this->server->getIndexes();
+       	 std::cout << "---------------"  << std::endl;
+		for (size_t i = 0; i < indexes.size(); i++)
+       	 std::cout << ">  " << indexes[i]  << std::endl;
 		checkServerByName();
 		this->req->prepareRequest();
 		return (true);

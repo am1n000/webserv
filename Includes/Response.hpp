@@ -27,7 +27,8 @@ class Response
 		int     handle_get(int sock_fd);
 		int     handle_post(int sock_fd);
 		int     handle_delete(int sock_fd);
-    void    handleCgi(int sock_fd);
+    	void    handleCgi(int sock_fd);
+  		std::vector<std::string> setIndexes();
 
 };
 
