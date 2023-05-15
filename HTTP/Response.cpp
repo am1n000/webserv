@@ -81,10 +81,12 @@ int Response::handle_post(int sock_fd)
   }
   else 
 	std::cout << "no cgi " << std::endl;
-	std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post\t\nContent-Type: text/plain\r\n\r\nrequest has been posted";
-	if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-		throw(InternalServerErrorException());
-	return (1);
+  std::string header =
+      "HTTP/1.1 201 Created\r\nLocation: /resources/post\t\nContent-Type: "
+      "text/plain\r\n\r\nrequest has been posted";
+  if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+        throw(InternalServerErrorException());
+  return (1);
 }
 
 int Response::handle_delete(int sock_fd)
@@ -105,7 +107,7 @@ void Response::handleCgi(int sock_fd) {
     std::cout << "file not found" << std::endl;
     if (f.is_open())
       f.close();
-    throw FileNotFound();
+    throw FileNotFoundException();
   }
     if (f.is_open())
       f.close();

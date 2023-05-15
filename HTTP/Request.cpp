@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/15 11:31:49 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/15 13:13:10 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,7 +297,7 @@ void Request::pushHeaders_() {
   key = tok.getNextToken(':'); 
   value = helpers::trim(tok.getNoneEmptyLine());
   if(helpers::hasSpace(key))
-      std::cerr << "badrequest here" << std::endl;
+      throw BadRequestException();
 	this->request_headers_.insert(std::make_pair(key, value));
   }
 }
@@ -328,7 +328,7 @@ void Request::setMethod(const std::string &method) {
   try {
 	this->request_method_ = Settings::get()->indexOfRequestMethod(method);
   if(!this->isMethodAllowed())
-      throw InternalServerError();
+      throw InternalServerErrorException();
   //     std::cout << "method not allowed" << std::endl;
     // std::cerr << "method not allowed" << std::endl;
   } catch (std::runtime_error &e) {
