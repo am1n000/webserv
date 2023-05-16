@@ -65,9 +65,6 @@ bool Client::reading()
 	if (this->req->isRequestCompleted())
 	{
 		std::vector<std::string> indexes = this->server->getIndexes();
-       	 std::cout << "---------------"  << std::endl;
-		for (size_t i = 0; i < indexes.size(); i++)
-       	 std::cout << ">  " << indexes[i]  << std::endl;
 		checkServerByName();
 		this->req->prepareRequest();
 		return (true);

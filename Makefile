@@ -21,8 +21,7 @@ SRC=App/Config.cpp App/Server.cpp HTTP/Request.cpp HTTP/Response.cpp \
 		Bootstrap/app.cpp App/multiplexers/Select.cpp \
 		App/multiplexers/Poll.cpp \
 		Bootstrap/app.cpp HTTP/Exceptions.cpp\
-		App/Cgi.cpp \
-		Utils/autoIndex.cpp
+		App/Cgi.cpp
 BUILD_SRC=$(INTRY) $(SRC)
 TEST_SRC=$(TEST_ENTRY) $(SRC)
 OBJ_DIR=objects

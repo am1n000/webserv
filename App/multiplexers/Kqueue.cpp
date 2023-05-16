@@ -33,13 +33,11 @@ void Kqueue::setUpServerConnections()
 		}
 		if (servers[i]->listenToConnections(server_data->getSockFd()))
 			continue;
+		hostPort[servers[i]->getHost()] = servers[i]->getPort();
 		server_data->setIsListeningSock(1);
 		server_data->server = Config::get()->getServers()[i];
-		struct timespec timeout;
-		timeout.tv_sec = 2;
-		timeout.tv_nsec = 0;
 		EV_SET(server_data->getChangePtr(), server_data->getSockFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
-		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, &timeout) != 0)
+		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 		{
 			std::cerr << "error: kevent registration 1" << std::endl;
 			continue;
@@ -49,10 +47,13 @@ void Kqueue::setUpServerConnections()
 
 void Kqueue::monitoringLoop()
 {
+	struct timespec timeout;
+	timeout.tv_sec = 10;
+	timeout.tv_nsec = 0;
 	while (1)
 	{
 		struct kevent events[MAX_EVENTS];
-		int eventCount = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
+		int eventCount = kevent(kq, NULL, 0, events, MAX_EVENTS, &timeout);
 		if (eventCount == -1)
 			std::cerr << "error: kevent monitoring" << std::endl;
 		for (int j = 0; j < eventCount; j++)
