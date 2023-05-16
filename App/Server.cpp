@@ -266,6 +266,10 @@ std::string Location::getUploadDir() const { return this->upload_dir_; }
 bool Location::getAutoIndex() const { return this->auto_index_; }
 
 std::vector<Request_Method_e>& Location::getAllowedMethods() { return this->allowed_methods_; }
+std::vector<std::string> &Location::getIndex()
+{
+	return (this->indexs_);
+}
 /*
 * location getters end
 */

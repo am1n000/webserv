@@ -1,6 +1,12 @@
 #pragma once
 
 #include <string>
+#include "Exceptions.hpp"
+#include <dirent.h>
+#include <sys/stat.h>
+#include <fstream>
+#include <sys/socket.h>
+#include <vector>
 
 namespace helpers {
 std::string trim(const std::string str, char c = ' ');
@@ -12,3 +18,9 @@ std::string timeBasedName(std::string extenssion);
 void        removeComments(std::string& buffer);
 bool        hasSpace(std::string& str);
 };
+
+char *my_tostring(int num);
+std::string get_time();
+void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path);
+std::vector<std::string> splitPaths(std::string fullPath);
+bool  widdinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths);

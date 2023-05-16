@@ -7,7 +7,7 @@ types {
     image/jpeg                                        jpeg;
     application/javascript                           js;
 
-
+    image/x-icon                                     ico;
     video/3gpp                                       3gpp;
     video/3gpp                                       3gp;
     video/mp2t                                       ts;

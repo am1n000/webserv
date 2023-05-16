@@ -72,6 +72,15 @@ class MethodNotAllowedException : public statusCodeExceptions
 		virtual const char* what() const throw();
 };
 
+class ConflictException : public statusCodeExceptions
+{
+	public :
+
+		ConflictException() : statusCodeExceptions("409") {}
+		~ConflictException() throw() {};
+		virtual const char* what() const throw();
+};
+
 class RequestURITooLongException : public statusCodeExceptions
 {
 	public :

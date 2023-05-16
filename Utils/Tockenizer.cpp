@@ -13,7 +13,6 @@
 #include "../Includes/Tockenizer.hpp"
 #include <cctype>
 #include <stdexcept>
-#include <vector>
 
 Tockenizer::Tockenizer() : current_(0) {}
 

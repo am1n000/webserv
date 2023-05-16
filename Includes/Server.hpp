@@ -73,7 +73,7 @@ class Location
     /*
      * location getters
      */
-		std::string getIndex() const;
+		std::vector<std::string> &getIndex();
 		std::map<std::string, std::string> &getCgis();
 		std::string getRedirection() const;
 		bool getAutoIndex() const;

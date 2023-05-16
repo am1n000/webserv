@@ -3,7 +3,6 @@
 #include <exception>
 #include <stdexcept>
 #include <string>
-#include "../Includes/Utils.hpp"
 
 char *my_tostring(int num)
 {
@@ -191,7 +190,6 @@ void helpers::removeComments(std::string &buffer) {
 	  }
   }
 }
-
 bool helpers::hasSpace(std::string& str) {
   for(size_t i(0); i < str.length(); i++) {
     if(std::isspace(str[i]))
@@ -200,29 +198,12 @@ bool helpers::hasSpace(std::string& str) {
   return false;
 };
 
-void  movedPermanentlyHandler(statusCodeExceptions &e, int sock, std::string path)
+void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath)
 {
-	std::string header = "HTTP/1.1 " + e.getValue();
-	header +=  " ";
-	header += e.what();
-	header += "\r\nLocation: ";
-	header += path + "/";
-	header += "\r\nServer: webserver-c\r\n\r\n";
-	send(sock, header.c_str(), header.length(), 0);
-
-}
-
-void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path)
-{
-	if (e.getValue() == "301")
-	{
-		movedPermanentlyHandler(e, sock, path);
-		return;
-	}
-	path = "./HTTPStatusCodes/" + e.getValue();
-	path +=	".html";
+	std::string statusCodePath = "/Users/ael-rhai/Desktop/webserv/HTTPStatusCodes/" + e.getValue();
+	statusCodePath +=	".html";
 	
-	std::ifstream	file(path.c_str(), std::ios::ate);
+	std::ifstream	file(statusCodePath.c_str(), std::ios::ate);
 	if (!file.is_open())
 	{
 		std::cerr << "status code file " << e.getValue() << "  could not be opened!" << std::endl;
@@ -236,8 +217,47 @@ void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path)
 	std::string header = "HTTP/1.1 " + e.getValue();
 	header +=  " ";
 	header += e.what();
+	if (e.getValue() == "301")
+	{
+		header += "\r\nLocation: ";
+		header += ressourcePath + "/";
+	}
 	header += "\r\nServer: webserver-c\r\n\r\n";
 	std::string a = buffer;	
 	header += a;
 	send(sock, header.c_str(), header.length(), 0);
+}
+
+
+std::vector<std::string> splitPaths(std::string fullPath)
+{
+  std::vector<std::string> paths;
+  size_t i = 1;
+  while (i < fullPath.size())
+  {
+    std::string path;
+    while (fullPath[i] != '/' && i < fullPath.size())
+    {
+      path += fullPath[i];
+      i++;
+    }
+    paths.push_back(path);
+    i++;
+  }
+  return (paths);
+}
+
+bool  widdinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths)
+{
+  size_t size = rootPaths.size();
+  for (size_t i = 0; i < paths.size(); i++)
+  {
+    if (paths[i] == "..")
+      rootPaths.pop_back();
+    else
+      rootPaths.push_back(paths[i]);
+    if (rootPaths.size() < size)
+      return (1);
+  }
+  return (0);
 }
