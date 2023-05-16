@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 23:22:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/10 11:33:48 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/16 14:22:45 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,20 +88,11 @@ std::string Tockenizer::getNextScope() {
 }
 
 
-Tockenizer::data_type Tockenizer::getHeaders() {
-  size_type size;
- size_type pos = this->data_.find("\r\n\r\n"); 
-  if (pos == std::string::npos)
-    throw std::runtime_error("header not found");
- size = pos - this->current_; 
-  std::string header = this->data_.substr(this->current_, size);
-  this->current_ += size + 4;
-  return header;
-}
+Tockenizer::size_type Tockenizer::getCurrent() const { return this->current_; }
 
 Tockenizer::data_type Tockenizer::data() { return this->data_; }
 
-bool Tockenizer::end() { return this->current_ >= this->data_.length(); }
+bool Tockenizer::end() { return this->current_ >= this->data_.length() || this->end_; }
 
 Tockenizer::~Tockenizer() {}
 
