@@ -121,6 +121,8 @@ void	Kqueue::read(Client *clientData)
 		EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
 		kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 		close(clientData->getSockFd());
+		delete (clientData);
+
 	}
 }
 
@@ -137,11 +139,12 @@ void	Kqueue::write(Client *clientData)
 		}
 	}
 	catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
-	{		
+	{	
 		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 		EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
 		kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 		close(clientData->getSockFd());
+		delete (clientData);
 	}
 }
 

@@ -155,10 +155,21 @@ void Request::unchunckRequest(std::string& buffer) {
   }
 }
 
+bool Request::outOfRoot()
+{
+    std::string root = this->request_location_->getRoot();
+    std::string ressource = this->getRequestedRessource();
+    std::vector<std::string> paths = splitPaths(this->getRequestedRessource());
+    std::vector<std::string> rootPaths = splitPaths(this->request_location_->getRoot());
+    return (widdinRoot(paths, rootPaths));
+}
+
 void Request::prepareRequest() {
 
   // setting up location if any match otherwise will be setted to null
   this->request_location_ =  this->matchLocation();
+  if (this->outOfRoot())
+    throw (BadRequestException());
 }
 
 /*

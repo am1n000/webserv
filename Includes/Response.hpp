@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include "Request.hpp"
-#include "Utils.hpp"
 #include "Config.hpp"
 
 class Response

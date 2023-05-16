@@ -45,7 +45,6 @@ std::string media;
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <vector>
 #include <unistd.h>
 #include <fcntl.h>
 // #define  MAX_EVENTS 10
@@ -92,6 +91,7 @@ private:
   void parseMetadata_(const std::string& metadata);
   void pushHeaders_();
   void setExtention_();
+  bool outOfRoot();
   
 
 public:

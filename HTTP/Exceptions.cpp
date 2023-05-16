@@ -48,6 +48,11 @@ const char* MethodNotAllowedException::what() const throw()
 	return ("Method Not Allowed");
 }
 
+const char* ConflictException::what() const throw()
+{
+	return ("Conflict");
+}
+
 const char* RequestURITooLongException::what() const throw()
 {
 	return ("Request-URI Too Long");

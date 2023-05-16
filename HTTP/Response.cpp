@@ -10,7 +10,10 @@ Response::Response(Request* request) : _request(request), _bytes_sent(0), _finis
 Response::Response() :_bytes_sent(0), _finished(0), _started(0)
 {};
 
-Response::~Response() {};
+Response::~Response()
+{
+	
+};
 
 void Response::set_file(std::string path)
 {
@@ -95,12 +98,30 @@ int Response::handle_delete(int sock_fd)
 		this->handleCgi(sock_fd);
 		return (1);
 	}
-	std::string header = "HTTP/1.1 204 No Content\r\n\r\n";
-	if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-		throw(InternalServerErrorException());
-	if (std::remove(this->_request->getRequestedFileFullPath().c_str()) != 0)
-		std::cerr << "error : file deletion" << std::endl;
-	return (1);
+    struct stat fileStat;
+	std::string directoryFullPath = this->_request->getRequestedFileFullPath();
+    if (stat(directoryFullPath.c_str(), &fileStat) == 0)
+    {
+        if (S_ISDIR(fileStat.st_mode))
+        {
+            DIR* dirp = opendir(directoryFullPath.c_str());
+            if (dirp == NULL)
+                throw (ForbiddenException());
+            if (this->_request->getRequestedRessource()[this->_request->getRequestedRessource().size() - 1] != '/')
+			{
+                throw (ConflictException());
+			}
+		}
+		std::string header = "HTTP/1.1 204 No Content\r\n\r\n";
+		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+			throw(InternalServerErrorException());
+		if (std::remove(this->_request->getRequestedFileFullPath().c_str()) != 0)
+			throw(ForbiddenException());
+		std::cout << "ok" << std::endl;
+		return (1);
+	}
+	throw(FileNotFoundException());
+	return (0);
 }
 
 
