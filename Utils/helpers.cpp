@@ -200,7 +200,7 @@ bool helpers::hasSpace(std::string& str) {
 
 void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath)
 {
-	std::string statusCodePath = "../HTTPStatusCodes/" + e.getValue();
+	std::string statusCodePath = "./HTTPStatusCodes/" + e.getValue();
 	statusCodePath +=	".html";
 	
 	std::ifstream	file(statusCodePath.c_str(), std::ios::ate);
