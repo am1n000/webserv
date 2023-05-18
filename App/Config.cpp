@@ -19,13 +19,13 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <sys/_types/_size_t.h>
 #include <utility>
 #include <vector>
+#include <cstdlib>
 
 Config::Config() : path_("webserv.conf") {
   try {
-    this->file_ = new std::ifstream(this->path_);
+    this->file_ = new std::ifstream(this->path_.c_str());
     this->setFileSize();
     this->read();
     this->tockenizer_ = new Tockenizer(this->buffer_);
@@ -37,7 +37,7 @@ Config::Config() : path_("webserv.conf") {
 
 Config::Config(const std::string &path) : path_(path) {
   try {
-    this->file_ = new std::ifstream(this->path_);
+    this->file_ = new std::ifstream(this->path_.c_str());
     this->setFileSize();
     this->read();
   } catch (...) {
@@ -187,7 +187,7 @@ ConfigFile::ConfigFile() {
 
 ConfigFile::ConfigFile(const std::string &path) {
   try {
-    file_.open(path);
+    file_.open(path.c_str());
     try {
       this->readFile();
       this->close();

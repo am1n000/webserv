@@ -15,6 +15,7 @@
 #define TOCKENIZER_HPP
 #include <string>
 #include <iostream>
+#include <vector>
 
 class Tockenizer {
 public:

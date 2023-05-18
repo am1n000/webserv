@@ -40,7 +40,6 @@ std::string media;
 } s_file;
 
 // also must be included on the global header 
-#include <sys/event.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -1,161 +1,164 @@
 #include "../../Includes/multiplexers/Kqueue.hpp"
 
-int	Kqueue::kq = kqueue();
-Kqueue*	Kqueue::instance = nullptr;
+#ifdef __APPLE__
+	int	Kqueue::kq = kqueue();
+	Kqueue*	Kqueue::instance = nullptr;
 
-Kqueue::Kqueue() {}
+	Kqueue::Kqueue() {}
 
-Kqueue::~Kqueue() {}
+	Kqueue::~Kqueue() {}
 
-Kqueue*	Kqueue::getInstance()
-{
-	if (instance == nullptr)
-		instance = new Kqueue;
-	return (instance);
-}
-
-void Kqueue::setUpServerConnections()
-{
-	std::vector<Server*> &servers = Config::get()->getServers();
-	std::map<std::string, std::string> hostPort;
-	for (size_t i = 0; i < servers.size(); i++)
+	Kqueue*	Kqueue::getInstance()
 	{
-		Client *server_data = new Client;
-		server_data->setSockFd(servers[i]->createSocket());
-		if (server_data->getSockFd() == -1)
-			continue;
-		if (servers[i]->bindSocket(server_data->getSockFd()))
+		if (instance == nullptr)
+			instance = new Kqueue;
+		return (instance);
+	}
+
+	void Kqueue::setUpServerConnections()
+	{
+		std::vector<Server*> &servers = Config::get()->getServers();
+		std::map<std::string, std::string> hostPort;
+		for (size_t i = 0; i < servers.size(); i++)
 		{
-			if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
+			Client *server_data = new Client;
+			server_data->setSockFd(servers[i]->createSocket());
+			if (server_data->getSockFd() == -1)
 				continue;
-			std::cerr << "error :bind" << std::endl;
-			exit(1);
-		}
-		if (servers[i]->listenToConnections(server_data->getSockFd()))
-			continue;
-		hostPort[servers[i]->getHost()] = servers[i]->getPort();
-		server_data->setIsListeningSock(1);
-		server_data->server = Config::get()->getServers()[i];
-		EV_SET(server_data->getChangePtr(), server_data->getSockFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
-		if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
-		{
-			std::cerr << "error: kevent registration 1" << std::endl;
-			continue;
-		}
-    }
-}
-
-void Kqueue::monitoringLoop()
-{
-	struct timespec timeout;
-	timeout.tv_sec = 10;
-	timeout.tv_nsec = 0;
-	while (1)
-	{
-		struct kevent events[MAX_EVENTS];
-		int eventCount = kevent(kq, NULL, 0, events, MAX_EVENTS, &timeout);
-		if (eventCount == -1)
-			std::cerr << "error: kevent monitoring" << std::endl;
-		for (int j = 0; j < eventCount; j++)
-		{
-			Client *tempData = (Client *)events[j].udata;
-			if (tempData->getIsListeningSock())
-				acceptConnections(tempData);
-			else
-			{ 
-				if (events[j].filter == EVFILT_READ)
-					read(tempData);
-				else
-					write(tempData);
-				break;
+			if (servers[i]->bindSocket(server_data->getSockFd()))
+			{
+				if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
+					continue;
+				std::cerr << "error :bind" << std::endl;
+				exit(1);
+			}
+			if (servers[i]->listenToConnections(server_data->getSockFd()))
+				continue;
+			hostPort[servers[i]->getHost()] = servers[i]->getPort();
+			server_data->setIsListeningSock(1);
+			server_data->server = Config::get()->getServers()[i];
+			EV_SET(server_data->getChangePtr(), server_data->getSockFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server_data);
+			if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
+			{
+				std::cerr << "error: kevent registration 1" << std::endl;
+				continue;
 			}
 		}
 	}
-}
 
-void Kqueue::acceptConnections(Client *clientData)
-{
-	int client_sock = accept(clientData->getSockFd(),
-		reinterpret_cast<sockaddr *>(&(clientData->server->getHostAddr())),
-		reinterpret_cast<socklen_t *>(&(clientData->server->getHostAddrlen())));
-	if (client_sock == -1)
-		std::cerr << "error: accept server " << std::endl;
-	else
+	void Kqueue::monitoringLoop()
 	{
 		struct timespec timeout;
-		timeout.tv_sec = 2;
+		timeout.tv_sec = 10;
 		timeout.tv_nsec = 0;
-		Client *u_data = new Client(client_sock, 0);
-		u_data->server = clientData->server;
-    	u_data->req->setServer(clientData->server);
-		EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
-		if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, &timeout) != 0)
-			std::cerr << "error: kevent registration 2" << std::endl;
+		while (1)
+		{
+			struct kevent events[MAX_EVENTS];
+			int eventCount = kevent(kq, NULL, 0, events, MAX_EVENTS, &timeout);
+			if (eventCount == -1)
+				std::cerr << "error: kevent monitoring" << std::endl;
+			for (int j = 0; j < eventCount; j++)
+			{
+				Client *tempData = (Client *)events[j].udata;
+				if (tempData->getIsListeningSock())
+					acceptConnections(tempData);
+				else
+				{ 
+					if (events[j].filter == EVFILT_READ)
+						read(tempData);
+					else
+						write(tempData);
+					break;
+				}
+			}
+		}
 	}
-}
 
-
-void	Kqueue::read(Client *clientData)
-{
-	try
+	void Kqueue::acceptConnections(Client *clientData)
 	{
-		if (clientData->reading())
+		int client_sock = accept(clientData->getSockFd(),
+			reinterpret_cast<sockaddr *>(&(clientData->server->getHostAddr())),
+			reinterpret_cast<socklen_t *>(&(clientData->server->getHostAddrlen())));
+		if (client_sock == -1)
+			std::cerr << "error: accept server " << std::endl;
+		else
 		{
 			struct timespec timeout;
 			timeout.tv_sec = 2;
 			timeout.tv_nsec = 0;
-			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ,
-					EV_DELETE, 0, 0, clientData);
-			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
-			std::cerr << "error: kevent 3" << std::endl;
-			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE,
-					EV_ADD | EV_ENABLE,0,0, clientData);
-			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, &timeout) == -1)
-			std::cerr << "error: kevent 33" << std::endl;
+			Client *u_data = new Client(client_sock, 0);
+			u_data->server = clientData->server;
+			u_data->req->setServer(clientData->server);
+			EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
+			if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, &timeout) != 0)
+				std::cerr << "error: kevent registration 2" << std::endl;
 		}
-
 	}
-	catch (statusCodeExceptions &e)
-	{
-		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
-		EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
-		kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
-		close(clientData->getSockFd());
-		delete (clientData);
 
-	}
-}
 
-void	Kqueue::write(Client *clientData)
-{
-	try
+	void	Kqueue::read(Client *clientData)
 	{
-		if (clientData->sending())
+		try
 		{
+			if (clientData->reading())
+			{
+				struct timespec timeout;
+				timeout.tv_sec = 2;
+				timeout.tv_nsec = 0;
+				EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ,
+						EV_DELETE, 0, 0, clientData);
+				if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
+				std::cerr << "error: kevent 3" << std::endl;
+				EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE,
+						EV_ADD | EV_ENABLE,0,0, clientData);
+				if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, &timeout) == -1)
+				std::cerr << "error: kevent 33" << std::endl;
+			}
+
+		}
+		catch (statusCodeExceptions &e)
+		{
+			displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
+			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
+			kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
+			close(clientData->getSockFd());
+			delete (clientData);
+
+		}
+	}
+
+	void	Kqueue::write(Client *clientData)
+	{
+		try
+		{
+			if (clientData->sending())
+			{
+				EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
+				kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
+				close(clientData->getSockFd());
+				delete (clientData);
+			}
+		}
+		catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
+		{	
+			displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
 			kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 			close(clientData->getSockFd());
 			delete (clientData);
 		}
 	}
-	catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
-	{	
-		displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
-		EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
-		kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
-		close(clientData->getSockFd());
-		delete (clientData);
-	}
-}
 
 
-void Kqueue::serve()
-{
-    if (kq == -1)
+	void Kqueue::serve()
 	{
-		std::cerr << "error: kqueue" << std::endl;
-		return;
+		if (kq == -1)
+		{
+			std::cerr << "error: kqueue" << std::endl;
+			return;
+		}
+		setUpServerConnections();
+		monitoringLoop();
 	}
-	setUpServerConnections();
-	monitoringLoop();
-}
+
+#endif

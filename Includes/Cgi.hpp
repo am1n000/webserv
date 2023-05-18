@@ -17,7 +17,7 @@
 #include "Server.hpp"
 #include <fstream>
 #include <iostream>
-#include <sys/_types/_size_t.h>
+#include <ctime>
 #include <vector>
 
 class Cgi {

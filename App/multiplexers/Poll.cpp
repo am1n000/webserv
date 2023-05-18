@@ -36,6 +36,7 @@ void Poll::setUpServerConnections()
 		}
 		if (servers[i]->listenToConnections(server_data->getSockFd()))
 			continue;
+		hostPort[servers[i]->getHost()] = servers[i]->getPort();
 		server_data->setIsListeningSock(1);
 		server_data->server = servers[i];
 		clientsData.push_back(server_data);
@@ -85,6 +86,7 @@ void Poll::acceptConnections(Client *clientData)
     else
     {
 		Client *new_client = new Client(client_sock, 0);
+		new_client->server = clientData->server;
     	new_client->req->setServer(clientData->server);
 		clientsData.push_back(new_client);
 		struct pollfd pfd;

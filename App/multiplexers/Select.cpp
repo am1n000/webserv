@@ -40,6 +40,7 @@ void Select::setUpServerConnections()
 		}
 		if (servers[i]->listenToConnections(server_data->getSockFd()))
 			continue;
+		hostPort[servers[i]->getHost()] = servers[i]->getPort();
 		server_data->setIsListeningSock(1);
 		server_data->server = servers[i];
 		FD_SET(server_data->getSockFd(), &readMaster);
@@ -100,6 +101,7 @@ void Select::acceptConnections(Client *clientData)
     else
     {
         Client *new_client = new Client(client_sock, 0);
+		new_client->server = clientData->server;
     	new_client->req->setServer(clientData->server);
         clientsData.push_back(new_client);
         FD_SET(client_sock, &readMaster);

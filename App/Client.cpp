@@ -5,7 +5,9 @@
 #include "../Includes/Cgi.hpp"
 
 Client::Client() {
-	this->_changePtr = new struct kevent;
+	#ifdef __APPLE__
+		this->_changePtr = new struct kevent;
+	#endif
 	this->req = new Request;
 	this->resp = new Response(this->req);
 }
@@ -13,15 +15,20 @@ Client::Client() {
 Client::Client(int sockfd, bool listen_sock)
 	: _sockFd(sockfd), _isListeningSock(listen_sock),
 		_postFileCreated(0) {
-	this->_changePtr = new struct kevent;
+	#ifdef __APPLE__
+		this->_changePtr = new struct kevent;
+	#endif
 	this->req = new Request;
 	this->resp = new Response(this->req);
 }
 
-Client::~Client() { 
-  delete (this->_changePtr);
-  delete this->req;
-  delete this->resp;
+Client::~Client()
+{ 
+	#ifdef __APPLE__
+		delete (this->_changePtr);
+	#endif
+	delete this->req;
+	delete this->resp;
 }
 
 bool Client::sending()
@@ -79,7 +86,9 @@ bool Client::getIsListeningSock() { return (this->_isListeningSock); }
 
 bool Client::getpostFileCreated() { return (this->_postFileCreated); }
 
-struct kevent *Client::getChangePtr() { return (this->_changePtr); }
+#ifdef __APPLE__
+	struct kevent *Client::getChangePtr() { return (this->_changePtr); }
+#endif
 
 
 //.setters
@@ -100,7 +109,9 @@ void Client::setpostFileCreated(bool postFileCreated)
 	this->_postFileCreated = postFileCreated;
 }
 
-void Client::setChangePtr()
-{
-	this->_changePtr = new struct kevent;
-}
+#ifdef __APPLE__
+	void Client::setChangePtr()
+	{
+		this->_changePtr = new struct kevent;
+	}
+#endif

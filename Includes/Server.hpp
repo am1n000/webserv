@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fcntl.h>
 #include <netdb.h>
+#include <cstring>
 
 class Location
 {

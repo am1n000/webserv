@@ -3,7 +3,6 @@
 
 
 #include <sys/types.h>
-#include <sys/event.h>
 #include <sys/time.h>
 #include <iostream>
 #include "../Client.hpp"
@@ -12,7 +11,7 @@
 class Multiplexer
 {
 	private:
-		virtual void setUpServerConnections() = 0;
+		virtual void 	setUpServerConnections() = 0;
 		virtual void	monitoringLoop() = 0;
 		virtual void    acceptConnections(Client *tempData) = 0;
 		virtual void	read(Client *tempData) = 0;

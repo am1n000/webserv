@@ -140,7 +140,7 @@ std::vector<std::string> Server::dictionary_(Server::pdictionary_,
 											std::end(Server::pdictionary_));
 
 bool Server::inDictinary(const std::string &token) {
-	for (std::vector<std::string const>::iterator it =
+	for (std::vector<std::string>::iterator it =
 			 Server::dictionary_.begin();
 		 it != Server::dictionary_.end(); it++) {
 	if (*it == token)
@@ -303,11 +303,13 @@ std::vector<std::string> &Location::getIndex()
 			return (true);
 		}
 		opt = 1;
-		if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0)
-		{
-			std::cerr << "error: setsockopt" << std::endl;
-			return (true);
-		}
+		#ifdef __APPLE__
+			if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0)
+			{
+				std::cerr << "error: setsockopt" << std::endl;
+				return (true);
+			}
+		#endif
 		if (bind(sock, reinterpret_cast<struct sockaddr
 				*>(&this->_hostAddr), this->_hostAddrlen) != 0)
 			return (true);

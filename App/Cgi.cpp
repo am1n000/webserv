@@ -18,7 +18,6 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
-#include <sys/_types/_size_t.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>

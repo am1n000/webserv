@@ -1,7 +1,12 @@
 #ifndef CLIENT_HPP
-
 #define CLIENT_HPP
 
+
+#ifdef	__APPLE__
+	#include <sys/event.h>
+#elif	__linux__
+	#include <sys/epoll.h>
+#endif
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
@@ -14,7 +19,9 @@ class Client
 		int 				_sockFd;
 		bool				_isListeningSock;
 		bool				_postFileCreated;
-		struct kevent		*_changePtr;
+		#ifdef __APPLE__
+			struct kevent		*_changePtr;
+		#endif
 		void	checkServerByName();
 
 	public :
@@ -32,13 +39,17 @@ class Client
 		int					getSockFd();
 		bool				getIsListeningSock();
 		bool				getpostFileCreated();
-		struct kevent*		getChangePtr();
+		#ifdef __APPLE__
+			struct kevent*		getChangePtr();
+		#endif
 
 		//.setters
 		void				setSockFd(int sockFd);
 		void				setIsListeningSock(int isListeningSock);
 		void				setpostFileCreated(bool postFileCreated);
-		void				setChangePtr();
+		#ifdef __APPLE__
+			void				setChangePtr();
+		#endif
 };
 
 
