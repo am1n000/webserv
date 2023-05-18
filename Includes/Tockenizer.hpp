@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 22:14:56 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/16 14:22:29 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/07 10:21:20 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,9 @@ public:
   typedef data_type &reference;
   typedef data_type *pointer;
   typedef const std::string& const_reference;
-  protected:
+  private:
     data_type data_;
     size_type current_;
-    bool      end_;
      
 public:
   Tockenizer();
@@ -34,8 +33,8 @@ public:
   data_type  getLine();
   data_type getNoneEmptyLine();
   data_type getNextToken(char c = ' ');
+  data_type getHeaders();
   data_type getNextScope();
-  size_type getCurrent() const;
   data_type data();
   bool  end();
   void skipLine();
