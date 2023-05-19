@@ -51,7 +51,6 @@
 
 	void Epoll::monitoringLoop()
 	{
-		std::cout << "from first try" << std::endl;
 		while (1)
 		{
 			struct epoll_event events[MAX_EVENTS];

@@ -200,32 +200,27 @@ bool helpers::hasSpace(std::string& str) {
 
 void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath)
 {
-	std::string statusCodePath = "./HTTPStatusCodes/" + e.getValue();
-	statusCodePath +=	".html";
-	
-	std::ifstream	file(statusCodePath.c_str(), std::ios::ate);
-	if (!file.is_open())
-	{
-		std::cerr << "status code file " << e.getValue() << "  could not be opened!" << std::endl;
-		return;
-	}
-    int len = file.tellg();
-    file.seekg(0, std::ios::beg);
-	char buffer[len];
-	file.read(buffer, len);
-	buffer[len] = '\0';
-	std::string header = "HTTP/1.1 " + e.getValue();
-	header +=  " ";
-	header += e.what();
+	std::string statusCodeResponse = "HTTP/1.1 " + e.getValue();
+	statusCodeResponse +=  " ";
+	statusCodeResponse += e.what();
 	if (e.getValue() == "301")
 	{
-		header += "\r\nLocation: ";
-		header += ressourcePath + "/";
+		statusCodeResponse += "\r\nLocation: ";
+		statusCodeResponse += ressourcePath + "/";
 	}
-	header += "\r\nServer: webserver-c\r\n\r\n";
-	std::string a = buffer;	
-	header += a;
-	send(sock, header.c_str(), header.length(), 0);
+	statusCodeResponse += "\r\nServer: webserv\r\n\r\n";
+
+	statusCodeResponse += "<!DOCTYPE html>\n<html>\n<head><title>";
+	statusCodeResponse += e.getValue();
+	statusCodeResponse += " ";
+	statusCodeResponse += e.what();
+	statusCodeResponse += "</title></head>\n<body>\n<center><h1>";
+	statusCodeResponse += e.getValue();
+	statusCodeResponse += " ";
+	statusCodeResponse += e.what();
+	statusCodeResponse += "</h1></center>\n<hr><center>webserv</center>\n</body>\n</html>\n";
+	std::cout << statusCodeResponse << std::endl;
+	send(sock, statusCodeResponse.c_str(), statusCodeResponse.length(), 0);
 }
 
 

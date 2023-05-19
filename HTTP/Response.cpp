@@ -216,7 +216,9 @@ std::string	Response::directoryCheck(int sock_fd)
 			std::string indexFile = "HTTP/1.1 200 OK\r\nServer: Almo7arrikX\r\nContent-type: text/html\r\nLast-Modified: ";
 			indexFile += get_time();
 			indexFile += "\r\n\r\n";
-			indexFile += "<!DOCTYPE html>\n<html>\n<head>\n	<title>Hello World</title>\n</head>\n<body>\n	<h1>Hello World</h1>\n	<table style=\"text-align: left;\">\n		<tr>\n			<th>Name</th>\n			<th>Last modified</th>\n			<th>Size</th>\n		</tr>\n";
+			indexFile += "<!DOCTYPE html>\n<html>\n<head>\n<title>Index</title>\n</head>\n<body>\n<h1>Index of " + this->_request->getRequestedRessource();
+			std::cout << this->_request->getRequestedRessource() << std::endl;
+			indexFile += "</h1>\n<table style=\"text-align: left;\">\n<tr>\n<th>Name</th>\n<th>Last modified</th>\n<th>Size</th>\n</tr>\n";
 			std::vector<std::string> content = this->getDirectoryContent(dirp);
 			std::string checkIndex = this->indexCheck(content);
 			if (checkIndex.size())
@@ -232,15 +234,15 @@ std::string	Response::directoryCheck(int sock_fd)
 					std::tm* modified_tm = std::localtime(&modified_time);
 					char modified_str[20];
 					std::strftime(modified_str, sizeof(modified_str), "%Y-%m-%d %H:%M:%S", modified_tm);
-					indexFile += "		<tr>\n			<td><a href=\"" + this->_request->getRequestedRessource();
+					indexFile += "<tr>\n<td><a href=\"" + this->_request->getRequestedRessource();
 					indexFile += content[i] + "\">";
 					indexFile += content[i] + "</a></td>\n";
-					indexFile += "			<td>";
+					indexFile += "<td>";
 					indexFile += modified_str;
 					indexFile += "</td>\n";
-					indexFile += "			<td>";
+					indexFile += "<td>";
 					indexFile += my_tostring(fileStat.st_size);
-					indexFile += "</td>\n		</tr>\n";
+					indexFile += "</td>\n</tr>\n";
 				}
 			}
             indexFile += "	</table>\n</body>\n</html>";
