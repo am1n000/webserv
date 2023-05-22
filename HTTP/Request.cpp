@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/15 13:13:10 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 10:19:52 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,19 +268,11 @@ Location* Request::matchLocation() {
  */
 
 void Request::parseHeader() {
-  if (!this->isHeaderCompleted())
-	return;
-  std::string token;
-  this->tockenizer_ = new Tockenizer(this->request_string_);
-  token = this->tockenizer_->getLine();
-  this->parseMetadata_(token);
-  try {
-	this->header_string_ = this->tockenizer_->getHeaders();
-	this->pushHeaders_();
-  } catch (std::runtime_error &e) {
-	// just printing the error code for now
-	std::cerr << "Error: " << e.what() << std::endl;
-  }
+  if(!this->isHeaderCompleted())
+    return;
+  this->tokenizer_ = new RequestTokenizer(this->request_string_);
+  this->parseMetadata_(this->tokenizer_->getLine());
+  this->request_headers_ = this->tokenizer_->parseHeaders();
 }
 
 /*
@@ -329,8 +321,9 @@ void Request::setExtention_() {
  * setters
  */
 
+// to be removed
 void Request::setHeaderString() {
-  this->header_string_ = this->tockenizer_->getHeaders();
+  // this->header_string_ = this->tockenizer_->getHeaders();
 }
 
 void Request::setMethod(const std::string &method) {
@@ -363,7 +356,6 @@ void Request::setRequestUri(const std::string &uri) {
   }
   // will be setted on the request completed hook
   this->setExtention_();
-  // this->test();
 }
 
 void Request::setRequestedRessource(const std::string &uri)
@@ -506,5 +498,8 @@ void Request::headerCompletedEventHook() {
  */
 
 void Request::test() {
-  this->prepareRequest();
+  for(std::map<std::string, std::string>::iterator it = this->request_headers_.begin(); it != this->request_headers_.end(); it++)
+    std::cout << "key: " << it->first << " value: " << it->second << std::endl;
+  // std::cout << "header parsed" << std::enl;
+  // this->prepareRequest();
 }

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/13 18:50:04 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 10:20:32 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,11 @@
 #include "Settings.hpp"
 #include "../Includes/Exceptions.hpp"
 #include "../Includes/helpers.hpp"
+#include "../Includes/RequestTokenizer.hpp"
 
 #define BUFFER_SIZE 4096
 #define REQUEST_SEPARATOR "\r\n\r\n"
-#define TMP_VAR_PATH "/Users/ael-rhai/Desktop/webserv/var/tmp/"
+#define TMP_VAR_PATH "/tmp/"
  
 
 // must be included on the response, i defined it here to avoid conflit
@@ -55,7 +56,7 @@ public:
   typedef std::map<std::string, std::string> string_map_type;
 
 private:
-  Tockenizer *tockenizer_;
+  RequestTokenizer *tokenizer_;
   std::string request_string_;
   std::string header_string_;
   std::string body_string_;

@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/05/12 20:19:46 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/05/19 12:11:52 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,8 @@ SRC=App/Config.cpp App/Server.cpp HTTP/Request.cpp HTTP/Response.cpp \
 		Bootstrap/app.cpp App/multiplexers/Select.cpp \
 		App/multiplexers/Poll.cpp App/multiplexers/Epoll.cpp \
 		Bootstrap/app.cpp HTTP/Exceptions.cpp\
-		App/Cgi.cpp
+		App/Cgi.cpp \
+		Utils/RequestTokenizer.cpp
 BUILD_SRC=$(INTRY) $(SRC)
 TEST_SRC=$(TEST_ENTRY) $(SRC)
 OBJ_DIR=objects
