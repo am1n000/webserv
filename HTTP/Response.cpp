@@ -12,7 +12,7 @@ Response::Response() : _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0)
 
 Response::~Response()
 {
-	
+	delete (this->_cgi);
 };
 
 void Response::set_file(std::string path)
@@ -135,28 +135,21 @@ bool Response::handleCgi(int sock_fd)
 	}
 		if (f.is_open())
 		f.close();
-		Cgi cgi(this->_request);
-		cgi.executeCgi();
+		this->_cgi = new Cgi(this->_request);
+		this->_cgi->executeCgi();
 
-		cgi.closeFiles();
-		this->_cgi_fd = open(cgi.getResponseFileName().c_str(), O_RDONLY);
-		std::cout <<"fd "<< _cgi_fd << std::endl;
+		this->_cgi->closeFiles();
+		this->_cgi_fd = open(this->_cgi->getResponseFileName().c_str(), O_RDONLY);
 		std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
 		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-		{
-			std::cout << "1" << std::endl;
 			throw(InternalServerErrorException());
-		}
   }
 
     char buffer[size];
     int i = 0;
 	i = read(this->_cgi_fd, buffer, size);
 	if (i == -1)
-	{
-		std::cout << "2   >  "<< this->_cgi_fd << std::endl;
 		throw(InternalServerErrorException());
-	}
 	if (i == 0)
 	{
 		close (this->_cgi_fd);
@@ -164,10 +157,7 @@ bool Response::handleCgi(int sock_fd)
 	}
 	buffer[i] = 0;
 	if (send(sock_fd, buffer, i, 0) < 0)
-		{
-			std::cout << "3" << std::endl;
-			throw(InternalServerErrorException());
-		}
+		throw(InternalServerErrorException());
 	return (0);
 }
 

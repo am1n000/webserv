@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Request.hpp"
 #include "Config.hpp"
+#include "Cgi.hpp"
 
 class Response
 {
@@ -18,6 +19,7 @@ class Response
 		std::string     			_filename;
 		std::string     			_mime_type;
 		std::ifstream   			_file;
+		Cgi							*_cgi;
 		
 
 	private:

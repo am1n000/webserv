@@ -28,8 +28,6 @@ Cgi::Cgi(Request* request): request_(request) {
 }
 
 Cgi::~Cgi() {
-  close(this->request_fd_);
-  close(this->response_fd_);
   remove(this->response_file_name_.c_str());
 }
 
