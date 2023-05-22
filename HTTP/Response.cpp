@@ -4,10 +4,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-Response::Response(Request* request) : _request(request), _bytes_sent(0), _finished(0), _started(0), _hasCgi(false)
+Response::Response(Request* request) : _request(request),  _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0), _hasCgi(false)
 {};
 
-Response::Response() :_bytes_sent(0), _finished(0), _started(0)
+Response::Response() : _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0)
 {};
 
 Response::~Response()
@@ -37,10 +37,7 @@ void Response::set_file(std::string path)
 int Response::handle_get(int sock_fd)
 {
 	if(this->_request->hasCgi())
-	{
-		this->handleCgi(sock_fd);
-		return 1;
-	}
+		return (this->handleCgi(sock_fd));
 	if (this->_started == 0)
 	{
 		std::string dirCheck = directoryCheck(sock_fd);
@@ -80,10 +77,8 @@ int Response::handle_get(int sock_fd)
 
 int Response::handle_post(int sock_fd)
 {
-  if (this->_request->hasCgi()) {
-	this->handleCgi(sock_fd);
-	return (1);
-  }
+  if (this->_request->hasCgi())
+	return (this->handleCgi(sock_fd));
   else 
 	std::cout << "no cgi " << std::endl;
   std::string header =
@@ -96,10 +91,9 @@ int Response::handle_post(int sock_fd)
 
 int Response::handle_delete(int sock_fd)
 {
-	if (this->_request->hasCgi()) {
-		this->handleCgi(sock_fd);
-		return (1);
-	}
+	if (this->_request->hasCgi())
+		return (this->handleCgi(sock_fd));
+
     struct stat fileStat;
 	std::string directoryFullPath = this->_request->getRequestedFileFullPath();
     if (stat(directoryFullPath.c_str(), &fileStat) == 0)
@@ -126,39 +120,55 @@ int Response::handle_delete(int sock_fd)
 }
 
 
-void Response::handleCgi(int sock_fd) {
+bool Response::handleCgi(int sock_fd)
+{
   int size = 1024;
-  std::fstream f(this->_request->getRequestedFileFullPath().c_str());
-  if(!f.good()) {
-    std::cerr << "file not found" << std::endl;
-    if (f.is_open())
-      f.close();
-    throw FileNotFoundException();
-  }
-    if (f.is_open())
-      f.close();
-    Cgi cgi(this->_request);
-    cgi.executeCgi();
+  if (this->_cgi_fd == -2)
+  {
+	std::fstream f(this->_request->getRequestedFileFullPath().c_str());
+	if(!f.good())
+	{
+		std::cerr << "file not found" << std::endl;
+		if (f.is_open())
+		f.close();
+		throw FileNotFoundException();
+	}
+		if (f.is_open())
+		f.close();
+		Cgi cgi(this->_request);
+		cgi.executeCgi();
 
-    cgi.closeFiles();
-    int fd = open(cgi.getResponseFileName().c_str(), O_RDONLY);
+		cgi.closeFiles();
+		this->_cgi_fd = open(cgi.getResponseFileName().c_str(), O_RDONLY);
+		std::cout <<"fd "<< _cgi_fd << std::endl;
+		std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
+		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+		{
+			std::cout << "1" << std::endl;
+			throw(InternalServerErrorException());
+		}
+  }
 
     char buffer[size];
-
     int i = 0;
-    // hardcoded for now
-    std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
-    send(sock_fd, header.c_str(), header.length(), 0);
-    /*
-     * this loop blocking the server's multiplexing
-     * working now only for test
-     * will be handled lather
-     */
-    do {
-                i = read(fd, buffer, size);
-                buffer[i] = 0;
-                send(sock_fd, buffer, i, 0);
-  } while (i > 0);
+	i = read(this->_cgi_fd, buffer, size);
+	if (i == -1)
+	{
+		std::cout << "2   >  "<< this->_cgi_fd << std::endl;
+		throw(InternalServerErrorException());
+	}
+	if (i == 0)
+	{
+		close (this->_cgi_fd);
+		return (1);
+	}
+	buffer[i] = 0;
+	if (send(sock_fd, buffer, i, 0) < 0)
+		{
+			std::cout << "3" << std::endl;
+			throw(InternalServerErrorException());
+		}
+	return (0);
 }
 
 
