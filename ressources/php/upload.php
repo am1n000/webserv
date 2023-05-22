@@ -1,4 +1,7 @@
 <?php
+print_r($_FILES);
+print_r($_SERVER);
+return;
 
 $target_dir = "/Users/ael-rhai/Desktop/webserv/ressources/php/uploads/";
 $file_name =  basename($_FILES["file"]["name"]);
