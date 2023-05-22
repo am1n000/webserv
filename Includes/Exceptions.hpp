@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/29 17:59:26 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/03/29 18:00:37 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 11:00:57 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,16 @@ class NotImplementedException : public statusCodeExceptions
 		virtual const char* what() const throw();
 };
 
+
+class BadConfigException {
+private:
+  std::string message_;
+public:
+  BadConfigException() throw() ;
+  BadConfigException(const std::string message) throw() ;
+  ~BadConfigException() throw();
+  virtual const char* what() const throw();
+};
 
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/22 10:19:52 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 11:58:49 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
  */
 
 Request::Request()
-    : header_completed_(false), body_completed_(false),
+    :tokenizer_(NULL), header_completed_(false), body_completed_(false),
       body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE),
       request_location_(NULL),
       chunk_size_(0), chunk_received_(0),
@@ -35,7 +35,7 @@ Request::Request()
 {}
 
 Request::Request(Request::size_type buffer_size)
-    : header_completed_(false), body_completed_(false), body_size_(0),
+    : tokenizer_(NULL), header_completed_(false), body_completed_(false), body_size_(0),
       buffer_size(buffer_size),
       request_location_(NULL),
       chunk_size_(0), chunk_received_(0),
@@ -44,7 +44,7 @@ Request::Request(Request::size_type buffer_size)
 
 Request::Request(char *buffer, Request::size_type recieved_size,
                  Request::size_type buffer_size)
-    : request_string_(buffer, recieved_size), header_completed_(false),
+    : tokenizer_(NULL), request_string_(buffer, recieved_size), header_completed_(false),
       body_completed_(false), buffer_size(buffer_size),
       request_location_(NULL),
       chunk_size_(0), chunk_received_(0),
@@ -55,6 +55,10 @@ Request::~Request() {
   if(this->body_file_) {
 	if(this->body_file_->is_open())
 	  this->body_file_->close();
+  // if(this->request_location_)
+  //     delete this->request_location_;
+  if(this->tokenizer_)
+      delete this->tokenizer_;
 	delete this->body_file_;
 	remove(this->body_file_name_.c_str());
   }
@@ -321,26 +325,12 @@ void Request::setExtention_() {
  * setters
  */
 
-// to be removed
-void Request::setHeaderString() {
-  // this->header_string_ = this->tockenizer_->getHeaders();
-}
-
 void Request::setMethod(const std::string &method) {
-  if (method == "")
-	throw BadRequestException();
-  try {
+  if (method.length() == 0)
+	  throw BadRequestException();
 	this->request_method_ = Settings::get()->indexOfRequestMethod(method);
   if(!this->isMethodAllowed())
-      throw InternalServerErrorException();
-  //     std::cout << "method not allowed" << std::endl;
-    // std::cerr << "method not allowed" << std::endl;
-  } catch (std::runtime_error &e) {
-	// for now as place hoder i will print the error
-	std::cerr << e.what() << std::endl;
-	// lather on i will throw the right exception
-	// that will retur the right status code to the client
-  }
+      throw MethodNotAllowedException();
 }
 
 void Request::setRequestUri(const std::string &uri) {
@@ -358,14 +348,15 @@ void Request::setRequestUri(const std::string &uri) {
   this->setExtention_();
 }
 
-void Request::setRequestedRessource(const std::string &uri)
-{
+void Request::setRequestedRessource(const std::string &uri) {
+  if(uri.length() == 0)
+    throw BadRequestException();
 	this->requestedRessource_ = uri;
 }
 
 void Request::setHttpVersion(const std::string &version) {
-  if (version == "")
-	throw BadRequestException();
+  if (version.length() == 0)
+	  throw BadRequestException();
   this->http_version_ = version;
 }
 
@@ -388,19 +379,6 @@ void Request::setServer(Server *server) {
 
 
 int Request::getRequestMethod() const { return this->request_method_; }
-
-s_file Request::getFile() {
-  this->file_.filename = this->server_->getRoot() + this->request_uri_;
-  std::string extention =
-	  this->file_.filename.substr(this->file_.filename.rfind(".") + 1);
-  std::map<std::string, std::string>::iterator it;
-  it = Config::get()->getMimeTypes().find(extention);
-  if (it == Config::get()->getMimeTypes().end())
-	this->file_.media = "text/plain";
-  else
-	this->file_.media = it->second;
-  return this->file_;
-}
 
 Request::size_type Request::getContentLength() {
   // temp till i figure out where to put it
@@ -443,8 +421,6 @@ std::string Request::getRequestRoot() const {
 
 std::string Request::getRequestedFileFullPath() const {
   std::string root = this->getRequestRoot();
-  // if (root[root.length() - 1] == '/')
-  //   return root.substr(0, root.length() - 1) + this->request_uri_;
   return root + this->request_uri_;
 }
 
@@ -473,6 +449,7 @@ std::string &Request::getBodyFileName() { return this->body_file_name_; }
 std::string& Request::getQueryParams() { return this->query_parameters_; }
 
 Location *Request::getLocation() { return this->request_location_; }
+
 /*
  * END getters
  */
@@ -483,14 +460,6 @@ Location *Request::getLocation() { return this->request_location_; }
 
 void Request::headerCompletedEventHook() {
   this->parseHeader();
-  // to test chunked request before parsing the request body
-  // if (this->isChuncked()) {
-  //   std::cout << "request chunked" << std::endl;
-  //   exit(0);
-  // } else {
-  //   std::cout << "normal request" << std::endl;
-  // }
-
 }
 
 /*
@@ -498,8 +467,4 @@ void Request::headerCompletedEventHook() {
  */
 
 void Request::test() {
-  for(std::map<std::string, std::string>::iterator it = this->request_headers_.begin(); it != this->request_headers_.end(); it++)
-    std::cout << "key: " << it->first << " value: " << it->second << std::endl;
-  // std::cout << "header parsed" << std::enl;
-  // this->prepareRequest();
 }

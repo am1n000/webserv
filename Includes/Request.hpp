@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/22 10:20:32 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 11:50:19 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,10 @@
 // adding classes header to avoid recursive inclusion
 class Server;
 class Location;
-typedef  struct t_file {
-  std::string  filename; 
-std::string media;
-} s_file;
+// typedef  struct t_file {
+//   std::string  filename; 
+// std::string media;
+// } s_file;
 
 // also must be included on the global header 
 #include <sys/time.h>
@@ -81,9 +81,6 @@ private:
   size_type chunk_size_;
   size_type chunk_received_;
   size_type content_length;
-  //the file is temporary just to work with amine's code
-  // to be changed lather
-  s_file file_;
 
   /*
   * private methods
@@ -137,7 +134,6 @@ public:
   void setRequestUri(const std::string& uri);
   void setRequestedRessource(const std::string& uri);
   void setHttpVersion(const std::string& version);
-  void setHeaderString();
   void setContentLength();
   void setServer(Server *server);
 
@@ -145,27 +141,25 @@ public:
    * getters
    */
 
-  size_type getContentLength() ;
-  int getRequestMethod() const;
-  // temoraty to be changed with the file struct
-  s_file getFile();
-  std::string getRequestString() const;
-  std::string getBodyString() const;
-  std::string getHeaderString() const;
-  size_type getBodySize() const;
+  size_type                          getContentLength() ;
+  int                                getRequestMethod() const;
+  std::string                        getRequestString() const;
+  std::string                        getBodyString() const;
+  std::string                        getHeaderString() const;
+  size_type                          getBodySize() const;
   std::map<std::string, std::string> &getHeaders();
-  const std::string &getRequestUri();
-  const std::string &getRequestedRessource();
-  std::string getExtention() const;
-  Server* getServer() const;
-  std::string getRequestRoot() const;
-  std::string getRequestedFileFullPath() const;
-  std::string getMimeType() const;
-  std::string &getRequestCgi() const;
-  std::fstream *getBodyFile();
-  std::string& getBodyFileName();
-  std::string& getQueryParams();
-  Location *getLocation();
+  const std::string                  &getRequestUri();
+  const std::string                  &getRequestedRessource();
+  std::string                        getExtention() const;
+  Server*                            getServer() const;
+  std::string                        getRequestRoot() const;
+  std::string                        getRequestedFileFullPath() const;
+  std::string                        getMimeType() const;
+  std::string                        &getRequestCgi() const;
+  std::fstream                       *getBodyFile();
+  std::string                        &getBodyFileName();
+  std::string                        &getQueryParams();
+  Location                           *getLocation();
 
   /*
    * hooks

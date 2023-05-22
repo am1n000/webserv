@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/29 15:34:07 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/04 15:56:27 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 11:28:33 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <string>
 #include <map>
+#include "../Includes/Exceptions.hpp"
 
 enum Request_Method_e {
   GET,

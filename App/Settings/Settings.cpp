@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/29 15:32:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/04 15:59:13 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 11:28:12 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ Request_Method_e Settings::indexOfRequestMethod(const std::string &method) {
   std::map<std::string, Request_Method_e>::iterator it;
   it = this->request_methods_.find(method);
   if(it == this->request_methods_.end())
-    throw std::runtime_error("method does not exist");
+    throw MethodNotAllowedException();
   return it->second;
 }
 

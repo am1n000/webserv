@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/13 20:43:19 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 11:15:46 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,10 @@ void Server::pushLocation(const std::string &locationString) {
 }
 
 void Server::setProp(const std::string &prop, const std::string &val) {
+  if (Server::members_.find(prop) == Server::members_.end())
+    throw BadConfigException("invalid directive, " + prop);
+  if(val.length() == 0)
+    throw BadConfigException("Empty value for: " + prop);
 	(this->*members_[prop])(helpers::trim(val));
 }
 
@@ -105,14 +109,14 @@ void Server::parseServer() {
 	token = this->tockenizer_->getNextToken();
 	if (token.length() == 0)
 		break;
-	if (!Server::inDictinary(token))
-		throw std::runtime_error("invalid directive " + token);
+	// if (!Server::inDictinary(token))
+	// 	throw std::runtime_error("invalid directive " + token);
 
 	if (token == "location")
 		val = this->tockenizer_->getNextToken();
 	else
 		val = this->tockenizer_->getLine();
-	this->setProp(token, val);
+	this->setProp(token, helpers::trim(val));
 	};
 }
 
@@ -177,7 +181,7 @@ void Location::parse() {
 	if ((key.length() == 0) ^ (value.length() == 0))
 		throw std::runtime_error("invalid value for " + key);
 	if (key.length() != 0 && value.length() != 0)
-		this->setProp(key, value);
+		this->setProp(key, helpers::trim(value));
 	}
 }
 
@@ -246,7 +250,11 @@ void Location::setRoot(const std::string &val) {
 }
 
 void Location::setProp(const std::string &prop, const std::string &val) {
-	(this->*Location::location_members_[prop])(helpers::trim(val));
+  if(this->Location::location_members_.find(prop) == Location::location_members_.end())
+    throw BadConfigException("invalid directive, " + prop);
+  if(val.length() == 0)
+    throw BadConfigException("Empty value for: " + prop);
+	(this->*Location::location_members_[prop])(val);
 }
 
 void Location::setUploadDir(const std::string &val) { this->upload_dir_ = val; }
