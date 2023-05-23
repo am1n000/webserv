@@ -28,6 +28,7 @@ class Response
 		std::vector<std::string>		getDirectoryContent(DIR* dirp);
 		std::string 					directoryCheck(int sock_fd);
 		std::string 					indexCheck(std::vector<std::string> content);
+    bool                        cgiInProgress_();
 
 	public:
 		Response();

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/23 00:22:54 by otossa           ###   ########.fr       */
+/*   Updated: 2023/05/23 15:06:00 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,7 @@
 #include <vector>
 #include "../dev/dev.hpp"
 
-Cgi::Cgi(Request* request): request_(request) {
-}
+Cgi::Cgi(Request* request): request_(request), finished_(0), in_progress(false) {}
 
 Cgi::~Cgi() {
   remove(this->response_file_name_.c_str());
@@ -40,7 +39,7 @@ void Cgi::openFiles() {
   this->request_fd_ = open(this->request_->getBodyFileName().c_str(), O_RDONLY);
   this->response_fd_ = open(this->response_file_name_.c_str(), O_CREAT | O_RDWR, 0666);
   if (this->request_fd_ < 0 || this->response_fd_ < 0)
-    throw std::runtime_error("error openning files");
+    throw InternalServerErrorException();
 }
 
 void Cgi::closeFiles() {
@@ -61,25 +60,32 @@ void printheaders(std::vector<char *> v) {
 }
 
 void Cgi::executeCgi() {
-  this->openFiles();
-  this->prepareEnv();
-  this->prepareArgs();
-  int pid = fork();
-  if (pid < 0) {
-    std::cerr << "Fork error" << std::endl;
-    exit(1);
-  }
-
-  if(pid == 0) {
-    dup2(this->request_fd_, 0);
-    dup2(this->response_fd_, 1);
-    if (execve(args_[0], &args_[0], &env_[0])) {
-    std::cerr << "execve failed" << std::endl;
-      std::cerr << strerror(errno) << std::endl;
+  if(!this->in_progress) {
+    this->in_progress = true;
+    this->openFiles();
+    this->prepareEnv();
+    this->prepareArgs();
+    this->process_id_ = fork();
+    if (this->process_id_ < 0) {
       exit(1);
+      // throw InternalServerErrorException();
+      // std::cerr << "Fork error" << std::endl;
+    }
+
+    if(this->process_id_ == 0) {
+      dup2(this->request_fd_, 0);
+      dup2(this->response_fd_, 1);
+      if (execve(args_[0], &args_[0], &env_[0])) {
+        exit(1);
+        // throw InternalServerErrorException();
+      }
     }
   }
-  wait(NULL);//! to check
+  this->finished_  = waitpid(this->process_id_,  &this->exit_status_, WNOHANG);
+  if(!WIFEXITED(this->exit_status_)) {
+    std::cerr << "exited with error code " << std::endl;
+    throw InternalServerErrorException();
+  }
 }
 
 
@@ -130,3 +136,7 @@ void Cgi::prepareArgs() {
 int Cgi::getResponseFileDescriptor() { return this->request_fd_; }
 
 std::string Cgi::getResponseFileName() { return this->response_file_name_; }
+
+bool Cgi::isFinished() {
+  return this->finished_ != 0;
+}

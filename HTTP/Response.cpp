@@ -4,19 +4,25 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-Response::Response(Request* request) : _request(request),  _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0), _hasCgi(false)
+Response::Response(Request* request) : _request(request),  _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0), _hasCgi(false), _cgi(NULL)
 {
-	this->_cgi = new Cgi(this->_request);
+  // if(this->_request->hasCgi()) {
+    this->_cgi = new Cgi(this->_request);
+    // this->_hasCgi = true;
+  // }
 };
 
-Response::Response() : _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0)
+Response::Response() : _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0), _cgi(NULL)
 {
-	this->_cgi = new Cgi(this->_request);
+  // if(this->_request->hasCgi()) {
+    // this->_hasCgi = true;
+  // }
 };
 
 Response::~Response()
 {
-	delete (this->_cgi);
+  if(this->_cgi)
+	  delete (this->_cgi);
 };
 
 void Response::set_file(std::string path)
@@ -33,8 +39,10 @@ void Response::set_file(std::string path)
 		this->_mime_type = it->second;
 	this->_bytes_to_send = _file.tellg();
 	this->_file.seekg(0, std::ios::beg);
-	if (this->_request->hasCgi())
-		this->_hasCgi = true;
+  if(this->_request->hasCgi()) {
+    this->_hasCgi = true;
+    this->_cgi = new Cgi(this->_request);
+  }
 }
 
 
@@ -81,16 +89,16 @@ int Response::handle_get(int sock_fd)
 
 int Response::handle_post(int sock_fd)
 {
-  if (this->_request->hasCgi())
-	return (this->handleCgi(sock_fd));
-  else 
-	std::cerr << "no cgi " << std::endl;
-  std::string header =
-      "HTTP/1.1 201 Created\r\nLocation: /resources/post\t\nContent-Type: "
-      "text/plain\r\n\r\nrequest has been posted";
-  if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-        throw(InternalServerErrorException());
-  return (1);
+        if (this->_request->hasCgi())
+                        return (this->handleCgi(sock_fd));
+        else
+                        std::cerr << "no cgi " << std::endl;
+        std::string header = "HTTP/1.1 201 Created\r\nLocation: "
+                             "/resources/post\t\nContent-Type: "
+                             "text/plain\r\n\r\nrequest has been posted";
+        if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+                        throw(InternalServerErrorException());
+        return (1);
 }
 
 int Response::handle_delete(int sock_fd)
@@ -126,40 +134,49 @@ int Response::handle_delete(int sock_fd)
 
 bool Response::handleCgi(int sock_fd)
 {
-  int size = 1024;
-  if (this->_cgi_fd == -2)
+  std::cout << "triggred" << std::endl;
+  if(!this->_cgi)
+    throw InternalServerErrorException();
+  // openning the files for the first time
+  if (!this->cgiInProgress_())
   {
-	std::fstream f(this->_request->getRequestedFileFullPath().c_str());
-	if(!f.good())
-	{
+    std::fstream f(this->_request->getRequestedFileFullPath().c_str());
+    if(!f.good())
+    {
+      if (f.is_open())
+      f.close();
+      throw FileNotFoundException();
+    }
 		if (f.is_open())
 		f.close();
-		throw FileNotFoundException();
-	}
-		if (f.is_open())
-		f.close();
-		this->_cgi->executeCgi();
-
-		this->_cgi->closeFiles();
-		this->_cgi_fd = open(this->_cgi->getResponseFileName().c_str(), O_RDONLY);
-		std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
-		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-			throw(InternalServerErrorException());
   }
+	this->_cgi->executeCgi();
+  if(this->_cgi->isFinished()) {
+    // std::cout << "send portion" << std::endl;
+    if(this->_cgi_fd == -2) {
+      this->_cgi->closeFiles();
+      this->_cgi_fd = open(this->_cgi->getResponseFileName().c_str(), O_RDONLY);
+      std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
+      if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+        throw(InternalServerErrorException());
+    }
 
+    int size = 1024;
     char buffer[size];
     int i = 0;
-	i = read(this->_cgi_fd, buffer, size);
-	if (i == -1)
-		throw(InternalServerErrorException());
-	if (i == 0)
-	{
-		close (this->_cgi_fd);
-		return (1);
-	}
-	buffer[i] = 0;
-	if (send(sock_fd, buffer, i, 0) < 0)
-		throw(InternalServerErrorException());
+    i = read(this->_cgi_fd, buffer, size);
+    if (i == -1)
+      throw(InternalServerErrorException());
+    if (i == 0)
+    {
+      close (this->_cgi_fd);
+      return (1);
+    }
+    buffer[i] = 0;
+    if (send(sock_fd, buffer, i, 0) < 0)
+      throw(InternalServerErrorException());
+    }
+
 	return (0);
 }
 
@@ -256,3 +273,9 @@ std::string	Response::directoryCheck(int sock_fd)
 	return (this->_request->getRequestedFileFullPath());
 }
 
+
+bool Response::cgiInProgress_() {
+  if(this->_cgi && this->_cgi->in_progress)
+    return true;
+  return false;
+}
