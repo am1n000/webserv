@@ -6,12 +6,12 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/05/22 11:04:26 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/05/23 01:09:21 by otossa           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CPP=c++
-FLAGS=-Wall -Wextra -Werror
+FLAGS=-Wall -Wextra -Werror -std=c++98
 NAME=webserv
 INTRY=main.cpp
 TEST_ENTRY=main.cpp

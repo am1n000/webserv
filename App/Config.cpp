@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/07 18:47:06 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/23 00:58:39 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,11 +124,11 @@ void Config::parseMimeTypes(const std::string &scope) {
 
   while (!tok.end()) {
     value = helpers::trim(tok.getNextToken());
-    key = helpers::trim(tok.getNextToken(';'));
+    key = helpers::trim(tok.getNoneEmptyLine());
     if (key.length() != 0 && value.length() != 0)
       this->mime_types_.insert(std::make_pair(key, value));
     if ((key.length() == 0) ^ (value.length() == 0))
-      throw std::runtime_error("error in mime types file");
+      throw BadConfigException("Invalid mime types");
   }
 }
 

@@ -1,4 +1,5 @@
 #include "../../Includes/multiplexers/Poll.hpp"
+#include <cstdlib>
 
 Poll::Poll() {}
 
@@ -7,12 +8,12 @@ Poll::~Poll() {}
 int                     Poll::position;
 std::vector<pollfd>     Poll::pollFds;
 std::vector<Client *>   Poll::clientsData;
-Poll*	Poll::instance = nullptr;
+Poll*	Poll::instance = NULL;
 
 
 Poll*	Poll::getInstance()
 {
-	if (instance == nullptr)
+	if (instance == NULL)
 		instance = new Poll;
 	return (instance);
 }

@@ -128,7 +128,6 @@ bool Response::handleCgi(int sock_fd)
 	std::fstream f(this->_request->getRequestedFileFullPath().c_str());
 	if(!f.good())
 	{
-		std::cerr << "file not found" << std::endl;
 		if (f.is_open())
 		f.close();
 		throw FileNotFoundException();

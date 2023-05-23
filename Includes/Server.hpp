@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/13 20:37:04 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/23 00:19:19 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,6 @@ class Server
 		std::map<std::string, Location*> locations_;
 		std::map<std::string, memberPointer> members_;
 		Tockenizer *tockenizer_;
-		static void setDictionary();
 
 	public:
 		Server();
@@ -119,6 +118,7 @@ class Server
 		static std::vector<std::string> dictionary_;
 		static const char* pdictionary_[];
 		static bool inDictinary(const std::string& token);
+		static void setDictionary();
 		void parseServer();
 		void setRoot(const std::string &val);
 		void setHost(const std::string &val);

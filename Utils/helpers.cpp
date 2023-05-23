@@ -1,8 +1,11 @@
 #include "../Includes/helpers.hpp"
 #include <cctype>
 #include <exception>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <cstdlib>
+#include <iostream>
 
 char *my_tostring(int num)
 {
@@ -75,6 +78,8 @@ std::string helpers::trim(const std::string str, char c) {
   int start;
   int end;
 
+  if(str.length() == 0)
+    return "";
   start = 0;
   end = str.length();
 
@@ -170,10 +175,11 @@ std::string helpers::timeBasedName(std::string extenssion = "") {
 
   char tmp[80];
   time_t x = clock();
-  srand(x);
+  std::srand(x);
   strftime(tmp, 80, "%Y-%m-%d-%H%M%S", now);
 
-  std::string name = std::to_string(rand()) + "_" + tmp + extenssion;
+  std::string ran(my_tostring(std::rand()));
+  std::string name = ran + "_" + tmp + extenssion;
   return name;
 }
 
@@ -197,6 +203,19 @@ bool helpers::hasSpace(std::string& str) {
   }
   return false;
 };
+
+int helpers::stoi(const std::string &str) {
+  std::istringstream ss(str);
+  int result;
+  ss >> std::hex >> result;
+  return result;
+}
+
+// std::string helpers::to_string(int value) {
+//   std::istringstream ss;
+//   ss << value;
+//   return ss.str();
+// }
 
 void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath)
 {

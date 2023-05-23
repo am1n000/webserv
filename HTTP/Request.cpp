@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/22 11:58:49 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/22 22:28:13 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <utility>
+#include <cstdlib>
 #include "../Includes/Exceptions.hpp"
 #include "../Includes/Exceptions/HttpExceptions.hpp"
 
@@ -100,7 +101,7 @@ void Request::appendBodyFile(const char *buffer, Request::size_type size) {
 	try {
 	  this->body_file_name_ = std::string(TMP_VAR_PATH) + helpers::timeBasedName(".request");
 	  this->body_file_ = new std::fstream;
-	  this->body_file_->open(this->body_file_name_, std::fstream::out);
+	  this->body_file_->open(this->body_file_name_.c_str(), std::fstream::out);
 	} catch (...) {
 	  std::cerr << "internal server error will goes here" << std::endl;
 	}
@@ -120,7 +121,7 @@ void Request::unchunckRequest(std::string& buffer) {
       buffer.erase(0, 2);
     }
     size_type pos = buffer.find("\r\n");
-    this->chunk_size_ = std::stoi(buffer.substr(0, pos),0, 16);
+    this->chunk_size_ = helpers::stoi(buffer.substr(0, pos));
     // body completed if chunk size equal zero
     buffer.erase(0, pos + 2);
     if(this->chunk_size_ == 0)
@@ -366,7 +367,7 @@ void Request::setContentLength() {
   if (it == this->request_headers_.end())
     this->content_length = 0;
   else
-    this->content_length = std::stoi(it->second);
+    this->content_length = std::atoi(it->second.data());
 }
 
 void Request::setServer(Server *server) {

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/13 18:17:54 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/23 00:22:54 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,8 @@ void Cgi::executeCgi() {
 void Cgi::prepareEnv() {
   // the strdup thing will be handled lather it is just a tmp thing
   try {
-    std::string tmp = "CONTENT_LENGTH=" + std::to_string(request_->getContentLength());
+    std::string cl(my_tostring(request_->getContentLength()));
+    std::string tmp = "CONTENT_LENGTH=" + cl;
     this->env_.push_back(strdup(tmp.data()));
     tmp = "CONTENT_TYPE=" + request_->getHeaders().find("Content-Type")->second;
     this->env_.push_back(strdup(tmp.data()));

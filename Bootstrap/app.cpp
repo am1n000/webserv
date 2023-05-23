@@ -4,10 +4,11 @@
 void app() {
 
   // loading configuration
+  Server::setDictionary();
   Settings::boot();
   Config::boot();
 
 
 
-  Config::cleanup();
+  // Config::cleanup();
 }

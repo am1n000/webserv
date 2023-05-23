@@ -17,6 +17,8 @@ std::string unscope(const std::string& scope);
 std::string timeBasedName(std::string extenssion);
 void        removeComments(std::string& buffer);
 bool        hasSpace(std::string& str);
+int         stoi(const std::string& str);
+std::string to_string(int value);
 };
 
 char *my_tostring(int num);

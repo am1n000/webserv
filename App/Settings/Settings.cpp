@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/29 15:32:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/22 11:28:12 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/23 00:10:39 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ const char* request_methods[] = {
   "GET",
   "POST",
   "DELETE",
+  NULL
 };
 
 Settings* Settings::object_ = NULL;
@@ -39,11 +40,16 @@ Settings::~Settings(){};
 
 void Settings::setRequestMethods_() {
   int i(0);
-  const char **begin = std::begin(request_methods);
-  const char **end = std::end(request_methods);
-  while(begin != end) {
-    this->request_methods_.insert(std::make_pair(std::string(*begin), static_cast<Request_Method_e>(i)));
-    begin++;
+  // const char **begin = std::begin(request_methods);
+  // const char **end = std::end(request_methods);
+  // while(begin != end) {
+  //   this->request_methods_.insert(std::make_pair(std::string(*begin), static_cast<Request_Method_e>(i)));
+  //   begin++;
+  //   i++;
+  // }
+  //
+  while(request_methods[i]) {
+    this->request_methods_.insert(std::make_pair(request_methods[i], static_cast<Request_Method_e>(i)));
     i++;
   }
 }

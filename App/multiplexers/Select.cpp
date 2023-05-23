@@ -1,4 +1,5 @@
 #include "../../Includes/multiplexers/Select.hpp"
+#include <cstdlib>
 
 Select::Select() {}
 
@@ -10,12 +11,12 @@ int                     Select::erasePosition;
 fd_set                  Select::readMaster;
 fd_set                  Select::writeMaster;
 std::vector<Client *>   Select::clientsData;
-Select*					Select::instance = nullptr;
+Select*					Select::instance = NULL;
 
 
 Select*	Select::getInstance()
 {
-	if (instance == nullptr)
+	if (instance == NULL)
 		instance = new Select;
 	return (instance);
 }

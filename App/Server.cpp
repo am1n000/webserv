@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/22 11:15:46 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/23 00:20:32 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 // for dev only
 #include "../dev/dev.hpp"
 #include <utility>
+#include <cstdlib>
 
 Server::Server() { this->setMembers(); }
 
@@ -35,7 +36,7 @@ void Server::setRoot(const std::string &val) { this->root_ = val; }
 
 void Server::setClientBodySize(const std::string &val) {
 	try {
-	this->client_body_size_limit_ = std::stoi(val);
+	this->client_body_size_limit_ = std::atoi(val.data());
 	} catch (...) {
 	std::cerr << "client body size limit is invaid" << std::endl;
 	exit(1);
@@ -138,10 +139,17 @@ std::vector<std::string> &Server::getIndexes() { return this->indexs_; }
 const char *Server::pdictionary_[] = {"root",        "index",
                                       "server_name", "listen",
                                       "error_page",  "client_body_limit",
-                                      "location"};
+                                      "location", NULL};
 
-std::vector<std::string> Server::dictionary_(Server::pdictionary_,
-											std::end(Server::pdictionary_));
+std::vector<std::string> Server::dictionary_;
+
+void Server::setDictionary() {
+  int i(0);
+  while (pdictionary_[i]) {
+    dictionary_.push_back(pdictionary_[i]);
+    i++;
+  }
+}
 
 bool Server::inDictinary(const std::string &token) {
 	for (std::vector<std::string>::iterator it =
@@ -301,7 +309,7 @@ std::vector<std::string> &Location::getIndex()
 		this->_hostAddrlen = sizeof(this->_hostAddr);
 		memset(&this->_hostAddr, 0, sizeof(this->_hostAddr));
 		this->_hostAddr.sin_family = AF_INET;
-		this->_hostAddr.sin_port = htons(std::stoi(this->getPort()));
+		this->_hostAddr.sin_port = htons(std::atoi(this->getPort().data()));
 		this->_hostAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 		int opt = 1;

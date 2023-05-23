@@ -1,8 +1,9 @@
 #include "../../Includes/multiplexers/Epoll.hpp"
+#include <cstdlib>
 
 #ifdef __linux__
 	int	Epoll::ep = epoll_create(16);
-	Epoll*	Epoll::instance = nullptr;
+	Epoll*	Epoll::instance = NULL;
 
 	Epoll::Epoll() {}
 
@@ -10,7 +11,7 @@
 
 	Epoll*	Epoll::getInstance()
 	{
-		if (instance == nullptr)
+		if (instance == NULL)
 			instance = new Epoll;
 		return (instance);
 	}
@@ -114,7 +115,7 @@
 		}
 		catch (statusCodeExceptions &e)
 		{
-			if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), nullptr) == -1)
+			if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), NULL) == -1)
 				std::cerr << "error: epoll_ctl deletion" << std::endl;
 			close(clientData->getSockFd());
 			delete (clientData);
@@ -128,7 +129,7 @@
 		{
 			if (clientData->sending())
 			{
-				if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), nullptr) == -1)
+				if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), NULL) == -1)
 					std::cerr << "error: epoll_ctl deletion" << std::endl;
 				close(clientData->getSockFd());
 				delete (clientData);
@@ -136,7 +137,7 @@
 		}
 		catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
 		{	
-			if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), nullptr) == -1)
+			if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), NULL) == -1)
 				std::cerr << "error: epoll_ctl deletion" << std::endl;
 			close(clientData->getSockFd());
 			delete (clientData);
