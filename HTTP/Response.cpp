@@ -131,52 +131,43 @@ int Response::handle_delete(int sock_fd)
 	return (0);
 }
 
-
 bool Response::handleCgi(int sock_fd)
 {
-  std::cout << "triggred" << std::endl;
-  if(!this->_cgi)
-    throw InternalServerErrorException();
-  // openning the files for the first time
-  if (!this->cgiInProgress_())
+  int size = 1024;
+  if (this->_cgi_fd == -2)
   {
-    std::fstream f(this->_request->getRequestedFileFullPath().c_str());
-    if(!f.good())
-    {
-      if (f.is_open())
-      f.close();
-      throw FileNotFoundException();
-    }
+	std::fstream f(this->_request->getRequestedFileFullPath().c_str());
+	if(!f.good())
+	{
 		if (f.is_open())
 		f.close();
-  }
-	this->_cgi->executeCgi();
-  if(this->_cgi->isFinished()) {
-    // std::cout << "send portion" << std::endl;
-    if(this->_cgi_fd == -2) {
-      this->_cgi->closeFiles();
-      this->_cgi_fd = open(this->_cgi->getResponseFileName().c_str(), O_RDONLY);
-      std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
-      if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-        throw(InternalServerErrorException());
-    }
+		throw FileNotFoundException();
+	}
+		if (f.is_open())
+		f.close();
+		this->_cgi->executeCgi();
 
-    int size = 1024;
+		this->_cgi->closeFiles();
+		this->_cgi_fd = open(this->_cgi->getResponseFileName().c_str(), O_RDONLY);
+		std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
+		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+			throw(InternalServerErrorException());
+  }
+	if (this->_cgi->isFinished())
+		return (0);
     char buffer[size];
     int i = 0;
-    i = read(this->_cgi_fd, buffer, size);
-    if (i == -1)
-      throw(InternalServerErrorException());
-    if (i == 0)
-    {
-      close (this->_cgi_fd);
-      return (1);
-    }
-    buffer[i] = 0;
-    if (send(sock_fd, buffer, i, 0) < 0)
-      throw(InternalServerErrorException());
-    }
-
+	i = read(this->_cgi_fd, buffer, size);
+	if (i == -1)
+		throw(InternalServerErrorException());
+	if (i == 0)
+	{
+		close (this->_cgi_fd);
+		return (1);
+	}
+	buffer[i] = 0;
+	if (send(sock_fd, buffer, i, 0) < 0)
+		throw(InternalServerErrorException());
 	return (0);
 }
 
