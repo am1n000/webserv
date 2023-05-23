@@ -5,10 +5,14 @@
 #include <unistd.h>
 
 Response::Response(Request* request) : _request(request),  _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0), _hasCgi(false)
-{};
+{
+	this->_cgi = new Cgi(this->_request);
+};
 
 Response::Response() : _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0)
-{};
+{
+	this->_cgi = new Cgi(this->_request);
+};
 
 Response::~Response()
 {
@@ -80,7 +84,7 @@ int Response::handle_post(int sock_fd)
   if (this->_request->hasCgi())
 	return (this->handleCgi(sock_fd));
   else 
-	std::cout << "no cgi " << std::endl;
+	std::cerr << "no cgi " << std::endl;
   std::string header =
       "HTTP/1.1 201 Created\r\nLocation: /resources/post\t\nContent-Type: "
       "text/plain\r\n\r\nrequest has been posted";
@@ -134,7 +138,6 @@ bool Response::handleCgi(int sock_fd)
 	}
 		if (f.is_open())
 		f.close();
-		this->_cgi = new Cgi(this->_request);
 		this->_cgi->executeCgi();
 
 		this->_cgi->closeFiles();
@@ -216,7 +219,6 @@ std::string	Response::directoryCheck(int sock_fd)
 			indexFile += get_time();
 			indexFile += "\r\n\r\n";
 			indexFile += "<!DOCTYPE html>\n<html>\n<head>\n<title>Index</title>\n</head>\n<body>\n<h1>Index of " + this->_request->getRequestedRessource();
-			std::cout << this->_request->getRequestedRessource() << std::endl;
 			indexFile += "</h1>\n<table style=\"text-align: left;\">\n<tr>\n<th>Name</th>\n<th>Last modified</th>\n<th>Size</th>\n</tr>\n";
 			std::vector<std::string> content = this->getDirectoryContent(dirp);
 			std::string checkIndex = this->indexCheck(content);

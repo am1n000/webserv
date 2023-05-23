@@ -15,7 +15,7 @@
 
 class Client
 {
-	private : //.variables
+	private :
 		int 				_sockFd;
 		bool				_isListeningSock;
 		bool				_postFileCreated;

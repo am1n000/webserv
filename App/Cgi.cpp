@@ -79,7 +79,7 @@ void Cgi::executeCgi() {
       exit(1);
     }
   }
-  wait(NULL);
+  wait(NULL);//! to check
 }
 
 

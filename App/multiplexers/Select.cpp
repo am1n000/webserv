@@ -54,13 +54,16 @@ void Select::monitoringLoop()
 	FD_ZERO(&writeMaster);
 	fd_set read_fds;
 	fd_set write_fds;
+	struct timeval timeout;
+	timeout.tv_sec = 5;
+	timeout.tv_usec = 0;
 	while (true)
 	{
 		FD_ZERO(&read_fds);
 		FD_ZERO(&write_fds);
 		read_fds = readMaster;
 		write_fds = writeMaster;
-		int ready_num = select(fd_max + 1, &read_fds, &write_fds, NULL, NULL);
+		int ready_num = select(fd_max + 1, &read_fds, &write_fds, NULL, &timeout);
 		if (ready_num < 0)
 		{
 			std::cerr << "error : select  " << errno <<  std::endl;

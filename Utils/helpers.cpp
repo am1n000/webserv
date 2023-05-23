@@ -218,28 +218,35 @@ int helpers::stoi(const std::string &str) {
 // }
 
 void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath)
+// void  displayStatusCodePage(sdt::map<std::string, std::string> erroPages, statusCodeExceptions &e, int sock, std::string ressourcePath)
 {
-	std::string statusCodeResponse = "HTTP/1.1 " + e.getValue();
-	statusCodeResponse +=  " ";
-	statusCodeResponse += e.what();
+	// std::string statusCodePath = errorPages[e.getValue()];
+	// if (statusCodePath.length() == 0)
+	std::string statusCodePath = "./ErrorPages/" + e.getValue();
+	statusCodePath +=	".html";
+	std::ifstream	file(statusCodePath.c_str(), std::ios::ate);
+	if (!file.is_open())
+	{
+		std::cerr << "status code file " << e.getValue() << "  could not be opened!" << std::endl;
+		return;
+	}
+    int len = file.tellg();
+    file.seekg(0, std::ios::beg);
+	char buffer[len];
+	file.read(buffer, len);
+	buffer[len] = '\0';
+	std::string header = "HTTP/1.1 " + e.getValue();
+	header +=  " ";
+	header += e.what();
 	if (e.getValue() == "301")
 	{
-		statusCodeResponse += "\r\nLocation: ";
-		statusCodeResponse += ressourcePath + "/";
+		header += "\r\nLocation: ";
+		header += ressourcePath + "/";
 	}
-	statusCodeResponse += "\r\nServer: webserv\r\n\r\n";
-
-	statusCodeResponse += "<!DOCTYPE html>\n<html>\n<head><title>";
-	statusCodeResponse += e.getValue();
-	statusCodeResponse += " ";
-	statusCodeResponse += e.what();
-	statusCodeResponse += "</title></head>\n<body>\n<center><h1>";
-	statusCodeResponse += e.getValue();
-	statusCodeResponse += " ";
-	statusCodeResponse += e.what();
-	statusCodeResponse += "</h1></center>\n<hr><center>webserv</center>\n</body>\n</html>\n";
-	std::cout << statusCodeResponse << std::endl;
-	send(sock, statusCodeResponse.c_str(), statusCodeResponse.length(), 0);
+	header += "\r\nServer: webserver-c\r\n\r\n";
+	std::string a = buffer;	
+	header += a;
+	send(sock, header.c_str(), header.length(), 0);
 }
 
 
@@ -261,7 +268,7 @@ std::vector<std::string> splitPaths(std::string fullPath)
   return (paths);
 }
 
-bool  widdinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths)
+bool  withinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths)
 {
   size_t size = rootPaths.size();
   for (size_t i = 0; i < paths.size(); i++)

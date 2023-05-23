@@ -25,4 +25,4 @@ char *my_tostring(int num);
 std::string get_time();
 void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path);
 std::vector<std::string> splitPaths(std::string fullPath);
-bool  widdinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths);
+bool  withinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths);

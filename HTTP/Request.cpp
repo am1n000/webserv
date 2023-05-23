@@ -169,7 +169,7 @@ bool Request::outOfRoot()
     std::string ressource = this->getRequestedRessource();
     std::vector<std::string> paths = splitPaths(this->getRequestedRessource());
     std::vector<std::string> rootPaths = splitPaths(this->request_location_->getRoot());
-    return (widdinRoot(paths, rootPaths));
+    return (withinRoot(paths, rootPaths));
 }
 
 void Request::prepareRequest() {

@@ -40,8 +40,6 @@ bool Client::sending()
 	finished = this->resp->handle_post(this->_sockFd);
 	else if (this->req->getRequestMethod() == DELETE)
 	finished = this->resp->handle_delete(this->_sockFd);
-	else
-	throw std::runtime_error("method not found");
 	return (finished);
 }
 

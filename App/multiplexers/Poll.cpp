@@ -51,7 +51,7 @@ void Poll::monitoringLoop()
 {
 	while (true)
 	{
-		int ready_num = poll(&pollFds[0], pollFds.size() , -1);
+		int ready_num = poll(&pollFds[0], pollFds.size() , 5000);
 		if (ready_num < 0)
 		{
 			std::cerr << "error : poll  " <<  std::endl;
