@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/23 00:58:39 by otossa           ###   ########.fr       */
+/*   Updated: 2023/05/23 11:36:00 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ Config::Config(const std::string &path) : path_(path) {
 
 std::string Config::read() {
   if (!this->file_->is_open())
-    throw std::runtime_error("can't read config, file is not openned");
+    throw BadConfigException("can not opent a config file" + this->path_);
   this->buffer_.resize(this->file_size_);
   this->file_->read(&this->buffer_[0], this->file_size_);
   helpers::removeComments(this->buffer_);
@@ -57,7 +57,7 @@ std::string Config::read() {
 
 void Config::setFileSize() {
   if (!this->file_->is_open())
-    throw std::runtime_error("can't read config, file is not openned");
+    throw BadConfigException("can not opent a config file" + this->path_);
   this->file_->seekg(0, std::ios::end);
   this->file_size_ = this->file_->tellg();
   this->file_->seekg(0, std::ios::beg);
@@ -194,9 +194,10 @@ ConfigFile::ConfigFile(const std::string &path) {
       this->tok_ = new Tockenizer(this->stream_);
     } catch (std::runtime_error &e) {
       std::cerr << e.what() << std::endl;
+      throw BadConfigException();
     }
   } catch (...) {
-    std::cerr << "file: " << path << " can not be oppened" << std::endl;
+      throw BadConfigException();
   }
 }
 
@@ -204,7 +205,7 @@ void ConfigFile::readFile() {
   size_t stream_size;
   // checking file is oppened
   if (!this->file_.is_open())
-    throw std::runtime_error("can't read file size, file is not openned");
+    throw BadConfigException("can not opent a config file");
 
   // getting the byte size of the file
   this->file_.seekg(0, std::ios::end);

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/11 17:49:09 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/04/01 23:48:10 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/23 11:28:26 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,10 @@ class ConfigFile {
     std::string stream_;
     std::ifstream file_;
     Tockenizer *tok_;  
-public:
-  ConfigFile();
-  ConfigFile(const std::string& path);
-  ~ConfigFile();
+  public:
+    ConfigFile();
+    ConfigFile(const std::string& path);
+    ~ConfigFile();
 
   void readFile();
   void close();
