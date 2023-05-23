@@ -68,7 +68,6 @@
 						read(tempData);
 					else
 						write(tempData);
-					break;
 				}
 			}
 		}
