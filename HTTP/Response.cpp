@@ -134,7 +134,6 @@ int Response::handle_delete(int sock_fd)
 
 bool Response::handleCgi(int sock_fd)
 {
-  std::cout << "triggred" << std::endl;
   if(!this->_cgi)
     throw InternalServerErrorException();
   // openning the files for the first time
