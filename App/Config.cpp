@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/23 11:36:00 by otossa           ###   ########.fr       */
+/*   Updated: 2023/05/24 13:54:34 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ Config::Config(const std::string &path) : path_(path) {
     this->file_ = new std::ifstream(this->path_.c_str());
     this->setFileSize();
     this->read();
+    this->tockenizer_ = new Tockenizer(this->buffer_);
   } catch (...) {
     std::cerr << "Config file could not be oppened" << std::endl;
     exit(1);
@@ -74,20 +75,7 @@ void Config::parse() {
     else if (token == "include") {
       this->parseFile(this->tockenizer_->getNoneEmptyLine());
     }
-    // std::cout << "there is an include directive" <<
-    // this->tockenizer_->getNoneEmptyLine() << std::endl;
   }
-  // dev::br();
-  // std::cout << this->servers_[0]->getRoot() << std::endl;
-  // std::cout << this->servers_[0]->getClienBodySizeLimit() << std::endl;
-  // std::cout << this->servers_[0]->getHost() << std::endl;
-  // std::cout << this->servers_[0]->getPort() << std::endl;
-  // // std::cout << this->servers_[1]->getRoot() << std::endl;
-  // dev::br();
-  // std::cout << this->servers_[1]->getRoot() << std::endl;
-  // std::cout << this->servers_[1]->getClienBodySizeLimit() << std::endl;
-  // std::cout << this->servers_[1]->getHost() << std::endl;
-  // std::cout << this->servers_[1]->getPort() << std::endl;
 }
 
 void Config::pushServer(const std::string &serverString) {
@@ -143,13 +131,16 @@ Config *Config::boot() {
     return Config::object_;
   Config::object_ = new Config();
   Config::object_->parse();
+  Config::checkHealth(Config::object_);
   return Config::object_;
 }
 
-Config *Config::boot(const std::string &path) {
+Config *Config::boot(const std::string path) {
   if (Config::object_ != NULL)
     return Config::object_;
   Config::object_ = new Config(path);
+  Config::object_->parse();
+  Config::checkHealth(Config::object_);
   return Config::object_;
 }
 
@@ -160,6 +151,26 @@ std::map<std::string, std::string>& Config::getMimeTypes() {
 }
 
 Config *Config::get() { return Config::object_; }
+
+/*
+ * checkers
+ */
+
+void Config::checkHealth(Config* config) {
+  if(config == NULL)
+    throw BadConfigException();
+  for (std::vector<Server *>::iterator it = config->servers_.begin(); it != config->servers_.end(); it++)
+  {
+    if(!Config::isServerValid(*it))
+      throw BadConfigException();
+  }
+}
+
+bool Config::isServerValid(Server* server) {
+  if(server->getPort().empty() || server->getRoot().empty()) 
+    return false;
+  return true;
+}
 
 /*
  * tests

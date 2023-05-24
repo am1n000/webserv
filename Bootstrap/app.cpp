@@ -1,13 +1,15 @@
 #include "../Includes/App.hpp"
 
-void app(char *config_file, int flag)
+void app(const std::string config_file, int flag)
 {
 
 	// loading configuration
 	Server::setDictionary();
+  Cgi::setCommonHeaders();
 	Settings::boot();
-	Config::boot();
-	(void)config_file;
+  std::cout << "booting the server" << std::endl;
+	Config::boot(config_file);
+  std::cout << "server booted" << std::endl;
 	if (flag == 0)
 	{
 		#ifdef __APPLE__

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:58:07 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/23 13:42:47 by otossa           ###   ########.fr       */
+/*   Updated: 2023/05/24 16:56:33 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,12 @@
 #include <fstream>
 #include <iostream>
 #include <ctime>
-#include <vector>
+#include <set>
 
 class Cgi {
+  public:
+    typedef std::map<std::string, std::string>::iterator header_iterator;
+
   private:
     Request *request_;
     std::vector<char *> env_;
@@ -31,6 +34,9 @@ class Cgi {
     int process_id_;
     int exit_status_;
     int finished_;
+    char *makeVar_(std::string key, const std::string& value);
+    void prepareKey_(std::string& key);
+    void prepareHttpHeaders_();
   public:
     Cgi();
     Cgi(Request* request);
@@ -40,6 +46,8 @@ class Cgi {
      * data
      */
     bool in_progress;
+    static const char* common_headers_array[];
+    static std::set<std::string>  common_headers;
 
     /*
      * handlers
@@ -61,5 +69,11 @@ class Cgi {
     int         getResponseFileDescriptor();
     std::string getResponseFileName();
     bool        isFinished();
+    /*
+     * setters
+     */
+      static void setCommonHeaders();
+
+  
 };
 #endif
