@@ -138,7 +138,7 @@
 				delete (clientData);
 			}
 		}
-		catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
+		catch (statusCodeExceptions &e)
 		{	
 			displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
