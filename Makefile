@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/05/23 01:09:21 by otossa           ###   ########.fr        #
+#    Updated: 2023/05/24 20:24:57 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,7 @@ test: makedir build_test
 build_test: $(TEST_OBJ)  
 	$(CPP) $^ -o $(NAME) 
 	@clear
-	@./$(NAME)
+	@./$(NAME) webserv.conf
 
 $(OBJ_DIR)/%.o:%.cpp
 	$(CPP) $(FLAGS) -c $< -o $@
@@ -48,13 +48,12 @@ $(NAME): $(OBJ)
 debug: $(SRC)
 	$(CPP) -g $^ main.cpp  -o $@
 	clear
-	lldb debug
+	lldb debug webserv.conf
 
 sanitize: $(TEST_OBJ)  
 	$(CPP) $^ -fsanitize=address -o $(NAME) 
 	@clear
-	@./$(NAME)
-
+	@./$(NAME) webserv.conf
 
 makedir:
 	mkdir -p objects
