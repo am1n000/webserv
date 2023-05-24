@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/29 15:34:07 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/22 11:28:33 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/24 22:41:21 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class Settings {
   public:
     static Settings* boot();
     static Settings* get();
+    static void cleanup();
     Request_Method_e indexOfRequestMethod(const std::string& method);
     static std::string methodString(int emethod);
 };

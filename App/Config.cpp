@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/24 13:54:34 by otossa           ###   ########.fr       */
+/*   Updated: 2023/05/24 22:33:37 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "../Includes/Server.hpp"
 #include <cctype>
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -21,7 +22,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <cstdlib>
 
 Config::Config() : path_("webserv.conf") {
   try {
@@ -76,6 +76,7 @@ void Config::parse() {
       this->parseFile(this->tockenizer_->getNoneEmptyLine());
     }
   }
+  // delete this->tockenizer_;
 }
 
 void Config::pushServer(const std::string &serverString) {
@@ -99,9 +100,9 @@ void Config::parseFile(const std::string &path) {
     if (token == "types")
       this->parseMimeTypes(file.tockenizer()->getNextScope());
     else if (token == "server")
-        this->pushServer(file.tockenizer()->getNextScope());
+      this->pushServer(file.tockenizer()->getNextScope());
     else if (token == "include")
-          this->parseFile(file.tockenizer()->getNoneEmptyLine());
+      this->parseFile(file.tockenizer()->getNoneEmptyLine());
   }
 }
 
@@ -146,7 +147,7 @@ Config *Config::boot(const std::string path) {
 
 std::vector<Server *> &Config::getServers() { return this->servers_; }
 
-std::map<std::string, std::string>& Config::getMimeTypes() {
+std::map<std::string, std::string> &Config::getMimeTypes() {
   return this->mime_types_;
 }
 
@@ -156,28 +157,20 @@ Config *Config::get() { return Config::object_; }
  * checkers
  */
 
-void Config::checkHealth(Config* config) {
-  if(config == NULL)
+void Config::checkHealth(Config *config) {
+  if (config == NULL)
     throw BadConfigException();
-  for (std::vector<Server *>::iterator it = config->servers_.begin(); it != config->servers_.end(); it++)
-  {
-    if(!Config::isServerValid(*it))
+  for (std::vector<Server *>::iterator it = config->servers_.begin();
+       it != config->servers_.end(); it++) {
+    if (!Config::isServerValid(*it))
       throw BadConfigException();
   }
 }
 
-bool Config::isServerValid(Server* server) {
-  if(server->getPort().empty() || server->getRoot().empty()) 
+bool Config::isServerValid(Server *server) {
+  if (server->getPort().empty() || server->getRoot().empty())
     return false;
   return true;
-}
-
-/*
- * tests
- */
-void Config::test() {
-  for(std::map<std::string, std::string>::iterator it = this->mime_types_.begin(); it != this->mime_types_.end(); it++)
-    std::cout << it->first << "  " << it->second << std::endl;
 }
 
 void Config::cleanup() {
@@ -208,7 +201,7 @@ ConfigFile::ConfigFile(const std::string &path) {
       throw BadConfigException();
     }
   } catch (...) {
-      throw BadConfigException();
+    throw BadConfigException();
   }
 }
 

@@ -21,7 +21,6 @@ int         stoi(const std::string& str);
 std::string to_string(int value);
 };
 
-char *my_tostring(int num);
 std::string get_time();
 void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path);
 std::vector<std::string> splitPaths(std::string fullPath);

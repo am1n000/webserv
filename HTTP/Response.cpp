@@ -258,7 +258,7 @@ std::string	Response::directoryCheck(int sock_fd)
 					indexFile += modified_str;
 					indexFile += "</td>\n";
 					indexFile += "<td>";
-					indexFile += my_tostring(fileStat.st_size);
+					indexFile += helpers::to_string(fileStat.st_size);
 					indexFile += "</td>\n</tr>\n";
 				}
 			}

@@ -1,6 +1,5 @@
 <?php
 
-while(true);
 
 // if(isset($_GET["name"]))
 //   echo "this is the neme from get: ". $_GET["name"];

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 23:22:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/10 11:33:48 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/24 22:02:56 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ std::string Tockenizer::getNextScope() {
   } while (begin + size < this->data_.length() && bracket > 0);
   this->current_ = begin + size;
   if (begin + size >= data_.length())
-    throw std::runtime_error("unclosed brackets");
+    throw BadConfigException("unclosed brackets");
   return this->data_.substr(begin + 1, size - 2);
 }
 
@@ -91,7 +91,7 @@ Tockenizer::data_type Tockenizer::getHeaders() {
   size_type size;
  size_type pos = this->data_.find("\r\n\r\n"); 
   if (pos == std::string::npos)
-    throw std::runtime_error("header not found");
+    throw BadRequestException();
  size = pos - this->current_; 
   std::string header = this->data_.substr(this->current_, size);
   this->current_ += size + 4;
