@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/11 17:49:09 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/23 11:28:26 by otossa           ###   ########.fr       */
+/*   Updated: 2023/05/24 10:42:19 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ class Config {
 
   public:
     static Config* boot();
-    static Config* boot(const std::string& path);
+    static Config* boot(const std::string path);
     static Config* get();
     static void cleanup();
     std::string read();
@@ -74,6 +74,11 @@ class Config {
     std::vector<Server*> &getServers();
     std::map<std::string, std::string>& getMimeTypes();
     ~Config();
+  /*
+   * checkers
+   */
+    static void checkHealth(Config* config);
+    static bool isServerValid(Server* server);
   /*
   * test method
   */

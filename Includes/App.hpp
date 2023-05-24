@@ -9,5 +9,5 @@
 #include "multiplexers/Select.hpp"
 #include "multiplexers/Poll.hpp"
 
-void app(char *config_file, int flag);
+void app(const std::string config_file, int flag);
 #endif // !APP_hpp

@@ -6,11 +6,13 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/23 15:06:00 by otossa           ###   ########.fr       */
+/*   Updated: 2023/05/24 18:20:59 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Includes/Cgi.hpp"
+#include <cctype>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -27,6 +29,8 @@
 Cgi::Cgi(Request* request): request_(request), finished_(0), in_progress(false) {}
 
 Cgi::~Cgi() {
+  for(size_t i = 0; i < this->env_.size(); i++)
+    delete [] env_[i];
   remove(this->response_file_name_.c_str());
 }
 
@@ -46,12 +50,6 @@ void Cgi::closeFiles() {
   close(this->request_fd_);
   close(this->response_fd_);
 }
-
-// void Cgi::appendStream(const char *buffer, size_t buffer_size) {
-//   // if(!this->file_.is_open())
-//   //   throw std::runtime_error("file is not oppend");
-//   // this->file_.write(buffer, buffer_size);
-// }
 
 void printheaders(std::vector<char *> v) {
 
@@ -94,39 +92,65 @@ void Cgi::executeCgi() {
 */
 
 void Cgi::prepareEnv() {
-  // the strdup thing will be handled lather it is just a tmp thing
   try {
-    std::string cl(my_tostring(request_->getContentLength()));
-    std::string tmp = "CONTENT_LENGTH=" + cl;
-    this->env_.push_back(strdup(tmp.data()));
-    tmp = "CONTENT_TYPE=" + request_->getHeaders().find("Content-Type")->second;
-    this->env_.push_back(strdup(tmp.data()));
-    tmp = "REQUEST_METHOD=" + Settings::methodString(request_->getRequestMethod());
-    this->env_.push_back(strdup(tmp.data()));
-    tmp = "SCRIPT_FILENAME=";
-    tmp += this->request_->getRequestedFileFullPath();
-    this->env_.push_back(strdup(tmp.data()));
-    tmp = "QUERY_STRING=" + this->request_->getQueryParams();
-    this->env_.push_back(strdup(tmp.c_str()));
+    // common headers
+    header_iterator clit = request_->getHeaders().find("Content-Type");
 
-    // this will only evaluated if the request belongs to a location to avoid segfault
-    if(this->request_->getLocation()) {
-    tmp = "UPLOAD_TMP_DIR=" + this->request_->getLocation()->getUploadDir();
-    this->env_.push_back(strdup(tmp.c_str()));
-    }
-
-    //for now this is hardcoded
-    this->env_.push_back(strdup("REDIRECT_STATUS=200"));
+    env_.push_back(makeVar_("REQUEST_METHOD", Settings::methodString(request_->getRequestMethod())));
+    env_.push_back(makeVar_("SCRIPT_FILENAME", this->request_->getRequestedFileFullPath()));
+    env_.push_back(makeVar_("QUERY_STRING", this->request_->getQueryParams()));
+    if(clit != request_->getHeaders().end())
+      env_.push_back(makeVar_("CONTENT_TYPE", clit->second));
+    env_.push_back(makeVar_("CONTENT_LENGTH", my_tostring(request_->getContentLength())));
+    env_.push_back(makeVar_("REDIRECT_STATUS", "200"));
+    if(this->request_->getLocation())
+      env_.push_back(makeVar_("UPLOAD_TMP_DIR", this->request_->getLocation()->getUploadDir()));
+    prepareHttpHeaders_();
     this->env_.push_back(NULL);
+   // http headers 
+  // dev::br();
+  // for(std::map<std::string, std::string>::iterator it = this->request_->getHeaders().begin(); it != this->request_->getHeaders().end(); it++)
+  //   std::cout << it->first << " " << it->second << std::endl;
   } catch (...) {
-    std::cerr << "bad request goes here " << std::endl;
+    throw InternalServerErrorException();
   }
-}
+  }
 
 void Cgi::prepareArgs() {
   this->args_.push_back(strdup(this->request_->getRequestCgi().c_str()));
   this->args_.push_back(strdup(this->request_->getRequestedFileFullPath().c_str()));
   this->args_.push_back(NULL);
+}
+
+char *Cgi::makeVar_(std::string key, const std::string& value) {
+  char *var;
+
+  prepareKey_(key);
+  size_t size = key.length() + value.length() + 2;
+  var = new char[size];
+  std::strcpy(var, key.c_str());
+  var[key.length()] = '=';
+  std::strcpy(var + key.length() + 1, value.c_str());
+  var[size - 1] = '\0';
+  return var;
+}
+
+void Cgi::prepareKey_(std::string &key) {
+  for (size_t i = 0; i < key.length(); i++) {
+    if (key[i] == '-')
+      key[i] = '_';
+    else
+      key[i] = std::toupper(key[i]);
+  }
+}
+
+void Cgi::prepareHttpHeaders_() {
+  std::string http = "HTTP_";
+  for(header_iterator it = request_->getHeaders().begin(); it != request_->getHeaders().end(); it++) {
+    if(Cgi::common_headers.find(it->first) == Cgi::common_headers.end()) {
+      env_.push_back(makeVar_(http + it->first, it->second));
+    }
+  }
 }
 
 /*
@@ -140,3 +164,20 @@ std::string Cgi::getResponseFileName() { return this->response_file_name_; }
 bool Cgi::isFinished() {
   return this->finished_ != 0;
 }
+
+void Cgi::setCommonHeaders() {
+  size_t i = 0;
+  while(Cgi::common_headers_array[i]) {
+    std::cout << Cgi::common_headers_array[i] << std::endl;
+    Cgi::common_headers.insert(Cgi::common_headers_array[i]);
+    i++;
+  }
+}
+
+const char *Cgi::common_headers_array[] = {
+  "Content-Length",
+  "Content-Type",
+  NULL
+};
+
+std::set<std::string> Cgi::common_headers;
