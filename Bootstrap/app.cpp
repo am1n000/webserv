@@ -6,7 +6,7 @@ void app(char *config_file, int flag)
 	// loading configuration
 	Server::setDictionary();
 	Settings::boot();
-	Config::boot();
+	Config::boot(config_file);
 	(void)config_file;
 	if (flag == 0)
 	{
