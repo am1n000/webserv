@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/24 23:03:13 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/25 10:17:56 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ Cgi::~Cgi() {
   for (size_t i = 0; i < this->args_.size(); i++)
     delete[] args_[i];
   remove(this->response_file_name_.c_str());
-  system("leaks webserv");
 }
 
 /*

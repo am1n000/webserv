@@ -7,7 +7,7 @@
 Response::Response(Request* request) : _request(request),  _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0), _hasCgi(false), _cgi(NULL)
 {
   // if(this->_request->hasCgi()) {
-    this->_cgi = new Cgi(this->_request);
+    // this->_cgi = new Cgi(this->_request);
     // this->_hasCgi = true;
   // }
 };
@@ -48,8 +48,11 @@ void Response::set_file(std::string path)
 
 int Response::handle_get(int sock_fd)
 {
-	if(this->_request->hasCgi())
+	if(this->_request->hasCgi()) {
+    if(!this->_cgi)
+      this->_cgi = new Cgi(_request);
 		return (this->handleCgi(sock_fd));
+  }
 	if (this->_started == 0)
 	{
 		std::string dirCheck = directoryCheck(sock_fd);
@@ -89,8 +92,11 @@ int Response::handle_get(int sock_fd)
 
 int Response::handle_post(int sock_fd)
 {
-        if (this->_request->hasCgi())
-                        return (this->handleCgi(sock_fd));
+	if(this->_request->hasCgi()) {
+    if(!this->_cgi)
+      this->_cgi = new Cgi(_request);
+		return (this->handleCgi(sock_fd));
+  }
         else
                         std::cerr << "no cgi " << std::endl;
         std::string header = "HTTP/1.1 201 Created\r\nLocation: "
@@ -103,8 +109,11 @@ int Response::handle_post(int sock_fd)
 
 int Response::handle_delete(int sock_fd)
 {
-	if (this->_request->hasCgi())
+	if (this->_request->hasCgi()) {
+    if(!this->_cgi)
+      this->_cgi = new Cgi(_request);
 		return (this->handleCgi(sock_fd));
+  }
 
     struct stat fileStat;
 	std::string directoryFullPath = this->_request->getRequestedFileFullPath();

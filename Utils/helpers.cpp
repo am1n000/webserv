@@ -6,10 +6,12 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <cstring>
+#include <stdlib.h>
 
 std::string helpers::to_string(int num)
 {
-  std::stringstream ss(num);
+  std::stringstream ss;
   ss <<  num;
   return ss.str();
 }
