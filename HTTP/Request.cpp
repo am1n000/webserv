@@ -101,6 +101,8 @@ void Request::appendBodyFile(const char *buffer, Request::size_type size) {
 }
 
 void Request::unchunckRequest(std::string &buffer) {
+  if (buffer.empty())
+    return ;
   size_type size_to_write(0);
   // begining of new chunk
   if (this->chunk_received_ == 0) {
@@ -216,9 +218,10 @@ bool Request::isChuncked() {
   string_map_type::iterator it =
       this->request_headers_.find("Transfer-Encoding");
   if (it != this->request_headers_.end()) {
-    if (it->second != "Chunked")
+    if (it->second != "Chunked" && it->second != "chunked")
       throw NotImplementedException();
-    return true;
+    else
+      return true;
   }
   return false;
 }
@@ -456,6 +459,10 @@ Location *Request::getLocation() { return this->request_location_; }
  */
 
 void Request::headerCompletedEventHook() { this->parseHeader(); }
+
+void Request::bodyCompletedEventHook() { 
+  // code needed to be trigred when finishing reading the body 
+}
 
 /*
  * tests
