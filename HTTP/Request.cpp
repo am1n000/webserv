@@ -327,7 +327,7 @@ void Request::setMethod(const std::string &method) {
 }
 
 void Request::setRequestUri(const std::string &uri) {
-  if (uri == "")
+  if (uri == "" || uri[0] != '/')
     throw BadRequestException();
   size_type pos = uri.find("?");
   if (pos != std::string::npos) {
@@ -350,6 +350,8 @@ void Request::setRequestedRessource(const std::string &uri) {
 void Request::setHttpVersion(const std::string &version) {
   if (version.length() == 0)
     throw BadRequestException();
+  if(version != "HTTP/1.1")
+    throw NotImplementedException();
   this->http_version_ = version;
 }
 
@@ -449,7 +451,7 @@ Location *Request::getLocation() { return this->request_location_; }
  * END getters
  */
 
-/*
+/* 
  * hooks
  */
 
