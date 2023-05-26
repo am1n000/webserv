@@ -114,6 +114,7 @@
 		}
 		catch (statusCodeExceptions &e)
 		{
+			displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 			if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), NULL) == -1)
 				std::cerr << "error: epoll_ctl deletion" << std::endl;
 			close(clientData->getSockFd());
@@ -136,6 +137,7 @@
 		}
 		catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
 		{	
+			displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
 			if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), NULL) == -1)
 				std::cerr << "error: epoll_ctl deletion" << std::endl;
 			close(clientData->getSockFd());
