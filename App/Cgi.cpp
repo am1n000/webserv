@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/25 10:17:56 by otossa           ###   ########.fr       */
+/*   Updated: 2023/05/25 23:17:42 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,8 +109,8 @@ void Cgi::prepareEnv() {
 
 void Cgi::prepareArgs() {
 
-  char *cgi = new char[this->request_->getRequestCgi().length()];
-  char *script = new char[this->request_->getRequestedFileFullPath().length()];
+  char *cgi = new char[this->request_->getRequestCgi().length() + 1];
+  char *script = new char[this->request_->getRequestedFileFullPath().length() + 1];
   std::strcpy(cgi, this->request_->getRequestCgi().c_str());
   std::strcpy(script, this->request_->getRequestedFileFullPath().c_str());
   this->args_.push_back(cgi);
