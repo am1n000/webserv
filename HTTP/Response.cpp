@@ -25,6 +25,20 @@ Response::~Response()
 	  delete (this->_cgi);
 };
 
+bool Response::respond(int sockFd) {
+  int method = this->_request->getRequestMethod();
+  switch (method) {
+    case GET:
+      return this->handle_get(sockFd);
+    case POST:
+      return this->handle_post(sockFd);
+    case DELETE:
+      return this->handle_delete(sockFd);
+    default:
+      return false; 
+  }
+}
+
 void Response::set_file(std::string path)
 {
 	this->_file.open(path.c_str(), std::ios::binary | std::ios::ate);
