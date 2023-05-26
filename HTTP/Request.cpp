@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/24 21:23:06 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/26 01:10:00 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,6 @@ Request::~Request() {
   if (this->body_file_) {
     if (this->body_file_->is_open())
       this->body_file_->close();
-    // if(this->request_location_)
-    //     delete this->request_location_;
     if (this->tokenizer_)
       delete this->tokenizer_;
     delete this->body_file_;
@@ -119,6 +117,7 @@ void Request::unchunckRequest(std::string &buffer) {
       this->content_length = body_size_;
       if (this->body_file_->is_open())
         this->body_file_->close();
+      this->bodyCompletedEventHook();
       return;
     }
     size_to_write = (this->chunk_size_ < buffer.length() + chunk_received_
@@ -188,6 +187,7 @@ bool Request::isBodyCompleted() {
   if (this->body_size_ >= this->getContentLength()) {
     this->body_completed_ = true;
     this->body_file_->close();
+    this->bodyCompletedEventHook();
   }
   return this->body_completed_;
 }

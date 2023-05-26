@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:49:20 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/22 11:50:19 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/26 00:57:31 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,6 +166,7 @@ public:
    */
 
   void headerCompletedEventHook();
+  void bodyCompletedEventHook();
   /*
   * test function will be removed lather
   */
