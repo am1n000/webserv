@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/24 21:23:33 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/26 12:01:33 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,12 @@
 // for dev only
 #include "../dev/dev.hpp"
 #include <cstdlib>
+#include <cstring>
 #include <utility>
 
 Server::Server() { this->setMembers(); }
 
-Server::Server(const std::string &serverString) : server_string_(serverString) {
+Server::Server(const std::string &serverString) : server_string_(serverString), client_body_size_limit_(-1) {
   this->setMembers();
   this->tockenizer_ =
       new Tockenizer(serverString.substr(1, serverString.length() - 2));
@@ -38,8 +39,7 @@ void Server::setClientBodySize(const std::string &val) {
   try {
     this->client_body_size_limit_ = std::atoi(val.data());
   } catch (...) {
-    std::cerr << "client body size limit is invaid" << std::endl;
-    exit(1);
+    throw BadConfigException();
   }
 }
 
@@ -65,14 +65,22 @@ void Server::setListen(const std::string &val) {
   }
 }
 
-void Server::setErrorPage(const std::string &val) { this->error_page_ = val; }
+void Server::setErrorPages(const std::string &val) { 
+
+  Tockenizer tok(val);
+  std::string code = tok.getNextToken();
+  std::string path = helpers::trim(tok.getNoneEmptyLine());
+  if(code.empty() || path.empty())
+    throw BadConfigException("invalid error page");
+  this->error_pages_.insert(std::make_pair(std::string(code), std::string(path)));
+}
 
 void Server::setMembers() {
   this->members_.insert(std::make_pair("root", &Server::setRoot));
   this->members_.insert(std::make_pair("index", &Server::setIndex));
   this->members_.insert(std::make_pair("server_name", &Server::setServerName));
   this->members_.insert(std::make_pair("listen", &Server::setListen));
-  this->members_.insert(std::make_pair("error_page", &Server::setErrorPage));
+  this->members_.insert(std::make_pair("error_page", &Server::setErrorPages));
   this->members_.insert(
       std::make_pair("client_body_limit", &Server::setClientBodySize));
   this->members_.insert(std::make_pair("location", &Server::pushLocation));
@@ -127,7 +135,7 @@ std::string &Server::getRoot() { return this->root_; }
 std::string &Server::getHost() { return this->host_; }
 std::string &Server::getPort() { return this->port_; }
 std::string &Server::getServerName() { return this->server_name_; }
-std::string &Server::getErrorPage() { return this->error_page_; }
+std::map<std::string, std::string> &Server::getErrorPages() { return this->error_pages_; }
 std::size_t &Server::getClienBodySizeLimit() {
   return this->client_body_size_limit_;
 }
@@ -183,7 +191,7 @@ void Location::parse() {
     key = this->tockenizer_->getNextToken();
     value = this->tockenizer_->getLine();
     if ((key.length() == 0) ^ (value.length() == 0))
-      throw std::runtime_error("invalid value for " + key);
+      throw BadConfigException("invalid value for " + key);
     if (key.length() != 0 && value.length() != 0)
       this->setProp(key, helpers::trim(value));
   }

@@ -111,9 +111,7 @@ int Response::handle_post(int sock_fd)
       this->_cgi = new Cgi(_request);
 		return (this->handleCgi(sock_fd));
   }
-        else
-                        std::cerr << "no cgi " << std::endl;
-        std::string header = "HTTP/1.1 201 Created\r\nLocation: "
+        std::string header = "HTTP/1.1 200 Created\r\nLocation: "
                              "/resources/post\t\nContent-Type: "
                              "text/plain\r\n\r\nrequest has been posted";
         if (send(sock_fd, header.c_str(), header.length(), 0) < 0)

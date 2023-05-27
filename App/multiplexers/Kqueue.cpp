@@ -117,7 +117,8 @@
 		}
 		catch (statusCodeExceptions &e)
 		{
-			displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
+      std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+      helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
 			kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 			close(clientData->getSockFd());
@@ -140,7 +141,9 @@
 		}
 		catch (statusCodeExceptions &e)
 		{	
-			displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource());
+
+      std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+    helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
 			kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
 			close(clientData->getSockFd());

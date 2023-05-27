@@ -81,6 +81,7 @@ private:
   size_type chunk_size_;
   size_type chunk_received_;
   size_type content_length;
+  int status_;
 
   /*
   * private methods

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/25 23:17:42 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/26 12:00:22 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,6 @@ bool Cgi::isFinished() { return this->finished_ != 0; }
 void Cgi::setCommonHeaders() {
   size_t i = 0;
   while (Cgi::common_headers_array[i]) {
-    std::cout << Cgi::common_headers_array[i] << std::endl;
     Cgi::common_headers.insert(Cgi::common_headers_array[i]);
     i++;
   }

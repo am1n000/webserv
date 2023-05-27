@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/24 21:19:05 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/26 11:45:03 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ class Server
 		std::string host_;
 		std::string port_;
 		std::string server_name_;
-		std::string error_page_;
+    std::map<std::string, std::string> error_pages_;
 		std::size_t client_body_size_limit_;
 		std::vector<std::string> indexs_;
 		std::map<std::string, Location*> locations_;
@@ -124,7 +124,7 @@ class Server
 		void setHost(const std::string &val);
 		void setPort(const std::string &val);
 		void setServerName(const std::string &val);
-		void setErrorPage(const std::string &val);
+		void setErrorPages(const std::string &val);
 		void setClientBodySize(const std::string &val);
 		void setIndex(const std::string &index);
 		void setListen(const std::string &val);
@@ -144,7 +144,7 @@ class Server
 
 		std::string &getServerName();
 
-		std::string &getErrorPage();
+    std::map<std::string, std::string> &getErrorPages();
 
 		std::size_t &getClienBodySizeLimit();
 

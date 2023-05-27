@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/26 01:10:00 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/26 12:00:34 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -462,6 +462,8 @@ void Request::headerCompletedEventHook() { this->parseHeader(); }
 
 void Request::bodyCompletedEventHook() { 
   // code needed to be trigred when finishing reading the body 
+  if(this->server_->getClienBodySizeLimit() < this->getContentLength())
+    throw PayloadTooLargeException();
 }
 
 /*

@@ -198,14 +198,16 @@ int helpers::stoi(const std::string &str) {
 //   return ss.str();
 // }
 
-void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath)
-// void  displayStatusCodePage(sdt::map<std::string, std::string> erroPages, statusCodeExceptions &e, int sock, std::string ressourcePath)
+void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath, std::string& errorPage)
 {
-	// std::string statusCodePath = errorPages[e.getValue()];
-	// if (statusCodePath.length() == 0)
-	std::string statusCodePath = "./ErrorPages/" + e.getValue();
-	statusCodePath +=	".html";
-	std::ifstream	file(statusCodePath.c_str(), std::ios::ate);
+  std::string errorPagePath;
+  if(errorPage.empty()) {
+    errorPagePath = "./ErrorPages/" + e.getValue();
+    errorPagePath +=	".html";
+  }
+  else 
+    errorPagePath = errorPage; 
+	std::ifstream	file(errorPagePath.c_str(), std::ios::ate);
 	if (!file.is_open())
 	{
 		std::cerr << "status code file " << e.getValue() << "  could not be opened!" << std::endl;
