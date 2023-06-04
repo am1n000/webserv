@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/26 12:00:22 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/04 16:59:56 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,10 +76,12 @@ void Cgi::executeCgi() {
     }
   }
   this->finished_ = waitpid(this->process_id_, &this->exit_status_, WNOHANG);
-  // if(!WIFEXITED(this->exit_status_)) {
-  //   std::cerr << "exited with error code " << std::endl;
-  //   throw InternalServerErrorException();
-  // }
+  if (WEXITSTATUS(this->exit_status_)) {
+    if (WIFEXITED(this->exit_status_) == 1) {
+      std::cerr << "error when trying to execute cgi" << std::endl;
+      throw InternalServerErrorException();
+    }
+  }
 }
 
 /*
