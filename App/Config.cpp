@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/24 22:33:37 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/04 19:08:01 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,11 +72,14 @@ void Config::parse() {
     token = this->tockenizer_->getNextToken();
     if (token == "server")
       this->pushServer(this->tockenizer_->getNextScope());
-    else if (token == "include") {
+    else if (token == "include")
       this->parseFile(this->tockenizer_->getNoneEmptyLine());
+    else {
+      if (token.length() > 1){
+        throw BadConfigException("invalid directive");
+      }
     }
   }
-  // delete this->tockenizer_;
 }
 
 void Config::pushServer(const std::string &serverString) {
@@ -103,6 +106,13 @@ void Config::parseFile(const std::string &path) {
       this->pushServer(file.tockenizer()->getNextScope());
     else if (token == "include")
       this->parseFile(file.tockenizer()->getNoneEmptyLine());
+    else {
+      if (token.length() > 0 && std::isalnum(token[0])){
+      std::cout << "|" << token << "|" << std::endl;
+      std::cout << "|" << token.length() << "|" << std::endl;
+        throw BadConfigException("invalid directive");
+      }
+    }
   }
 }
 

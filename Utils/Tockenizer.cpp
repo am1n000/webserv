@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 23:22:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/24 22:02:56 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/04 19:06:57 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,10 @@ Tockenizer::data_type Tockenizer::getNoneEmptyLine() {
 std::string Tockenizer::getNextToken(char c) {
   size_type size(0);
   size_type begin;
-  data_type result;
+  data_type result = "";
 
   begin = this->current_;
-  while(std::isspace(this->data_[begin]))
+  while(begin < this->data_.length() && (std::isspace(this->data_[begin]) || this->data_[begin] == '\n'))
     begin++;
   while (begin + size < this->data_.length() &&
          (data_[begin + size] != c || data_[begin + size] == '\n')) {
@@ -57,10 +57,12 @@ std::string Tockenizer::getNextToken(char c) {
   }
   this->current_ = begin + size + 1 ;
   if(size == 0)
-    return result;
+    return "";
+  size_type subsize = size + begin < this->data_.length() ? size : this->data_.length() - begin;
   result = this->data_.substr(begin, size);
   if(result[result.length() - 1] == '\n')
-    result[result.length() - 1] = '\0';
+    result.erase(result.size() - 1);
+  std::cout << this->current_ << "    " << this->data_.length() << "   " << size << "  " << subsize << std::endl;
   return result;
 }
 
