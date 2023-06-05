@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpNotImplementedException.cpp                    :+:      :+:    :+:   */
+/*   Exceptions.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 11:02:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/08 11:41:02 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/26 10:17:20 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,9 @@ const char* RequestURITooLongException::what() const throw()
 const char* NotImplementedException::what() const throw()
 {
 	return ("Not Implemented");
+}
+
+const char* PayloadTooLargeException::what() const throw()
+{
+	return ("payload too large");
 }

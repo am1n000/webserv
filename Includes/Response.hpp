@@ -34,6 +34,7 @@ class Response
 		Response();
 		Response(Request *request);
 		~Response();
+    bool respond(int sockFd);
 		void	set_file(std::string path);
 		int     handle_get(int sock_fd);
 		int     handle_post(int sock_fd);

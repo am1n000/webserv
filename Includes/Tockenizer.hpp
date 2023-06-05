@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 22:14:56 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/19 09:41:38 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/05/24 22:40:06 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,12 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "../Includes/Exceptions.hpp"
 
 class Tockenizer {
 public:
   typedef size_t size_type;
   typedef std::string data_type;
-  typedef data_type &reference;
-  typedef data_type *pointer;
   typedef const std::string& const_reference;
 protected:
     data_type data_;

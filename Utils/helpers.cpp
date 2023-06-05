@@ -6,33 +6,14 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <cstring>
+#include <stdlib.h>
 
-char *my_tostring(int num)
+std::string helpers::to_string(int num)
 {
-	int i = 0, rem, len = 0, n;
- 
-	n = num;
-	while (n != 0)
-	{
-		len++;
-		n /= 10;
-	}
-	if  (len == 1)
-		len = 2;
-	char *str = new char[len];
-	if  (len == 1)
-	{
-		str[0] = '0';
-		i = 1;
-	}
-	for (;i < len; i++)
-	{
-		rem = num % 10;
-		num = num / 10;
-		str[len - (i + 1)] = rem + '0';
-	}
-	str[len] = '\0';
-	return (str);
+  std::stringstream ss;
+  ss <<  num;
+  return ss.str();
 }
 
 std::string get_time()
@@ -55,17 +36,17 @@ std::string get_time()
 	std::string now_time;
 	now_time = day_name;
 	now_time += ", ";
-	now_time += my_tostring(day);
+	now_time += helpers::to_string(day);
 	now_time += " ";
 	now_time += month_name;
 	now_time += " ";
-	now_time += my_tostring(year);
+	now_time += helpers::to_string(year);
 	now_time += " ";
-	now_time += my_tostring(hour);
+	now_time += helpers::to_string(hour);
 	now_time += ":";
-	now_time += my_tostring(min);
+	now_time += helpers::to_string(min);
 	now_time += ":";
-	now_time += my_tostring(sec);
+	now_time += helpers::to_string(sec);
 	now_time += " ";
 	now_time += "GMT";
 	return (now_time);
@@ -178,7 +159,7 @@ std::string helpers::timeBasedName(std::string extenssion = "") {
   std::srand(x);
   strftime(tmp, 80, "%Y-%m-%d-%H%M%S", now);
 
-  std::string ran(my_tostring(std::rand()));
+  std::string ran(helpers::to_string(std::rand()));
   std::string name = ran + "_" + tmp + extenssion;
   return name;
 }
@@ -217,14 +198,16 @@ int helpers::stoi(const std::string &str) {
 //   return ss.str();
 // }
 
-void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath)
-// void  displayStatusCodePage(sdt::map<std::string, std::string> erroPages, statusCodeExceptions &e, int sock, std::string ressourcePath)
+void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath, std::string& errorPage)
 {
-	// std::string statusCodePath = errorPages[e.getValue()];
-	// if (statusCodePath.length() == 0)
-	std::string statusCodePath = "./ErrorPages/" + e.getValue();
-	statusCodePath +=	".html";
-	std::ifstream	file(statusCodePath.c_str(), std::ios::ate);
+  std::string errorPagePath;
+  if(errorPage.empty()) {
+    errorPagePath = "./ErrorPages/" + e.getValue();
+    errorPagePath +=	".html";
+  }
+  else 
+    errorPagePath = errorPage; 
+	std::ifstream	file(errorPagePath.c_str(), std::ios::ate);
 	if (!file.is_open())
 	{
 		std::cerr << "status code file " << e.getValue() << "  could not be opened!" << std::endl;

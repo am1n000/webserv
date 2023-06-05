@@ -33,14 +33,7 @@ Client::~Client()
 
 bool Client::sending()
 {
-	bool finished = false;
-	if (this->req->getRequestMethod() == GET)
-	finished = this->resp->handle_get(this->_sockFd);
-	else if (this->req->getRequestMethod() == POST)
-	finished = this->resp->handle_post(this->_sockFd);
-	else if (this->req->getRequestMethod() == DELETE)
-	finished = this->resp->handle_delete(this->_sockFd);
-	return (finished);
+  return this->resp->respond(this->_sockFd);
 }
 
 void	Client::checkServerByName()

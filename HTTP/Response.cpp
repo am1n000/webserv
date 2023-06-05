@@ -7,7 +7,7 @@
 Response::Response(Request* request) : _request(request),  _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0), _hasCgi(false), _cgi(NULL)
 {
   // if(this->_request->hasCgi()) {
-    this->_cgi = new Cgi(this->_request);
+    // this->_cgi = new Cgi(this->_request);
     // this->_hasCgi = true;
   // }
 };
@@ -24,6 +24,20 @@ Response::~Response()
   if(this->_cgi)
 	  delete (this->_cgi);
 };
+
+bool Response::respond(int sockFd) {
+  int method = this->_request->getRequestMethod();
+  switch (method) {
+    case GET:
+      return this->handle_get(sockFd);
+    case POST:
+      return this->handle_post(sockFd);
+    case DELETE:
+      return this->handle_delete(sockFd);
+    default:
+      return false; 
+  }
+}
 
 void Response::set_file(std::string path)
 {
@@ -48,8 +62,11 @@ void Response::set_file(std::string path)
 
 int Response::handle_get(int sock_fd)
 {
-	if(this->_request->hasCgi())
+	if(this->_request->hasCgi()) {
+    if(!this->_cgi)
+      this->_cgi = new Cgi(_request);
 		return (this->handleCgi(sock_fd));
+  }
 	if (this->_started == 0)
 	{
 		std::string dirCheck = directoryCheck(sock_fd);
@@ -89,11 +106,12 @@ int Response::handle_get(int sock_fd)
 
 int Response::handle_post(int sock_fd)
 {
-        if (this->_request->hasCgi())
-                        return (this->handleCgi(sock_fd));
-        else
-                        std::cerr << "no cgi " << std::endl;
-        std::string header = "HTTP/1.1 201 Created\r\nLocation: "
+	if(this->_request->hasCgi()) {
+    if(!this->_cgi)
+      this->_cgi = new Cgi(_request);
+		return (this->handleCgi(sock_fd));
+  }
+        std::string header = "HTTP/1.1 200 Created\r\nLocation: "
                              "/resources/post\t\nContent-Type: "
                              "text/plain\r\n\r\nrequest has been posted";
         if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
@@ -103,8 +121,11 @@ int Response::handle_post(int sock_fd)
 
 int Response::handle_delete(int sock_fd)
 {
-	if (this->_request->hasCgi())
+	if (this->_request->hasCgi()) {
+    if(!this->_cgi)
+      this->_cgi = new Cgi(_request);
 		return (this->handleCgi(sock_fd));
+  }
 
     struct stat fileStat;
 	std::string directoryFullPath = this->_request->getRequestedFileFullPath();
@@ -258,7 +279,7 @@ std::string	Response::directoryCheck(int sock_fd)
 					indexFile += modified_str;
 					indexFile += "</td>\n";
 					indexFile += "<td>";
-					indexFile += my_tostring(fileStat.st_size);
+					indexFile += helpers::to_string(fileStat.st_size);
 					indexFile += "</td>\n</tr>\n";
 				}
 			}

@@ -31,5 +31,6 @@ void app(const std::string config_file, int flag)
 		P->serve();
 	}
 
-	// Config::cleanup();
+	Config::cleanup();
+  Settings::cleanup();
 }
