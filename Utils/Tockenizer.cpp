@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/20 23:22:52 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/04 19:06:57 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/05 11:11:01 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,11 +58,9 @@ std::string Tockenizer::getNextToken(char c) {
   this->current_ = begin + size + 1 ;
   if(size == 0)
     return "";
-  size_type subsize = size + begin < this->data_.length() ? size : this->data_.length() - begin;
   result = this->data_.substr(begin, size);
   if(result[result.length() - 1] == '\n')
     result.erase(result.size() - 1);
-  std::cout << this->current_ << "    " << this->data_.length() << "   " << size << "  " << subsize << std::endl;
   return result;
 }
 
