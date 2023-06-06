@@ -10,9 +10,9 @@
 
 	Kqueue*	Kqueue::getInstance()
 	{
-		if (instance == nullptr)
-			instance = new Kqueue;
-		return (instance);
+		if (Kqueue::instance == nullptr)
+			Kqueue::instance = new Kqueue;
+		return (Kqueue::instance);
 	}
 
 	void Kqueue::setUpServerConnections()
@@ -91,19 +91,21 @@
 			reinterpret_cast<sockaddr *>(&(clientData->server->getHostAddr())),
 			reinterpret_cast<socklen_t *>(&(clientData->server->getHostAddrlen())));
 		if (client_sock == -1)
-			std::cerr << "error: accept server " << std::endl;
+			std::cerr << "error: accept server " << clientData->server->getServerName() <<  std::endl;
 		else
 		{
-			struct timespec timeout;
-			timeout.tv_sec = 2;
-			timeout.tv_nsec = 0;
 			Client *u_data = new Client(client_sock, 0);
 			u_data->server = clientData->server;
 			u_data->req->setServer(clientData->server);
 			EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
-			EV_SET(u_data->getTimerChangePtr(), client_sock, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 5000, u_data);
-			if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, &timeout) != 0)
+			EV_SET(u_data->getTimeoutChangePtr(), client_sock, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 5, u_data);
+			if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, NULL) != 0 
+				|| kevent(kq, u_data->getTimeoutChangePtr(), 1, NULL, 0, NULL) != 0)
+			{
 				std::cerr << "error: kevent registration 2" << std::endl;
+				helpers::InternalServerError(client_sock);
+				delete (u_data);
+			}
 		}
 	}
 
@@ -114,26 +116,39 @@
 		{
 			if (clientData->reading())
 			{
-				struct timespec timeout;
-				timeout.tv_sec = 2;
-				timeout.tv_nsec = 0;
-				EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ,
-						EV_DELETE, 0, 0, clientData);
+				EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
 				if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
-				std::cerr << "error: kevent 3" << std::endl;
-				EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE,
-						EV_ADD | EV_ENABLE,0,0, clientData);
-				if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, &timeout) == -1)
-				std::cerr << "error: kevent 33" << std::endl;
+				{
+					std::cerr << "error: kevent 3" << std::endl;
+					throw (InternalServerErrorException());
+				}
+
+				EV_SET(clientData->getTimeoutChangePtr(), clientData->getSockFd(), EVFILT_TIMER, EV_DELETE, 0, 0, clientData);
+				if (kevent(kq, clientData->getTimeoutChangePtr(), 1, NULL, 0, NULL) == -1)
+				{
+					std::cerr << "error: kevent 3" << std::endl;
+					throw (InternalServerErrorException());
+				}
+
+				EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_ADD | EV_ENABLE,0,0, clientData);
+				if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
+				{
+					std::cerr << "error: kevent 3" << std::endl;
+					throw (InternalServerErrorException());
+				}
 			}
 
 		}
 		catch (statusCodeExceptions &e)
 		{
-      std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-      helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
+			std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+			helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
-			kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
+			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
+			{
+					std::cerr << "error: kevent 4" << std::endl;
+					helpers::InternalServerError(clientData->getSockFd());
+			}
 			close(clientData->getSockFd());
 			delete (clientData);
 
@@ -147,21 +162,53 @@
 			if (clientData->sending())
 			{
 				EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
-				kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
+				if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
+				{
+					std::cerr << "error: kevent 5" << std::endl;
+					throw(InternalServerErrorException());
+				}
 				close(clientData->getSockFd());
 				delete (clientData);
 			}
 		}
 		catch (statusCodeExceptions &e)
 		{	
-
-      std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-    helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
+      		std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+    		helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
-			kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL);
+			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
+			{
+				std::cerr << "error: kevent 6" << std::endl;
+				helpers::InternalServerError(clientData->getSockFd());
+			}
 			close(clientData->getSockFd());
 			delete (clientData);
 		}
+	}
+
+	void	Kqueue::timeout(Client *clientData)
+	{
+		try
+		{
+			if (!clientData->req->isRequestCompleted())
+				throw(RequestTimeoutException());
+		}
+		catch(statusCodeExceptions &e)
+		{
+      		std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+			helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
+			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
+			EV_SET(clientData->getTimeoutChangePtr(), clientData->getSockFd(), EVFILT_TIMER, EV_DELETE, 0, 0, clientData);
+			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1
+				|| kevent(kq, clientData->getTimeoutChangePtr(), 1, NULL, 0, NULL) == -1)
+			{
+				std::cerr << "error: kevent 7" << std::endl;
+				helpers::InternalServerError(clientData->getSockFd());
+			}
+			close(clientData->getSockFd());
+			delete (clientData);
+		}
+		
 	}
 
 
@@ -170,7 +217,7 @@
 		if (kq == -1)
 		{
 			std::cerr << "error: kqueue" << std::endl;
-			return;
+			exit(1);
 		}
 		setUpServerConnections();
 		monitoringLoop();

@@ -19,9 +19,10 @@ void        removeComments(std::string& buffer);
 bool        hasSpace(std::string& str);
 int         stoi(const std::string& str);
 std::string to_string(int value);
-void  displayStatusCodePage(statusCodeExceptions &e, int sock, std::string path, std::string& errorPage);
-};
-
+void  displayStatusCodePage(statusCodeExceptions &e, int sock, bool slash, std::string& errorPage);
+void  InternalServerError(int sock);
 std::string get_time();
 std::vector<std::string> splitPaths(std::string fullPath);
 bool  withinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths);
+};
+

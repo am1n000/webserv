@@ -158,10 +158,9 @@ bool Request::outOfRoot()
   else
     root = this->server_->getRoot();
   std::string ressource = this->getRequestedRessource();
-  std::vector<std::string> paths = splitPaths(this->getRequestedRessource());
-  std::vector<std::string> rootPaths =
-      splitPaths(root);
-  return (withinRoot(paths, rootPaths));
+  std::vector<std::string> paths = helpers::splitPaths(this->getRequestedRessource());
+  std::vector<std::string> rootPaths = helpers::splitPaths(root);
+  return (helpers::withinRoot(paths, rootPaths));
 }
 
 void Request::prepareRequest() {

@@ -21,7 +21,7 @@ class Client
 		bool				_postFileCreated;
 		#ifdef __APPLE__
 			struct kevent		*_changePtr;
-			struct kevent		*_timerChangePtr;
+			struct kevent		*_timeoutChangePtr;
 		#endif
 		void	checkServerByName();
 
@@ -42,7 +42,7 @@ class Client
 		bool				getpostFileCreated();
 		#ifdef __APPLE__
 			struct kevent*		getChangePtr();
-			struct kevent*		getTimerChangePtr();
+			struct kevent*		getTimeoutChangePtr();
 		#endif
 
 		//.setters
@@ -51,7 +51,7 @@ class Client
 		void				setpostFileCreated(bool postFileCreated);
 		#ifdef __APPLE__
 			void				setChangePtr();
-			void				setTimerChangePtr();
+			void				setTimeoutChangePtr();
 		#endif
 };
 

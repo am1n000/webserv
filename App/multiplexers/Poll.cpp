@@ -117,7 +117,7 @@ void	Poll::read(Client *clientData)
 	catch(statusCodeExceptions &e)
 	{
     std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-    helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
+    helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
 		close (clientData->getSockFd());
 		clientsData.erase(clientsData.begin() + position);
 		pollFds.erase(pollFds.begin() + position);
@@ -138,7 +138,7 @@ void	Poll::write(Client *clientData)
 	catch(statusCodeExceptions &e)
 	{		
     std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-    helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
+    helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
 		close (clientData->getSockFd());
 		clientsData.erase(clientsData.begin() + position);
 		pollFds.erase(pollFds.begin() + position);
