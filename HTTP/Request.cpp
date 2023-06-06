@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/26 12:00:34 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/06 08:44:49 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,8 +165,6 @@ bool Request::outOfRoot()
 }
 
 void Request::prepareRequest() {
-
-  // setting up location if any match otherwise will be setted to null
   this->request_location_ = this->matchLocation();
   if (this->outOfRoot())
     throw(BadRequestException());
@@ -335,6 +333,8 @@ void Request::setMethod(const std::string &method) {
 }
 
 void Request::setRequestUri(const std::string &uri) {
+  if(uri.length() > 1024)
+    throw RequestURITooLongException();
   if (uri == "" || uri[0] != '/')
     throw BadRequestException();
   size_type pos = uri.find("?");

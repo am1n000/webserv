@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 23:57:48 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/04 16:59:56 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/06 14:22:06 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,14 @@ void Cgi::prepareEnv() {
     if (this->request_->getLocation())
       env_.push_back(makeVar_("UPLOAD_TMP_DIR", this->request_->getLocation()->getUploadDir()));
     prepareHttpHeaders_();
+  /*
+   *  SERVER_PROTOCOL , SERVER_PORT, SERVER_NAME, SERVER_SOFTWARE
+   */
+
+    env_.push_back(makeVar_("SERVER_PROTOCOL", "HTTP 1.1"));
+    env_.push_back(makeVar_("SERVER_PORT", this->request_->getServer()->getPort()));
+    env_.push_back(makeVar_("SERVER_NAME", this->request_->getServer()->getServerName()));
+    env_.push_back(makeVar_("SERVER_SOFTWARE", "l'mo7arik x"));
     this->env_.push_back(NULL);
   } catch (...) {
     throw InternalServerErrorException();
