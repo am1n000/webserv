@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/04 19:08:01 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/06 09:34:55 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,8 +108,6 @@ void Config::parseFile(const std::string &path) {
       this->parseFile(file.tockenizer()->getNoneEmptyLine());
     else {
       if (token.length() > 0 && std::isalnum(token[0])){
-      std::cout << "|" << token << "|" << std::endl;
-      std::cout << "|" << token.length() << "|" << std::endl;
         throw BadConfigException("invalid directive");
       }
     }
@@ -186,6 +184,18 @@ bool Config::isServerValid(Server *server) {
 void Config::cleanup() {
   // this is the method responsable for cleening the object i will let it empty
   // for now
+  if(Config::object_->file_) {
+    if(Config::object_->file_->is_open())
+      Config::object_->file_->close();
+    delete Config::object_->file_;
+  }
+  if(Config::object_->tockenizer_)
+    delete Config::object_->tockenizer_;
+  
+  std::vector<Server*> & servers = Config::object_->servers_;
+
+  for(size_type i = 0; i < servers.size(); i++)
+    delete servers[i];
 }
 
 /* --------------------------------------------------------------------------------------
@@ -196,7 +206,7 @@ void Config::cleanup() {
  */
 
 ConfigFile::ConfigFile() {
-  throw std::runtime_error("file path need to pe specified");
+  throw BadConfigException("file path need to pe specified");
 }
 
 ConfigFile::ConfigFile(const std::string &path) {
@@ -236,4 +246,9 @@ void ConfigFile::close() { this->file_.close(); }
 
 Tockenizer *ConfigFile::tockenizer() { return this->tok_; }
 
-ConfigFile::~ConfigFile() {}
+ConfigFile::~ConfigFile() {
+  if(this->tok_)
+    delete this->tok_;
+  if(this->file_.is_open())
+    this->file_.close();
+}
