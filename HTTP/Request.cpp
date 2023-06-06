@@ -150,12 +150,17 @@ void Request::unchunckRequest(std::string &buffer) {
   }
 }
 
-bool Request::outOfRoot() {
-  std::string root = this->request_location_->getRoot();
+bool Request::outOfRoot()
+{
+  std::string root;
+  if (this->request_location_)
+    root = this->request_location_->getRoot();
+  else
+    root = this->server_->getRoot();
   std::string ressource = this->getRequestedRessource();
   std::vector<std::string> paths = splitPaths(this->getRequestedRessource());
   std::vector<std::string> rootPaths =
-      splitPaths(this->request_location_->getRoot());
+      splitPaths(root);
   return (withinRoot(paths, rootPaths));
 }
 

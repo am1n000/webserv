@@ -25,16 +25,25 @@
 			Client *serverData = new Client;
 			serverData->setSockFd(servers[i]->createSocket());
 			if (serverData->getSockFd() == -1)
+			{
+				delete (serverData);			
 				continue;
+			}
 			if (servers[i]->bindSocket(serverData->getSockFd()))
 			{
 				if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
+				{
+					delete (serverData);		
 					continue;
+				}
 				std::cerr << "error :bind" << std::endl;
 				exit(1);
 			}
 			if (servers[i]->listenToConnections(serverData->getSockFd()))
+			{
+				delete (serverData);
 				continue;
+			}
 			hostPort[servers[i]->getHost()] = servers[i]->getPort();
 			serverData->setIsListeningSock(1);
 			serverData->server = Config::get()->getServers()[i];
@@ -45,6 +54,7 @@
 			if (epoll_ctl(ep, EPOLL_CTL_ADD, serverData->getSockFd(), &event) == -1)
 			{
 				std::cerr << "error: epoll_ctl" << std::endl;
+				delete (serverData);
 				continue;
 			}
 		}
