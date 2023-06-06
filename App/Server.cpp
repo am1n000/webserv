@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/06 14:43:14 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/06 21:59:36 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,7 +302,11 @@ bool Server::bindSocket(int sock) {
   memset(&this->_hostAddr, 0, sizeof(this->_hostAddr));
   this->_hostAddr.sin_family = AF_INET;
   this->_hostAddr.sin_port = htons(std::atoi(this->getPort().data()));
-  this->_hostAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  if (inet_pton(AF_INET, this->getHost().c_str(), &(this->_hostAddr.sin_addr)) <= 0)
+  {
+      std::cerr << "error : Invalid IP " << std::endl;
+      return (true);
+  }
 
   int opt = 1;
   if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {

@@ -20,11 +20,12 @@ class Response
 		std::string     			_mime_type;
 		std::ifstream   			_file;
 		Cgi							*_cgi;
+    std::string           _cgi_buffer;
 		
 
 	private:
 		//indexing functions
-  		std::vector<std::string> 		chooseIndexes();
+  	std::vector<std::string> 		chooseIndexes();
 		std::vector<std::string>		getDirectoryContent(DIR* dirp);
 		std::string 					directoryCheck(int sock_fd);
 		std::string 					indexCheck(std::vector<std::string> content);

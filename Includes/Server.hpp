@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/06 14:42:56 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/06 22:00:09 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <cstring>
+#include <arpa/inet.h>
 
 class Location
 {
