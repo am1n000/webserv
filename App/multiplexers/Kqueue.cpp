@@ -75,9 +75,11 @@
 				else
 				{ 
 					if (events[j].filter == EVFILT_READ)
-						read(tempData);
+						this->read(tempData);
+					else if (events[j].filter == EVFILT_WRITE)
+						this->write(tempData);
 					else
-						write(tempData);
+						this->timeout(tempData);
 				}
 			}
 		}
@@ -99,6 +101,7 @@
 			u_data->server = clientData->server;
 			u_data->req->setServer(clientData->server);
 			EV_SET(u_data->getChangePtr(), client_sock, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, u_data);
+			EV_SET(u_data->getTimerChangePtr(), client_sock, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 5000, u_data);
 			if (kevent(kq, u_data->getChangePtr(), 1, NULL, 0, &timeout) != 0)
 				std::cerr << "error: kevent registration 2" << std::endl;
 		}

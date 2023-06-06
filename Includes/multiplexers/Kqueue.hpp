@@ -19,6 +19,7 @@ class Kqueue : public Multiplexer
 		void 	acceptConnections(Client *tempData);
 		void	read(Client *tempData);
 		void	write(Client *tempData);
+		void	timeout(Client *tempData);
 
 
 	public :
