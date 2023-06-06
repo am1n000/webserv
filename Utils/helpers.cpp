@@ -206,7 +206,12 @@ void  helpers::InternalServerError(int sock)
     statusCodeResponse += "</title></head>\n<body>\n<center><h1>";
     statusCodeResponse += "505 Internal Server Error";
     statusCodeResponse += "</h1></center>\n<hr><center>webserv</center>\n</body>\n</html>\n";
-    send(sock, statusCodeResponse.c_str(), statusCodeResponse.length(), 0);
+    int send_val = send(sock, statusCodeResponse.c_str(), statusCodeResponse.length(), 0);
+    if (send_val == 0)
+      return;
+    else if (send_val == -1)
+        return;
+    
 }
 
 std::string helpers::handleRedirection(statusCodeExceptions &e)
@@ -247,7 +252,11 @@ void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::str
     header = handleRedirection(e);
 	std::string a = buffer;	
 	header += a;
-	send(sock, header.c_str(), header.length(), 0);
+	int send_val =send(sock, header.c_str(), header.length(), 0);
+  if (send_val == 0)
+    return;
+  else if (send_val == -1)
+    return;
 }
 
 std::vector<std::string> helpers::splitPaths(std::string fullPath)

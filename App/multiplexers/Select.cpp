@@ -95,7 +95,7 @@ void Select::monitoringLoop()
 				ready_num--;
 			}
 			while (fd_max > 2)
-			{
+			{// finding the new max after deleting the old max
 				if (FD_ISSET(fd_max, &readMaster) || FD_ISSET(fd_max, &writeMaster))
 					break;
 				fd_max--;
@@ -140,6 +140,9 @@ void	Select::read(Client *clientData)
 		helpers::displayStatusCodePage(e, clientData->getSockFd(), pages[e.getValue()]);
 		FD_CLR(clientData->getSockFd(), &readMaster);
 		close (clientData->getSockFd());
+		std::cerr << "-------------   " << clientData->getSockFd() <<  std::endl;
+		std::cerr << "read :  " << erasePosition << std::endl;
+		delete (clientsData[erasePosition]);
 		clientsData.erase(clientsData.begin() + erasePosition);
 	}
 }
@@ -153,6 +156,7 @@ void	Select::write(Client *clientData)
 		{
 			FD_CLR(clientData->getSockFd(), &writeMaster);
 			close (clientData->getSockFd());
+			delete (clientsData[erasePosition]);
 			clientsData.erase(clientsData.begin() + erasePosition);
 		}
 	}
@@ -162,6 +166,7 @@ void	Select::write(Client *clientData)
 		helpers::displayStatusCodePage(e, clientData->getSockFd(), pages[e.getValue()]);
 		FD_CLR(clientData->getSockFd(), &writeMaster);
 		close (clientData->getSockFd());
+		delete (clientsData[erasePosition]);
 		clientsData.erase(clientsData.begin() + erasePosition);
 	}
 }

@@ -64,6 +64,7 @@ void Response::set_file(std::string path)
 
 int Response::handle_get(int sock_fd)
 {
+	int send_val;
 	if(this->_request->hasCgi()) {
     if(!this->_cgi)
       this->_cgi = new Cgi(_request);
@@ -84,8 +85,11 @@ int Response::handle_get(int sock_fd)
 		header += "Last-Modified: ";
 		header += helpers::get_time();
 		header += "\r\n\r\n";
-		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+		send_val = send(sock_fd, header.c_str(), header.length(), 0);
+		if (send_val == -1)
 			throw(InternalServerErrorException());
+		else if (send_val == 0)
+			return (1);
 		this->_started = 1;
 		return (0);
 	}
@@ -94,8 +98,11 @@ int Response::handle_get(int sock_fd)
 			bufferSize = this->_bytes_to_send - this->_bytes_sent;
 		char buffer[bufferSize];
 		this->_file.read(buffer, bufferSize);
-		if (send(sock_fd, buffer, bufferSize, 0) < 0)
+		send_val = send(sock_fd, buffer, bufferSize, 0);
+		if (send_val == -1)
 			throw(InternalServerErrorException());
+		else if (send_val == 0)
+			return (1);
 		this->_bytes_sent += bufferSize;
 		if (this->_bytes_sent >= this->_bytes_to_send)
 		{
@@ -108,6 +115,7 @@ int Response::handle_get(int sock_fd)
 
 int Response::handle_post(int sock_fd)
 {
+	int send_val;
 	if(this->_request->hasCgi()) {
     if(!this->_cgi)
       this->_cgi = new Cgi(_request);
@@ -116,8 +124,11 @@ int Response::handle_post(int sock_fd)
         std::string header = "HTTP/1.1 200 Created\r\nLocation: "
                              "/resources/post\t\nContent-Type: "
                              "text/plain\r\n\r\nrequest has been posted";
-        if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-            throw(InternalServerErrorException());
+        send_val = send(sock_fd, header.c_str(), header.length(), 0);
+		if (send_val == -1)
+			throw(InternalServerErrorException());
+		else if (send_val == 0)
+			return (1);
         return (1);
 }
 
@@ -146,8 +157,11 @@ int Response::handle_delete(int sock_fd)
 		if (std::remove(this->_request->getRequestedFileFullPath().c_str()) != 0)
 			throw(ForbiddenException());
 		std::string header = "HTTP/1.1 204 No Content\r\n\r\n";
-		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
+		int send_val = send(sock_fd, header.c_str(), header.length(), 0);
+		if (send_val == -1)
 			throw(InternalServerErrorException());
+		else if (send_val == 0)
+			return (1);
 		return (1);
 	}
 	throw(FileNotFoundException());
@@ -160,11 +174,11 @@ bool Response::handleCgi(int sock_fd)
 
   int size = 1024;
   char buffer[size];
+  int send_val;
   int i = 0;
 
   if(!this->_cgi)
     throw InternalServerErrorException();
-  // openning the files for the first time
   if (!this->cgiInProgress_())
   {
     std::fstream f(this->_request->getRequestedFileFullPath().c_str());
@@ -179,7 +193,6 @@ bool Response::handleCgi(int sock_fd)
   }
 	this->_cgi->executeCgi();
   if(this->_cgi->isFinished()) {
-    // std::cout << "send portion" << std::endl;
     if(this->_cgi_fd == -2) {
       std::string header = "HTTP/1.1";
       this->_cgi->closeFiles();
@@ -207,8 +220,12 @@ bool Response::handleCgi(int sock_fd)
         header += " 201 Created\r\nLocation: /resources/post";
       }
       header += stringBuffer;
-      if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-        throw(InternalServerErrorException());
+		send_val = send(sock_fd, header.c_str(), header.length(), 0);
+		if (send_val == -1)
+			throw(InternalServerErrorException());
+		else if (send_val == 0)
+			return (1);
+		return (0);
     }
 
     i = read(this->_cgi_fd, buffer, size);
@@ -220,8 +237,11 @@ bool Response::handleCgi(int sock_fd)
       return (1);
     }
     buffer[i] = 0;
-    if (send(sock_fd, buffer, i, 0) < 0)
-      throw(InternalServerErrorException());
+    send_val = send(sock_fd, buffer, i, 0);
+		if (send_val == -1)
+			throw(InternalServerErrorException());
+		else if (send_val == 0)
+			return (1);
     }
 
 	return (0);

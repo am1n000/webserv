@@ -60,8 +60,10 @@ bool Client::reading()
 	char buffer[2048];
 	int recieved_size;
 	recieved_size = recv(this->_sockFd, buffer, 2048, 0);
-	if (recieved_size < 0)
-		throw std::runtime_error("recv failed");
+	if (recieved_size  == -1)
+		throw (InternalServerErrorException());
+	else if (recieved_size == 0)
+		return (1);
 	this->req->appendBuffer(buffer, recieved_size);
 	if (this->req->isRequestCompleted())
 	{
@@ -70,9 +72,10 @@ bool Client::reading()
 		this->req->prepareRequest();
 		if (this->req->getLocation())
 		{
-			if (!this->req->getLocation()->getRedirection().empty()){
+			if (!this->req->getLocation()->getRedirection().empty())
+			{
 				std::string redirection = this->req->getLocation()->getRedirection();
-			throw(MovedPermanentlyException(redirection));
+				throw(MovedPermanentlyException(redirection));
 			}
 		}
 		return (true);

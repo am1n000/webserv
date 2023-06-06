@@ -119,6 +119,7 @@ void	Poll::read(Client *clientData)
     std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
     helpers::displayStatusCodePage(e, clientData->getSockFd(), pages[e.getValue()]);
 		close (clientData->getSockFd());
+		delete (clientsData[position]);
 		clientsData.erase(clientsData.begin() + position);
 		pollFds.erase(pollFds.begin() + position);
 	}
@@ -131,6 +132,7 @@ void	Poll::write(Client *clientData)
 		if (clientData->sending())
 		{
 			close (clientData->getSockFd());
+			delete (clientsData[position]);
 			clientsData.erase(clientsData.begin() + position);
 			pollFds.erase(pollFds.begin() + position);
 		}
@@ -140,6 +142,7 @@ void	Poll::write(Client *clientData)
     std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
     helpers::displayStatusCodePage(e, clientData->getSockFd(), pages[e.getValue()]);
 		close (clientData->getSockFd());
+		delete (clientsData[position]);
 		clientsData.erase(clientsData.begin() + position);
 		pollFds.erase(pollFds.begin() + position);
 	}
