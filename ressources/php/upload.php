@@ -1,9 +1,6 @@
 <?php
-print_r($_FILES);
-print_r($_SERVER);
-return;
 
-$target_dir = "/Users/ael-rhai/Desktop/webserv/ressources/php/uploads/";
+$target_dir = $_SERVER['UPLOAD_TMP_DIR'];
 $file_name =  basename($_FILES["file"]["name"]);
 $target_file = $target_dir . basename($_FILES["file"]["name"]);
 $uploadOk = 1;
@@ -43,6 +40,7 @@ if ($uploadOk == 0) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
   <style>
     @import url("https://fonts.googleapis.com/css?family=DM+Sans:400,500,700&display=swap");
 
@@ -243,28 +241,12 @@ if ($uploadOk == 0) {
     <div class="cards">
       <label class="card" for="item-1" id="song-1">
         <?php
-        echo '<img src="uploads/' . $file_name . '" alt="song">';
-        ?>
-      </label>
-      <label class="card" for="item-2" id="song-2">
-        <?php
-        echo '<img src="uploads/' . $file_name . '" alt="song">';
-        ?>
-      </label>
-      <label class="card" for="item-3" id="song-3">
-        <?php
-        echo '<img src="uploads/' . $file_name . '" alt="song">';
+        echo '<img src="../uploads/' . $file_name . '" alt="song">';
         ?>
       </label>
     </div>
     <div class="player">
       <div class="upper-part">
-        <div class="play-icon">
-          <svg width="20" height="20" fill="#2992dc" stroke="#2992dc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="feather feather-play" viewBox="0 0 24 24">
-            <defs />
-            <path d="M5 3l14 9-14 9V3z" />
-          </svg>
-        </div>
         <div class="info-area" id="test">
           <label class="song-info" id="song-info-1">
             <div class="title"></div>
@@ -275,37 +257,14 @@ if ($uploadOk == 0) {
               echo "jhon doe";
             ?>
         </div>
-        <div class="sub-line">
-          <div class="subtitle">Balthazar</div>
-          <div class="time">4.05</div>
-        </div>
-        </label>
-        <label class="song-info" id="song-info-2">
-          <div class="title">Words Remain</div>
-          <div class="sub-line">
-            <div class="subtitle">Moderator</div>
-            <div class="time">4.05</div>
-          </div>
-        </label>
-        <label class="song-info" id="song-info-3">
-          <div class="title">Falling Out</div>
-          <div class="sub-line">
-            <div class="subtitle">Otzeki</div>
-            <div class="time">4.05</div>
-          </div>
-        </label>
       </div>
     </div>
-    <div class="progress-bar">
-      <span class="progress"></span>
-    </div>
-  </div>
+        <div>
+          <a href="upload.html" class="btn btn-primary mt-4">upload more</a>
+        </div>
   </div>
 </body>
 <script>
-  $('input').on('change', function() {
-    $('body').toggleClass('blue');
-  });
 </script>
 
 </html>
