@@ -24,16 +24,25 @@
 			Client *server_data = new Client;
 			server_data->setSockFd(servers[i]->createSocket());
 			if (server_data->getSockFd() == -1)
+			{
+				delete (server_data);
 				continue;
+			}
 			if (servers[i]->bindSocket(server_data->getSockFd()))
 			{
 				if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
+				{
+					delete (server_data);
 					continue;
+				}
 				std::cerr << "error :bind" << std::endl;
 				exit(1);
 			}
 			if (servers[i]->listenToConnections(server_data->getSockFd()))
+			{
+				delete (server_data);
 				continue;
+			}
 			hostPort[servers[i]->getHost()] = servers[i]->getPort();
 			server_data->setIsListeningSock(1);
 			server_data->server = Config::get()->getServers()[i];
@@ -41,6 +50,7 @@
 			if (kevent(kq, server_data->getChangePtr(), 1, NULL, 0, NULL) != 0)
 			{
 				std::cerr << "error: kevent registration 1" << std::endl;
+				delete (server_data);
 				continue;
 			}
 		}

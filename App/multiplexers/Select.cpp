@@ -31,16 +31,25 @@ void Select::setUpServerConnections()
 		Client *server_data = new Client;
 		server_data->setSockFd(servers[i]->createSocket());
 		if (server_data->getSockFd() == -1)
+		{
+			delete (server_data);
 			continue;
+		}
 		if (servers[i]->bindSocket(server_data->getSockFd()))
 		{
 			if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
+			{
+				delete (server_data);
 				continue;
+			}
 			std::cerr << "error :bind" << std::endl;
 			exit(1);
 		}
 		if (servers[i]->listenToConnections(server_data->getSockFd()))
+		{
+			delete (server_data);
 			continue;
+		}
 		hostPort[servers[i]->getHost()] = servers[i]->getPort();
 		server_data->setIsListeningSock(1);
 		server_data->server = servers[i];
