@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/26 12:01:33 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/06 14:43:14 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,9 +136,7 @@ std::string &Server::getHost() { return this->host_; }
 std::string &Server::getPort() { return this->port_; }
 std::string &Server::getServerName() { return this->server_name_; }
 std::map<std::string, std::string> &Server::getErrorPages() { return this->error_pages_; }
-std::size_t &Server::getClienBodySizeLimit() {
-  return this->client_body_size_limit_;
-}
+std::size_t &Server::getClienBodySizeLimit() { return this->client_body_size_limit_; }
 
 std::vector<std::string> &Server::getIndexes() { return this->indexs_; }
 
@@ -277,17 +275,12 @@ void Location::setUploadDir(const std::string &val) { this->upload_dir_ = val; }
  */
 
 std::map<std::string, std::string> &Location::getCgis() { return this->cgis_; }
-
 std::string Location::getRoot() const { return this->root_; }
-
 std::string Location::getUploadDir() const { return this->upload_dir_; }
-
 bool Location::getAutoIndex() const { return this->auto_index_; }
-
-std::vector<Request_Method_e> &Location::getAllowedMethods() {
-  return this->allowed_methods_;
-}
+std::vector<Request_Method_e> &Location::getAllowedMethods() { return this->allowed_methods_;  }
 std::vector<std::string> &Location::getIndex() { return (this->indexs_); }
+const std::string& Location::getRedirection() const { return this->redirection_; }
 /*
  * location getters end
  */

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:03:44 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/05/26 11:45:03 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/06 14:42:56 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ class Location
      */
 		std::vector<std::string> &getIndex();
 		std::map<std::string, std::string> &getCgis();
-		std::string getRedirection() const;
+		const std::string& getRedirection() const;
 		bool getAutoIndex() const;
     std::string getRoot() const;
     std::string getUploadDir() const;
