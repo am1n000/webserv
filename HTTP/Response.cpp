@@ -1,6 +1,8 @@
 #include "../Includes/Response.hpp"
 #include "../Includes/Cgi.hpp"
 #include <cstdio>
+#include <cstring>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -155,6 +157,11 @@ int Response::handle_delete(int sock_fd)
 
 bool Response::handleCgi(int sock_fd)
 {
+
+  int size = 1024;
+  char buffer[size];
+  int i = 0;
+
   if(!this->_cgi)
     throw InternalServerErrorException();
   // openning the files for the first time
@@ -174,16 +181,36 @@ bool Response::handleCgi(int sock_fd)
   if(this->_cgi->isFinished()) {
     // std::cout << "send portion" << std::endl;
     if(this->_cgi_fd == -2) {
+      std::string header = "HTTP/1.1";
       this->_cgi->closeFiles();
       this->_cgi_fd = open(this->_cgi->getResponseFileName().c_str(), O_RDONLY);
-      std::string header = "HTTP/1.1 201 Created\r\nLocation: /resources/post";
+
+      std::string stringBuffer;
+      stringBuffer.resize(size);
+      i = read(this->_cgi_fd, &stringBuffer[0], size);
+      if(i < 0)
+        throw InternalServerErrorException();
+
+      stringBuffer[i] = '\0';
+      stringBuffer.resize(i+1);
+      if(!std::strncmp(stringBuffer.c_str(), "Status", 6)) {
+        size_t pos = stringBuffer.find("\r\n");
+        size_t colonpos = stringBuffer.find(":");
+
+        std::string status = stringBuffer.substr(colonpos, pos - colonpos); 
+        stringBuffer.erase(0, pos);
+        
+        header += status;
+
+      }
+      else {
+        header += " 201 Created\r\nLocation: /resources/post";
+      }
+      header += stringBuffer;
       if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
         throw(InternalServerErrorException());
     }
 
-    int size = 1024;
-    char buffer[size];
-    int i = 0;
     i = read(this->_cgi_fd, buffer, size);
     if (i == -1)
       throw(InternalServerErrorException());
