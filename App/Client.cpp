@@ -68,6 +68,13 @@ bool Client::reading()
 		std::vector<std::string> indexes = this->server->getIndexes();
 		checkServerByName();
 		this->req->prepareRequest();
+		if (this->req->getLocation())
+		{
+			if (!this->req->getLocation()->getRedirection().empty()){
+				std::string redirection = this->req->getLocation()->getRedirection();
+			throw(MovedPermanentlyException(redirection));
+			}
+		}
 		return (true);
 	}
 	return (false);

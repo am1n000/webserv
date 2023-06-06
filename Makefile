@@ -48,7 +48,7 @@ $(NAME): $(OBJ)
 debug: $(SRC)
 	$(CPP) -g  $^ main.cpp  -o $@
 	clear
-	# lldb debug webserv.conf
+	lldb debug webserv.conf
 
 sanitize: $(TEST_OBJ)  
 	$(CPP) $^ -fsanitize=address -o $(NAME) 

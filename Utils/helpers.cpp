@@ -206,23 +206,20 @@ void  helpers::InternalServerError(int sock)
     statusCodeResponse += "</title></head>\n<body>\n<center><h1>";
     statusCodeResponse += "505 Internal Server Error";
     statusCodeResponse += "</h1></center>\n<hr><center>webserv</center>\n</body>\n</html>\n";
-    if (send(sock, statusCodeResponse.c_str(), statusCodeResponse.length(), 0) == -1)
-      std::cerr << "error :send" << std::endl;
+    send(sock, statusCodeResponse.c_str(), statusCodeResponse.length(), 0);
 }
 
-std::string handleRedirection(statusCodeExceptions &e, bool slash)
+std::string helpers::handleRedirection(statusCodeExceptions &e)
 {
 	std::string header = "HTTP/1.1 " + e.getValue();
 	header +=  " Moved Permanently";
   header += "\r\nLocation: ";
   header += e.what();
-  if (slash)
-    header += "/";
 	header += "\r\nServer: webserver-c\r\n\r\n";
   return (header);
 }
 
-void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, bool slash, std::string& errorPage)
+void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::string& errorPage)
 {
   std::string errorPagePath;
   if(errorPage.empty()) {
@@ -247,13 +244,11 @@ void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, bool sla
 	header += e.what();
 	header += "\r\nServer: webserver-c\r\n\r\n";
 	if (e.getValue() == "301")
-    header = handleRedirection(e, slash);
+    header = handleRedirection(e);
 	std::string a = buffer;	
 	header += a;
-	if (send(sock, header.c_str(), header.length(), 0) == -1)
-      std::cerr << "error :send" << std::endl;
+	send(sock, header.c_str(), header.length(), 0);
 }
-
 
 std::vector<std::string> helpers::splitPaths(std::string fullPath)
 {

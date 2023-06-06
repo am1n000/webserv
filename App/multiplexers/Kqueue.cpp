@@ -75,9 +75,11 @@
 				else
 				{ 
 					if (events[j].filter == EVFILT_READ)
-						read(tempData);
+						this->read(tempData);
+					else if (events[j].filter == EVFILT_WRITE)
+						this->write(tempData);
 					else
-						write(tempData);
+						this->timeout(tempData);
 				}
 			}
 		}
@@ -89,7 +91,10 @@
 			reinterpret_cast<sockaddr *>(&(clientData->server->getHostAddr())),
 			reinterpret_cast<socklen_t *>(&(clientData->server->getHostAddrlen())));
 		if (client_sock == -1)
+		{
 			std::cerr << "error: accept server " << clientData->server->getServerName() <<  std::endl;
+
+		}
 		else
 		{
 			Client *u_data = new Client(client_sock, 0);
@@ -140,9 +145,11 @@
 		catch (statusCodeExceptions &e)
 		{
 			std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-			helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
+			helpers::displayStatusCodePage(e, clientData->getSockFd(), pages[e.getValue()]);
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
-			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
+			EV_SET(clientData->getTimeoutChangePtr(), clientData->getSockFd(), EVFILT_TIMER, EV_DELETE, 0, 0, clientData);
+			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1
+			 || kevent(kq, clientData->getTimeoutChangePtr(), 1, NULL, 0, NULL) == -1)
 			{
 					std::cerr << "error: kevent 4" << std::endl;
 					helpers::InternalServerError(clientData->getSockFd());
@@ -172,7 +179,7 @@
 		catch (statusCodeExceptions &e)
 		{	
       		std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-    		helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
+    		helpers::displayStatusCodePage(e, clientData->getSockFd(), pages[e.getValue()]);
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_WRITE, EV_DELETE, 0, 0, clientData);
 			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1)
 			{
@@ -194,7 +201,7 @@
 		catch(statusCodeExceptions &e)
 		{
       		std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-			helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
+			helpers::displayStatusCodePage(e, clientData->getSockFd(), pages[e.getValue()]);
 			EV_SET(clientData->getChangePtr(), clientData->getSockFd(), EVFILT_READ, EV_DELETE, 0, 0, clientData);
 			EV_SET(clientData->getTimeoutChangePtr(), clientData->getSockFd(), EVFILT_TIMER, EV_DELETE, 0, 0, clientData);
 			if (kevent(kq, clientData->getChangePtr(), 1, NULL, 0, NULL) == -1

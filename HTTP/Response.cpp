@@ -117,7 +117,7 @@ int Response::handle_post(int sock_fd)
                              "/resources/post\t\nContent-Type: "
                              "text/plain\r\n\r\nrequest has been posted";
         if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
-                        throw(InternalServerErrorException());
+            throw(InternalServerErrorException());
         return (1);
 }
 
@@ -278,7 +278,7 @@ std::string	Response::directoryCheck(int sock_fd)
             if (dirp == NULL)
                 throw (ForbiddenException());
             if (this->_request->getRequestedRessource()[this->_request->getRequestedRessource().size() - 1] != '/')
-                throw (MovedPermanentlyException(this->_request->getRequestedRessource()));	
+                throw (MovedPermanentlyException(this->_request->getRequestedRessource() + "/"));	
 			std::string indexFile = "HTTP/1.1 200 OK\r\nServer: Almo7arrikX\r\nContent-type: text/html\r\nLast-Modified: ";
 			indexFile += helpers::get_time();
 			indexFile += "\r\n\r\n";
