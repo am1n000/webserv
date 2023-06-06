@@ -20,7 +20,7 @@ void app(const std::string config_file, int flag)
 			E->serve();
 		#endif
 	}
-	if (flag == 1)
+	else if (flag == 1)
 	{
 		Select *S = Select::getInstance();
 		S->serve();
