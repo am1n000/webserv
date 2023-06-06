@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/05/25 09:01:46 by otossa           ###   ########.fr        #
+#    Updated: 2023/06/06 09:43:24 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,7 +46,7 @@ $(NAME): $(OBJ)
 	$(CPP) $^ -o $@
 
 debug: $(SRC)
-	$(CPP) -g -fsanitize=leak $^ main.cpp  -o $@
+	$(CPP) -g  $^ main.cpp  -o $@
 	clear
 	# lldb debug webserv.conf
 
