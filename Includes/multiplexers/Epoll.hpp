@@ -25,6 +25,7 @@ class Epoll : public Multiplexer
 		~Epoll();
 
 		static	Epoll* getInstance();
+		static	Epoll* deleteInstance();
 		void 			serve();
 };
 

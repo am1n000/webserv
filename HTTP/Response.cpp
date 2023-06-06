@@ -82,7 +82,7 @@ int Response::handle_get(int sock_fd)
 		header += this->_mime_type;
 		header += "\r\n";
 		header += "Last-Modified: ";
-		header += get_time();
+		header += helpers::get_time();
 		header += "\r\n\r\n";
 		if (send(sock_fd, header.c_str(), header.length(), 0) < 0)
 			throw(InternalServerErrorException());
@@ -278,9 +278,9 @@ std::string	Response::directoryCheck(int sock_fd)
             if (dirp == NULL)
                 throw (ForbiddenException());
             if (this->_request->getRequestedRessource()[this->_request->getRequestedRessource().size() - 1] != '/')
-                throw (MovedPermanentlyException());	
+                throw (MovedPermanentlyException(this->_request->getRequestedRessource()));	
 			std::string indexFile = "HTTP/1.1 200 OK\r\nServer: Almo7arrikX\r\nContent-type: text/html\r\nLast-Modified: ";
-			indexFile += get_time();
+			indexFile += helpers::get_time();
 			indexFile += "\r\n\r\n";
 			indexFile += "<!DOCTYPE html>\n<html>\n<head>\n<title>Index</title>\n</head>\n<body>\n<h1>Index of " + this->_request->getRequestedRessource();
 			indexFile += "</h1>\n<table style=\"text-align: left;\">\n<tr>\n<th>Name</th>\n<th>Last modified</th>\n<th>Size</th>\n</tr>\n";

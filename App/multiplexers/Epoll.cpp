@@ -102,7 +102,11 @@
 			event.data.fd = ptr->getSockFd();
 			event.data.ptr = ptr;
 			if (epoll_ctl(ep, EPOLL_CTL_ADD, ptr->getSockFd(), &event) == -1)
+			{
 				std::cerr << "error: epoll_ctl 2" << std::endl;
+				helpers::InternalServerError(client_sock);
+				delete (ptr);
+			}
 		}
 	}
 
@@ -118,16 +122,22 @@
 				event.data.fd = clientData->getSockFd();
 				event.data.ptr = clientData;
 				if (epoll_ctl(ep, EPOLL_CTL_MOD, clientData->getSockFd(), &event) == -1)
+				{
 					std::cerr << "error: epoll_ctl write" << std::endl;
+					throw (InternalServerErrorException());
+				}
 			}
 
 		}
 		catch (statusCodeExceptions &e)
 		{
-    std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-    helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
+			std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+			helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
 			if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), NULL) == -1)
+			{
 				std::cerr << "error: epoll_ctl deletion" << std::endl;
+				helpers::InternalServerError(clientData->getSockFd());
+			}
 			close(clientData->getSockFd());
 			delete (clientData);
 
@@ -141,17 +151,23 @@
 			if (clientData->sending())
 			{
 				if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), NULL) == -1)
+				{
 					std::cerr << "error: epoll_ctl deletion" << std::endl;
+					throw(InternalServerErrorException());
+				}
 				close(clientData->getSockFd());
 				delete (clientData);
 			}
 		}
 		catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
 		{	
-      std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-    helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
+			std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+			helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
 			if (epoll_ctl(ep, EPOLL_CTL_DEL, clientData->getSockFd(), NULL) == -1)
+			{
 				std::cerr << "error: epoll_ctl deletion" << std::endl;
+				helpers::InternalServerError(clientData->getSockFd());
+			}
 			close(clientData->getSockFd());
 			delete (clientData);
 		}
@@ -163,7 +179,7 @@
 		if (ep == -1)
 		{
 			std::cerr << "error: Epoll" << std::endl;
-			return;
+			exit (1);
 		}
 		setUpServerConnections();
 		monitoringLoop();

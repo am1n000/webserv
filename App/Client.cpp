@@ -7,7 +7,7 @@
 Client::Client() {
 	#ifdef __APPLE__
 		this->_changePtr = new struct kevent;
-		this->_TimerChangePtr = new struct kevent;
+		this->_timeoutChangePtr = new struct kevent;
 	#endif
 	this->req = new Request;
 	this->resp = new Response(this->req);
@@ -18,7 +18,7 @@ Client::Client(int sockfd, bool listen_sock)
 		_postFileCreated(0) {
 	#ifdef __APPLE__
 		this->_changePtr = new struct kevent;
-		this->_TimerChangePtr = new struct kevent;
+		this->_timeoutChangePtr = new struct kevent;
 	#endif
 	this->req = new Request;
 	this->resp = new Response(this->req);
@@ -28,7 +28,7 @@ Client::~Client()
 { 
 	#ifdef __APPLE__
 		delete (this->_changePtr);
-		delete (this->_TimerChangePtr);
+		delete (this->_timeoutChangePtr);
 	#endif
 	delete this->req;
 	delete this->resp;
@@ -82,7 +82,7 @@ bool Client::getpostFileCreated() { return (this->_postFileCreated); }
 
 #ifdef __APPLE__
 	struct kevent *Client::getChangePtr() { return (this->_changePtr); }
-	struct kevent *Client::getTimerChangePtr() { return (this->_timerChangePtr); }
+	struct kevent *Client::getTimeoutChangePtr() { return (this->_timeoutChangePtr); }
 #endif
 
 
@@ -109,8 +109,8 @@ void Client::setpostFileCreated(bool postFileCreated)
 	{
 		this->_changePtr = new struct kevent;
 	}
-	void Client::setTimerChangePtr()
+	void Client::setTimeoutChangePtr()
 	{
-		this->_timerChangePtr = new struct kevent;
+		this->_timeoutChangePtr = new struct kevent;
 	}
 #endif

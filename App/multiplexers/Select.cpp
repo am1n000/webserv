@@ -136,8 +136,8 @@ void	Select::read(Client *clientData)
 	}
 	catch(statusCodeExceptions &e)
 	{
-    std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-    helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
+		std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+		helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
 		FD_CLR(clientData->getSockFd(), &readMaster);
 		close (clientData->getSockFd());
 		clientsData.erase(clientsData.begin() + erasePosition);
@@ -158,8 +158,8 @@ void	Select::write(Client *clientData)
 	}
 	catch(statusCodeExceptions &e)
 	{
-    std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
-    helpers::displayStatusCodePage(e, clientData->getSockFd(), clientData->req->getRequestedRessource(), pages[e.getValue()]);
+		std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
+		helpers::displayStatusCodePage(e, clientData->getSockFd(), 0, pages[e.getValue()]);
 		FD_CLR(clientData->getSockFd(), &writeMaster);
 		close (clientData->getSockFd());
 		clientsData.erase(clientsData.begin() + erasePosition);

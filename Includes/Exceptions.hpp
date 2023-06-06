@@ -19,21 +19,22 @@
 
 class statusCodeExceptions : public std::exception
 {
-	public:
-		statusCodeExceptions(std::string code) : _code(code) {}
-		~statusCodeExceptions() throw() {}
-		virtual const char* what() const throw() = 0;
-		std::string getValue() const throw();
 	protected:
 		std::string _code;
+	public:
+		statusCodeExceptions(std::string code);
+		~statusCodeExceptions() throw();
+		virtual const char* what() const throw() = 0;
+		std::string getValue() const throw();
 };
 
 class MovedPermanentlyException : public statusCodeExceptions
 {
+	private :
+		std::string _redirection;
 	public :
-
-		MovedPermanentlyException() : statusCodeExceptions("301") {}
-		~MovedPermanentlyException() throw() {};
+		MovedPermanentlyException(std::string redirection);
+		~MovedPermanentlyException() throw();
 		virtual const char* what() const throw();
 };
 
@@ -41,8 +42,8 @@ class BadRequestException : public statusCodeExceptions
 {
 	public :
 
-		BadRequestException() : statusCodeExceptions("400") {}
-		~BadRequestException() throw() {};
+		BadRequestException();
+		~BadRequestException() throw();
 		virtual const char* what() const throw();
 };
 
@@ -50,16 +51,16 @@ class ForbiddenException : public statusCodeExceptions
 {
 	public :
 
-		ForbiddenException() : statusCodeExceptions("403") {}
-		~ForbiddenException() throw() {};
+		ForbiddenException();
+		~ForbiddenException() throw();
 		virtual const char* what() const throw();
 };
 
 class FileNotFoundException : public statusCodeExceptions
 {
 	public :
-		FileNotFoundException() : statusCodeExceptions("404") {}
-		~FileNotFoundException() throw() {};
+		FileNotFoundException();
+		~FileNotFoundException() throw();
 		virtual const char* what() const throw();
 };
 
@@ -67,8 +68,17 @@ class MethodNotAllowedException : public statusCodeExceptions
 {
 	public :
 
-		MethodNotAllowedException() : statusCodeExceptions("405") {}
-		~MethodNotAllowedException() throw() {};
+		MethodNotAllowedException();
+		~MethodNotAllowedException() throw();
+		virtual const char* what() const throw();
+};
+
+class RequestTimeoutException : public statusCodeExceptions
+{
+	public :
+
+		RequestTimeoutException();
+		~RequestTimeoutException() throw();
 		virtual const char* what() const throw();
 };
 
@@ -76,8 +86,8 @@ class ConflictException : public statusCodeExceptions
 {
 	public :
 
-		ConflictException() : statusCodeExceptions("409") {}
-		~ConflictException() throw() {};
+		ConflictException();
+		~ConflictException() throw();
 		virtual const char* what() const throw();
 };
 
@@ -85,8 +95,8 @@ class RequestURITooLongException : public statusCodeExceptions
 {
 	public :
 
-		RequestURITooLongException() : statusCodeExceptions("414") {}
-		~RequestURITooLongException() throw() {};
+		RequestURITooLongException();
+		~RequestURITooLongException() throw();
 		virtual const char* what() const throw();
 };
 
@@ -94,8 +104,8 @@ class InternalServerErrorException : public statusCodeExceptions
 {
 	public :
 
-		InternalServerErrorException() : statusCodeExceptions("500") {}
-		~InternalServerErrorException() throw() {};
+		InternalServerErrorException();
+		~InternalServerErrorException() throw();
 		virtual const char* what() const throw();
 };
 
@@ -103,8 +113,8 @@ class NotImplementedException : public statusCodeExceptions
 {
 	public :
 
-		NotImplementedException() : statusCodeExceptions("501") {}
-		~NotImplementedException() throw() {};
+		NotImplementedException();
+		~NotImplementedException() throw();
 		virtual const char* what() const throw();
 };
 
@@ -112,19 +122,20 @@ class PayloadTooLargeException : public statusCodeExceptions
 {
 	public :
 
-		PayloadTooLargeException() : statusCodeExceptions("413") {}
-		~PayloadTooLargeException() throw() {};
+		PayloadTooLargeException();
+		~PayloadTooLargeException() throw();
 		virtual const char* what() const throw();
 };
 
-class BadConfigException {
-private:
-  std::string message_;
-public:
-  BadConfigException() throw() ;
-  BadConfigException(const std::string message) throw() ;
-  ~BadConfigException() throw();
-  virtual const char* what() const throw();
+class BadConfigException
+{
+	private:
+		std::string message_;
+	public:
+		BadConfigException() throw() ;
+		BadConfigException(const std::string message) throw() ;
+		~BadConfigException() throw();
+		virtual const char* what() const throw();
 };
 
 

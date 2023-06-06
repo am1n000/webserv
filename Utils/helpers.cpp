@@ -16,7 +16,7 @@ std::string helpers::to_string(int num)
   return ss.str();
 }
 
-std::string get_time()
+std::string helpers::get_time()
 {
 	time_t now = time(0);
 
@@ -198,7 +198,31 @@ int helpers::stoi(const std::string &str) {
 //   return ss.str();
 // }
 
-void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::string ressourcePath, std::string& errorPage)
+void  helpers::InternalServerError(int sock)
+{
+    std::string statusCodeResponse = "HTTP/1.1 500 Internal Server Error\r\nServer: webserv\r\n\r\n" ;
+    statusCodeResponse += "<!DOCTYPE html>\n<html>\n<head><title>";
+    statusCodeResponse += "505 Internal Server Error";
+    statusCodeResponse += "</title></head>\n<body>\n<center><h1>";
+    statusCodeResponse += "505 Internal Server Error";
+    statusCodeResponse += "</h1></center>\n<hr><center>webserv</center>\n</body>\n</html>\n";
+    if (send(sock, statusCodeResponse.c_str(), statusCodeResponse.length(), 0) == -1)
+      std::cerr << "error :send" << std::endl;
+}
+
+std::string handleRedirection(statusCodeExceptions &e, bool slash)
+{
+	std::string header = "HTTP/1.1 " + e.getValue();
+	header +=  " Moved Permanently";
+  header += "\r\nLocation: ";
+  header += e.what();
+  if (slash)
+    header += "/";
+	header += "\r\nServer: webserver-c\r\n\r\n";
+  return (header);
+}
+
+void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, bool slash, std::string& errorPage)
 {
   std::string errorPagePath;
   if(errorPage.empty()) {
@@ -210,7 +234,7 @@ void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::str
 	std::ifstream	file(errorPagePath.c_str(), std::ios::ate);
 	if (!file.is_open())
 	{
-		std::cerr << "status code file " << e.getValue() << "  could not be opened!" << std::endl;
+    helpers::InternalServerError(sock);
 		return;
 	}
     int len = file.tellg();
@@ -221,19 +245,17 @@ void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::str
 	std::string header = "HTTP/1.1 " + e.getValue();
 	header +=  " ";
 	header += e.what();
-	if (e.getValue() == "301")
-	{
-		header += "\r\nLocation: ";
-		header += ressourcePath + "/";
-	}
 	header += "\r\nServer: webserver-c\r\n\r\n";
+	if (e.getValue() == "301")
+    header = handleRedirection(e, slash);
 	std::string a = buffer;	
 	header += a;
-	send(sock, header.c_str(), header.length(), 0);
+	if (send(sock, header.c_str(), header.length(), 0) == -1)
+      std::cerr << "error :send" << std::endl;
 }
 
 
-std::vector<std::string> splitPaths(std::string fullPath)
+std::vector<std::string> helpers::splitPaths(std::string fullPath)
 {
   std::vector<std::string> paths;
   size_t i = 1;
@@ -251,7 +273,7 @@ std::vector<std::string> splitPaths(std::string fullPath)
   return (paths);
 }
 
-bool  withinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths)
+bool  helpers::withinRoot(std::vector<std::string> paths, std::vector<std::string> rootPaths)
 {
   size_t size = rootPaths.size();
   for (size_t i = 0; i < paths.size(); i++)
