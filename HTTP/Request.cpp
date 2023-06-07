@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/06 08:44:49 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/07 16:14:41 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@
 Request::Request()
     : tokenizer_(NULL), header_completed_(false), body_completed_(false),
       body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE),
-      request_location_(NULL), chunk_size_(0), chunk_received_(0),
       content_length(0) {}
 
 Request::Request(Request::size_type buffer_size)
@@ -213,7 +212,9 @@ bool Request::hasCgi() const {
 bool Request::isAutoIndexed() {
   if (!this->request_location_)
     this->request_location_ = this->matchLocation();
-  return this->request_location_->getAutoIndex();
+  if(this->request_location_)
+    return this->request_location_->getAutoIndex();
+  return false;
 }
 
 bool Request::isChuncked() {
