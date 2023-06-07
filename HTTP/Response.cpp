@@ -198,16 +198,17 @@ bool Response::handleCgi(int sock_fd) {
         size_t pos = stringBuffer.find("\r\n");
         size_t colonpos = stringBuffer.find(":");
 
-        std::string status = stringBuffer.substr(colonpos, pos - colonpos);
-        stringBuffer.erase(0, pos);
+        std::string status = stringBuffer.substr(colonpos + 1, pos - colonpos);
+        stringBuffer.erase(0, pos + 2);
 
         header += status;
 
       } else {
-        header += " 201 Created\r\nLocation: /resources/post";
+        this->manipulateHeaderByMethod(header);
       }
       header += stringBuffer;
       this->_cgi_buffer = header;
+      return 0;
     }
 
     if (this->_cgi_buffer.empty()) {
@@ -220,9 +221,11 @@ bool Response::handleCgi(int sock_fd) {
       }
       buffer[i] = 0;
       this->_cgi_buffer = buffer;
+      // bat tajribi
+      this->_cgi_buffer.resize(i);
     } else {
       send_val = send(sock_fd, this->_cgi_buffer.c_str(),
-                      this->_cgi_buffer.length(), 0);
+                      this->_cgi_buffer.length() - 1, 0);
       if (send_val == -1)
         throw(InternalServerErrorException());
       else if (send_val == 0)
@@ -328,4 +331,19 @@ bool Response::cgiInProgress_() {
   if (this->_cgi && this->_cgi->in_progress)
     return true;
   return false;
+}
+
+void Response::manipulateHeaderByMethod(std::string& header) {
+
+  switch (this->_request->getRequestMethod()) {
+    case POST:
+        header += " 201 Created\r\n";
+    break;
+      case DELETE:
+        header +=  " 202 Accepted\r\n";
+    break;
+    default:
+        header += " 200 OK\r\n";
+      break;
+  }
 }

@@ -30,6 +30,7 @@ class Response
 		std::string 					directoryCheck(int sock_fd);
 		std::string 					indexCheck(std::vector<std::string> content);
     bool                        cgiInProgress_();
+    void                        manipulateHeaderByMethod(std::string& header);
 
 	public:
 		Response();
