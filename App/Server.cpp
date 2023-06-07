@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/06 21:59:36 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/07 08:14:49 by otossa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,11 @@ Server::~Server() {}
 /*
  * server setters
  */
-void Server::setRoot(const std::string &val) { this->root_ = val; }
+void Server::setRoot(const std::string &val) { 
+  this->root_ = val; 
+  if(this->root_[this->root_.length() - 1] != '/')
+    this->root_.append("/");
+}
 
 void Server::setClientBodySize(const std::string &val) {
   try {
@@ -255,8 +259,10 @@ void Location::setAllowedMethods(const std::string &val) {
 void Location::setRoot(const std::string &val) {
   Tockenizer tok = Tockenizer(val);
   this->root_ = helpers::trim(tok.getLine());
+  if(this->root_[this->root_.length() - 1] != '/') 
+    this->root_.append("/");
   if (!tok.end())
-    throw std::runtime_error("invalid value for root");
+    throw BadConfigException("invalid value for root");
 }
 
 void Location::setProp(const std::string &prop, const std::string &val) {
