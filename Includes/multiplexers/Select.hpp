@@ -26,7 +26,7 @@ class Select : public Multiplexer
 
 		~Select();
 		static	Select* getInstance();
-		static	Select* deleteInstance();
+		static	void	deleteInstance();
 		void 			serve();
 };
 

@@ -26,7 +26,7 @@ class Kqueue : public Multiplexer
 		~Kqueue();
 
 		static	Kqueue* getInstance();
-		static	Kqueue* deleteInstance();
+		static	void	deleteInstance();
 		void 			serve();
 };
 

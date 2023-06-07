@@ -18,6 +18,7 @@ class Multiplexer
 		virtual void	write(Client *tempData) = 0;
 
 	public :
+        virtual ~Multiplexer() {};
 		virtual void serve() = 0;
 };
 

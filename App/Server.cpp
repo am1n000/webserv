@@ -293,7 +293,7 @@ int Server::createSocket() {
     std::cerr << "error: socket" << std::endl;
     return (-1);
   }
-  fcntl(sock, F_SETFL, O_NONBLOCK); // if not the connection will block
+  fcntl(sock, F_SETFL, O_NONBLOCK);
   return (sock);
 }
 
@@ -302,11 +302,7 @@ bool Server::bindSocket(int sock) {
   memset(&this->_hostAddr, 0, sizeof(this->_hostAddr));
   this->_hostAddr.sin_family = AF_INET;
   this->_hostAddr.sin_port = htons(std::atoi(this->getPort().data()));
-  if (inet_pton(AF_INET, this->getHost().c_str(), &(this->_hostAddr.sin_addr)) <= 0)
-  {
-      std::cerr << "error : Invalid IP " << std::endl;
-      return (true);
-  }
+  this->_hostAddr.sin_addr.s_addr = inet_addr(this->getHost().c_str());
 
   int opt = 1;
   if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {

@@ -20,6 +20,11 @@ Select*	Select::getInstance()
 		instance = new Select;
 	return (instance);
 }
+void	Select::deleteInstance()
+{
+	if (Select::instance != nullptr)
+		delete (Select::instance);
+}
 
 void Select::setUpServerConnections()
 {
@@ -37,11 +42,6 @@ void Select::setUpServerConnections()
 		}
 		if (servers[i]->bindSocket(server_data->getSockFd()))
 		{
-			if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
-			{
-				delete (server_data);
-				continue;
-			}
 			std::cerr << "error :bind" << std::endl;
 			exit(1);
 		}

@@ -17,6 +17,12 @@ Poll*	Poll::getInstance()
 		instance = new Poll;
 	return (instance);
 }
+
+void	Poll::deleteInstance()
+{
+	if (Poll::instance != nullptr)
+		delete (Poll::instance);
+}
 void Poll::setUpServerConnections()
 {
 	std::vector<Server*> &servers = Config::get()->getServers();
@@ -33,11 +39,6 @@ void Poll::setUpServerConnections()
 		}
 		if (servers[i]->bindSocket(server_data->getSockFd()))
 		{
-			if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
-			{
-				delete(server_data);
-				continue;
-			}
 			std::cerr << "error :bind" << std::endl;
 			exit(1);
 		}

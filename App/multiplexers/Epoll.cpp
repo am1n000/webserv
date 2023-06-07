@@ -11,9 +11,15 @@
 
 	Epoll*	Epoll::getInstance()
 	{
-		if (instance == NULL)
-			instance = new Epoll;
-		return (instance);
+		if (Epoll::instance == NULL)
+			Epoll::instance = new Epoll;
+		return (Epoll::instance);
+	}
+
+	void	Epoll::getInstance()
+	{
+		if (Epoll::instance != nullptr)
+			delete (Epoll::instance);
 	}
 
 	void Epoll::setUpServerConnections()
@@ -31,11 +37,6 @@
 			}
 			if (servers[i]->bindSocket(serverData->getSockFd()))
 			{
-				if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
-				{
-					delete (serverData);		
-					continue;
-				}
 				std::cerr << "error :bind" << std::endl;
 				exit(1);
 			}
@@ -159,7 +160,7 @@
 				delete (clientData);
 			}
 		}
-		catch (statusCodeExceptions &e) //! to be modified according to every exception thrown
+		catch (statusCodeExceptions &e)
 		{	
 			std::map<std::string, std::string> pages = clientData->req->getServer()->getErrorPages();
 			helpers::displayStatusCodePage(e, clientData->getSockFd(), pages[e.getValue()]);

@@ -14,6 +14,11 @@
 			Kqueue::instance = new Kqueue;
 		return (Kqueue::instance);
 	}
+	void	Kqueue::deleteInstance()
+	{
+		if (Kqueue::instance != nullptr)
+			delete (Kqueue::instance);
+	}
 
 	void Kqueue::setUpServerConnections()
 	{
@@ -30,11 +35,6 @@
 			}
 			if (servers[i]->bindSocket(server_data->getSockFd()))
 			{
-				if (hostPort[servers[i]->getHost()] == servers[i]->getPort())
-				{
-					delete (server_data);
-					continue;
-				}
 				std::cerr << "error :bind" << std::endl;
 				exit(1);
 			}

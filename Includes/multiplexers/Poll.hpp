@@ -24,7 +24,7 @@ class Poll : public Multiplexer
 
 		~Poll();
 		static	Poll*	getInstance();
-		static	Poll*	deleteInstance();
+		static	void	deleteInstance();
 		void 			serve();
 };
 
