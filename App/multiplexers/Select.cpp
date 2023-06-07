@@ -22,7 +22,7 @@ Select*	Select::getInstance()
 }
 void	Select::deleteInstance()
 {
-	if (Select::instance != nullptr)
+	if (Select::instance != NULL)
 		delete (Select::instance);
 }
 

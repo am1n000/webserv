@@ -20,7 +20,7 @@ Poll*	Poll::getInstance()
 
 void	Poll::deleteInstance()
 {
-	if (Poll::instance != nullptr)
+	if (Poll::instance != NULL)
 		delete (Poll::instance);
 }
 void Poll::setUpServerConnections()

@@ -2,7 +2,7 @@
 
 #ifdef __APPLE__
 	int	Kqueue::kq = kqueue();
-	Kqueue*	Kqueue::instance = nullptr;
+Kqueue*	Kqueue::instance = NULL;
 
 	Kqueue::Kqueue() {}
 
@@ -10,13 +10,13 @@
 
 	Kqueue*	Kqueue::getInstance()
 	{
-		if (Kqueue::instance == nullptr)
+	if (Kqueue::instance == NULL)
 			Kqueue::instance = new Kqueue;
 		return (Kqueue::instance);
 	}
 	void	Kqueue::deleteInstance()
 	{
-		if (Kqueue::instance != nullptr)
+	if (Kqueue::instance != NULL)
 			delete (Kqueue::instance);
 	}
 

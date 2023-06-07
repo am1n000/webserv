@@ -16,9 +16,9 @@
 		return (Epoll::instance);
 	}
 
-	void	Epoll::getInstance()
+	void	Epoll::deleteInstance()
 	{
-		if (Epoll::instance != nullptr)
+		if (Epoll::instance != NULL)
 			delete (Epoll::instance);
 	}
 
