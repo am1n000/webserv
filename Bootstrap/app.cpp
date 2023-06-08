@@ -1,4 +1,5 @@
 #include "../Includes/App.hpp"
+#include "../Includes/Exceptions.hpp"
 
 void app(const std::string config_file, int flag)
 {
@@ -9,6 +10,11 @@ void app(const std::string config_file, int flag)
 	Settings::boot();
   std::cout << "booting the server" << std::endl;
 	Config::boot(config_file);
+
+  if(Config::get()->getServers().empty())
+    throw BadConfigException("there is no servers in config file");
+  // if(Config::get()->getMimeTypes().empty())
+  //   throw BadConfigException("there is no mimetypes");
   std::cout << "server booted" << std::endl;
 	if (flag == 0)
 	{
