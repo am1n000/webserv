@@ -67,7 +67,7 @@ bool Client::reading()
 	this->req->appendBuffer(buffer, recieved_size);
 	if (this->req->isRequestCompleted())
 	{
-		std::vector<std::string> indexes = this->server->getIndexes();
+		// std::vector<std::string> indexes = this->server->getIndexes();
 		checkServerByName();
 		this->req->prepareRequest();
 		if (this->req->getLocation())
