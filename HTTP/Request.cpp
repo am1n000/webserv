@@ -29,7 +29,8 @@
 Request::Request()
     : tokenizer_(NULL), header_completed_(false), body_completed_(false),
       body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE),
-      content_length(0) {}
+      content_length(0) , request_location_(NULL)
+{}
 
 Request::Request(Request::size_type buffer_size)
     : tokenizer_(NULL), header_completed_(false), body_completed_(false),
@@ -163,7 +164,6 @@ bool Request::outOfRoot()
 }
 
 void Request::prepareRequest() {
-  this->request_location_ = this->matchLocation();
   if (this->outOfRoot())
     throw(BadRequestException());
 }
@@ -230,13 +230,11 @@ bool Request::isChuncked() {
 }
 
 bool Request::isMethodAllowed() {
-  if (this->request_location_) {
-    std::vector<Request_Method_e> &allowed_methods =
-        this->request_location_->getAllowedMethods();
-    if (allowed_methods.size() == 0)
+  if (this->getLocation()) {
+    std::vector<Request_Method_e> &allowed_methods = this->request_location_->getAllowedMethods();
+    if (allowed_methods.empty())
       return true;
-    for (std::vector<Request_Method_e>::iterator it = allowed_methods.begin();
-         it != allowed_methods.end(); it++) {
+    for (std::vector<Request_Method_e>::iterator it = allowed_methods.begin(); it != allowed_methods.end(); it++) {
       if (*it == this->request_method_)
         return true;
     }
@@ -463,7 +461,10 @@ Location *Request::getLocation() { return this->request_location_; }
  * hooks
  */
 
-void Request::headerCompletedEventHook() { this->parseHeader(); }
+void Request::headerCompletedEventHook() { 
+  this->parseHeader();
+  this->matchLocation();
+}
 
 void Request::bodyCompletedEventHook() { 
   // code needed to be trigred when finishing reading the body 

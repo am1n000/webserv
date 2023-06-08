@@ -6,7 +6,7 @@
 #    By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/08 11:36:46 by hchakoub          #+#    #+#              #
-#    Updated: 2023/06/06 09:43:24 by hchakoub         ###   ########.fr        #
+#    Updated: 2023/06/08 13:15:07 by hchakoub         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,6 +24,7 @@ SRC=App/Config.cpp App/Server.cpp HTTP/Request.cpp HTTP/Response.cpp \
 		App/Cgi.cpp \
 		App/Exceptions.cpp \
 		Utils/RequestTokenizer.cpp
+
 BUILD_SRC=$(INTRY) $(SRC)
 TEST_SRC=$(TEST_ENTRY) $(SRC)
 OBJ_DIR=objects
@@ -46,7 +47,7 @@ $(NAME): $(OBJ)
 	$(CPP) $^ -o $@
 
 debug: $(SRC)
-	$(CPP) -g  $^ main.cpp  -o $@
+	$(CPP) -g -fsanitize=address $^ main.cpp  -o $@
 	clear
 	lldb debug webserv.conf
 
