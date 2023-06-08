@@ -241,7 +241,7 @@ void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::str
 	}
     int len = file.tellg();
     file.seekg(0, std::ios::beg);
-	char buffer[len];
+	char buffer[len + 1];
 	file.read(buffer, len);
 	buffer[len] = '\0';
 	std::string header = "HTTP/1.1 " + e.getValue();

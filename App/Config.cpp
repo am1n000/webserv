@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/09 14:41:58 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/06 09:34:55 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/08 10:47:45 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,8 @@ void Config::parse() {
       this->pushServer(this->tockenizer_->getNextScope());
     else if (token == "include")
       this->parseFile(this->tockenizer_->getNoneEmptyLine());
+    else if (token == "types")
+      this->parseMimeTypes(this->tockenizer_->getNextScope());
     else {
       if (token.length() > 1){
         throw BadConfigException("invalid directive");
@@ -107,7 +109,7 @@ void Config::parseFile(const std::string &path) {
     else if (token == "include")
       this->parseFile(file.tockenizer()->getNoneEmptyLine());
     else {
-      if (token.length() > 0 && std::isalnum(token[0])){
+      if (token.length() > 0){
         throw BadConfigException("invalid directive");
       }
     }
