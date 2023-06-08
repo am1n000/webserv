@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/07 16:14:41 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/08 13:29:45 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,13 @@
 Request::Request()
     : tokenizer_(NULL), header_completed_(false), body_completed_(false),
       body_file_(NULL), body_size_(0), buffer_size(BUFFER_SIZE),
-      content_length(0) , request_location_(NULL)
-{}
+      request_location_(NULL),
+      chunk_size_(0), chunk_received_(0), content_length(0) {}
+
 
 Request::Request(Request::size_type buffer_size)
     : tokenizer_(NULL), header_completed_(false), body_completed_(false),
+      body_file_(NULL),
       body_size_(0), buffer_size(buffer_size), request_location_(NULL),
       chunk_size_(0), chunk_received_(0), content_length(0) {}
 
@@ -41,6 +43,8 @@ Request::Request(char *buffer, Request::size_type recieved_size,
                  Request::size_type buffer_size)
     : tokenizer_(NULL), request_string_(buffer, recieved_size),
       header_completed_(false), body_completed_(false),
+      body_file_(NULL),
+      body_size_(0),
       buffer_size(buffer_size), request_location_(NULL), chunk_size_(0),
       chunk_received_(0), content_length(0) {}
 
