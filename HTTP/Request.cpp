@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/08 13:29:45 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/09 19:07:11 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,8 +214,6 @@ bool Request::hasCgi() const {
 }
 
 bool Request::isAutoIndexed() {
-  if (!this->request_location_)
-    this->request_location_ = this->matchLocation();
   if(this->request_location_)
     return this->request_location_->getAutoIndex();
   return false;
@@ -419,8 +417,9 @@ std::map<std::string, Location *> &Server::getLocations() {
 
 std::string Request::getRequestRoot() const {
   if (this->request_location_ != NULL) {
-    if (this->request_location_->getRoot().size() != 0)
+    if (!this->request_location_->getRoot().empty()) {
       return this->request_location_->getRoot();
+    }
   }
   return this->server_->getRoot();
 }
@@ -467,7 +466,7 @@ Location *Request::getLocation() { return this->request_location_; }
 
 void Request::headerCompletedEventHook() { 
   this->parseHeader();
-  this->matchLocation();
+  this->request_location_ = this->matchLocation();
 }
 
 void Request::bodyCompletedEventHook() { 
