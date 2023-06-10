@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/07 16:14:19 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/10 10:28:19 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 // for dev only
 #include <cstdlib>
 #include <cstring>
+#include <dirent.h>
 #include <utility>
 
 Server::Server() { this->setMembers(); }
@@ -34,8 +35,16 @@ Server::~Server() {}
  */
 void Server::setRoot(const std::string &val) { 
   this->root_ = val; 
-  if(this->root_[this->root_.length() - 1] != '/')
-    this->root_.append("/");
+  if(this->root_.empty())
+    throw BadConfigException("emty value for root");
+  if(this->root_[this->root_.length() - 1] == '/')
+    this->root_.erase(this->root_.end() - 1);
+
+  // check if directory exists
+  DIR* rootdir;
+  rootdir = opendir(this->root_.c_str());
+  if(!rootdir)
+    throw BadConfigException("invalid root directory");
 }
 
 void Server::setClientBodySize(const std::string &val) {
@@ -258,10 +267,16 @@ void Location::setAllowedMethods(const std::string &val) {
 void Location::setRoot(const std::string &val) {
   Tockenizer tok = Tockenizer(val);
   this->root_ = helpers::trim(tok.getLine());
-  if(this->root_[this->root_.length() - 1] != '/') 
-    this->root_.append("/");
-  if (!tok.end())
+  if(this->root_.empty() || !tok.end())
     throw BadConfigException("invalid value for root");
+  if(this->root_[this->root_.length() - 1] == '/') 
+    this->root_.erase(this->root_.end() - 1);
+
+  // check if directory exists
+  DIR* rootdir;
+  rootdir = opendir(this->root_.c_str());
+  if(!rootdir)
+    throw BadConfigException("invalid root directory");
 }
 
 void Location::setProp(const std::string &prop, const std::string &val) {
