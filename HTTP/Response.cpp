@@ -111,7 +111,7 @@ int Response::handle_post(int sock_fd) {
     return (this->handleCgi(sock_fd));
   }
 
-  std::ifstream file(this->_request->getRequestedFileFullPath());
+  std::ifstream file(this->_request->getRequestedFileFullPath().c_str());
   if(!file.is_open())
     throw FileNotFoundException();
   file.close();
