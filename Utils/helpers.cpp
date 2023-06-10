@@ -1,6 +1,7 @@
 #include "../Includes/helpers.hpp"
 #include <cctype>
 #include <exception>
+#include <ios>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -236,8 +237,13 @@ void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::str
 	std::ifstream	file(errorPagePath.c_str(), std::ios::ate);
 	if (!file.is_open())
 	{
-    helpers::InternalServerError(sock);
-		return;
+    errorPagePath = "./ErrorPages/" + e.getValue();
+    errorPagePath +=	".html";
+    file.open(errorPagePath.c_str(), std::ios::ate);
+    if(!file.is_open()) {
+      helpers::InternalServerError(sock);
+      return;
+    }
 	}
     int len = file.tellg();
     file.seekg(0, std::ios::beg);
@@ -252,6 +258,7 @@ void  helpers::displayStatusCodePage(statusCodeExceptions &e, int sock, std::str
     header = handleRedirection(e);
 	std::string a = buffer;	
 	header += a;
+  file.close();
 	int send_val =send(sock, header.c_str(), header.length(), 0);
   if (send_val == 0)
     return;

@@ -9,18 +9,11 @@
 Response::Response(Request *request)
     : _request(request), _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0),
       _hasCgi(false), _cgi(NULL){
-                          // if(this->_request->hasCgi()) {
-                          // this->_cgi = new Cgi(this->_request);
-                          // this->_hasCgi = true;
-                          // }
                       };
 
 Response::Response()
     : _cgi_fd(-2), _bytes_sent(0), _finished(0), _started(0),
       _cgi(NULL){
-          // if(this->_request->hasCgi()) {
-          // this->_hasCgi = true;
-          // }
       };
 
 Response::~Response() {
