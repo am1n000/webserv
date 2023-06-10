@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/10 11:34:45 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/10 14:48:53 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,18 +247,15 @@ Location *Request::matchLocation() {
   size_type pos;
   std::string locationString;
   Server::location_type location = this->server_->getLocations();
-  for (Server::location_iterator it = location.begin(); it != location.end();
-       it++) {
+  for (Server::location_iterator it = location.begin(); it != location.end(); it++) {
     pos = this->request_uri_.find(it->first);
-    if (pos != std::string::npos &&
-        locationString.length() < it->first.length())
+    if (pos != std::string::npos && locationString.length() < it->first.length())
       locationString = it->first;
   }
-  if (locationString.length() > 0) {
-    Server::location_iterator lit =
-        this->server_->getLocations().find(locationString);
+  if (!locationString.empty()) {
+    Server::location_iterator lit = this->server_->getLocations().find(locationString);
     // removing mathed location from the request uri
-    this->request_uri_.erase(0, lit->first.length() - 1);
+    this->request_uri_.erase(0, lit->first.length());
     return lit->second;
   }
   return NULL;

@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/08 15:04:02 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/10 10:28:19 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/10 14:55:53 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,10 +104,14 @@ void Server::test() { this->setProp("root", "helloroot"); }
 
 void Server::pushLocation(const std::string &locationString) {
   std::string ls = locationString;
-  if (locationString[locationString.length() - 1] == '/' &&
-      locationString.length() != 1) {
-    ls.erase(locationString.length() - 1, 1);
+  std::string slash = "/";
+  if(ls.empty() || ls[0] == '{')
+    throw BadConfigException("invalid location value");
+  if (ls[0] != '/') {
+    ls = slash + ls;
   }
+  if(ls[ls.length() - 1] == '/' && ls.length() > 1)
+    ls.erase(ls.end() - 1);
   Location *location = new Location(ls, this->tockenizer_->getNextScope());
   this->locations_.insert(std::make_pair(ls, location));
 }
