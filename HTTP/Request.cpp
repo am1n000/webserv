@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/09 19:07:11 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/10 11:34:45 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,10 +157,7 @@ void Request::unchunckRequest(std::string &buffer) {
 bool Request::outOfRoot()
 {
   std::string root;
-  if (this->request_location_)
-    root = this->request_location_->getRoot();
-  else
-    root = this->server_->getRoot();
+  root = this->getRequestRoot();
   std::string ressource = this->getRequestedRessource();
   std::vector<std::string> paths = helpers::splitPaths(this->getRequestedRessource());
   std::vector<std::string> rootPaths = helpers::splitPaths(root);
@@ -168,8 +165,9 @@ bool Request::outOfRoot()
 }
 
 void Request::prepareRequest() {
-  if (this->outOfRoot())
-    throw(BadRequestException());
+  if (this->outOfRoot()) {
+    throw(ForbiddenException());
+  }
 }
 
 /*
@@ -260,7 +258,7 @@ Location *Request::matchLocation() {
     Server::location_iterator lit =
         this->server_->getLocations().find(locationString);
     // removing mathed location from the request uri
-    this->request_uri_.erase(0, lit->first.length());
+    this->request_uri_.erase(0, lit->first.length() - 1);
     return lit->second;
   }
   return NULL;
