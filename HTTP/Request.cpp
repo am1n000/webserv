@@ -6,7 +6,7 @@
 /*   By: hchakoub <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:47:13 by hchakoub          #+#    #+#             */
-/*   Updated: 2023/06/10 14:48:53 by hchakoub         ###   ########.fr       */
+/*   Updated: 2023/06/10 15:10:23 by hchakoub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -421,6 +421,8 @@ std::string Request::getRequestRoot() const {
 
 std::string Request::getRequestedFileFullPath() const {
   std::string root = this->getRequestRoot();
+  if(root[root.length() - 1] != '/' && this->request_uri_[0] != '/')
+    return root + "/" + this->request_uri_;
   return root + this->request_uri_;
 }
 
