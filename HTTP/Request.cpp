@@ -232,8 +232,6 @@ bool Request::isChuncked() {
 bool Request::isMethodAllowed() {
   if (this->getLocation()) {
     std::vector<Request_Method_e> &allowed_methods = this->request_location_->getAllowedMethods();
-    if (allowed_methods.empty())
-      return true;
     for (std::vector<Request_Method_e>::iterator it = allowed_methods.begin(); it != allowed_methods.end(); it++) {
       if (*it == this->request_method_)
         return true;
@@ -323,8 +321,7 @@ void Request::setMethod(const std::string &method) {
   if (method.length() == 0)
     throw BadRequestException();
   this->request_method_ = Settings::get()->indexOfRequestMethod(method);
-  if (!this->isMethodAllowed())
-    throw MethodNotAllowedException();
+
 }
 
 void Request::setRequestUri(const std::string &uri) {
@@ -464,6 +461,8 @@ Location *Request::getLocation() { return this->request_location_; }
 void Request::headerCompletedEventHook() { 
   this->parseHeader();
   this->request_location_ = this->matchLocation();
+  if (!this->isMethodAllowed())
+    throw MethodNotAllowedException();
 }
 
 void Request::bodyCompletedEventHook() { 

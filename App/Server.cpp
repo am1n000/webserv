@@ -263,9 +263,16 @@ void Location::setAutoIndex(const std::string &val) {
 void Location::setAllowedMethods(const std::string &val) {
   Tockenizer tok = Tockenizer(val);
   while (!tok.end()) {
-    Request_Method_e method =
-        Settings::get()->indexOfRequestMethod(tok.getNextToken());
-    this->allowed_methods_.push_back(method);
+    try
+    {
+      Request_Method_e method =
+          Settings::get()->indexOfRequestMethod(tok.getNextToken());
+      this->allowed_methods_.push_back(method);
+    }
+    catch(...)
+    {
+      throw (BadConfigException("method not allowed!"));
+    }
   }
 }
 void Location::setRoot(const std::string &val) {
