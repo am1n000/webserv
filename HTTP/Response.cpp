@@ -2,6 +2,7 @@
 #include "../Includes/Cgi.hpp"
 #include <cstdio>
 #include <cstring>
+#include <fstream>
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -109,7 +110,12 @@ int Response::handle_post(int sock_fd) {
       this->_cgi = new Cgi(_request);
     return (this->handleCgi(sock_fd));
   }
-  std::string header = "HTTP/1.1 200 Created\r\nLocation: "
+
+  std::ifstream file(this->_request->getRequestedFileFullPath());
+  if(!file.is_open())
+    throw FileNotFoundException();
+  file.close();
+  std::string header = "HTTP/1.1 201 Created\r\nLocation: "
                        "/resources/post\t\nContent-Type: "
                        "text/plain\r\n\r\nrequest has been posted";
   send_val = send(sock_fd, header.c_str(), header.length(), 0);
