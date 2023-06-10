@@ -75,7 +75,7 @@ void Select::monitoringLoop()
 		int ready_num = select(fd_max + 1, &read_fds, &write_fds, NULL, &timeout);
 		if (ready_num < 0)
 		{
-			std::cerr << "error : select  " << errno <<  std::endl;
+			std::cerr << "error : select  " <<  std::endl;
 			exit (1);
 		}
 		for (size_t i = 0; i < clientsData.size() && ready_num > 0; i++)
